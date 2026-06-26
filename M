@@ -5,3 +5,8 @@ Currently the UI calls loadTeamMembers(), which uses fetchWithAuth() to call the
 I also searched for UKG-related implementation like secure7.saashr, oauth2/token, client_credentials, client_secret, and ukgReadyClientId, but there is no existing UKG authentication or API integration in this repo.
 
 So as of now, UKG is not integrated in the Team Members flow. We need to add a new backend integration/API route for UKG, then map the UKG response fields to id, name, email, avatar, and role for the UI.
+
+
+
+
+To integrate UKG, we'll need to add a server-side UKG authentication flow, call the UKG endpoint, map the response to the existing TeamMember model, and then return that data to the UI. The current frontend can remain unchanged if we update the backend route.
