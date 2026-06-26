@@ -39,6 +39,7 @@ export function TeamMembersSection({
   const { currentUser } = useCurrentUser()
   const { allUsers } = useTeams()
   const { toast } = useToast()
+
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(initialMembers)
   const [loadingMembers, setLoadingMembers] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -48,7 +49,6 @@ export function TeamMembersSection({
   const [newMemberUserId, setNewMemberUserId] = useState("")
   const [newMemberRole, setNewMemberRole] = useState("Team Member")
 
-  // Task 7.5: Ownership transfer dialog state
   const [transferDialog, setTransferDialog] = useState<{
     open: boolean
     memberUserId: string
@@ -60,57 +60,99 @@ export function TeamMembersSection({
   const loadTeamMembers = async () => {
     try {
       setLoadingMembers(true)
+
       const response = await fetchWithAuth(`/api/team-members?teamId=${teamId}`)
+
+      console.log("[Team Members] API Status:", response.status)
+
       if (!response.ok) {
         throw new Error(`Failed to load team members: ${response.status}`)
       }
+
       const result = await response.json()
-      
-      // Deduplicate members by user_id to avoid duplicate keys
+
+      console.log("[Team Members] Raw API Response:", result)
+
       const membersMap = new Map<string, TeamMember>()
-      
+
       ;(result.data || []).forEach((member: any) => {
-        // Skip if we already have this member (deduplicate)
-        if (membersMap.has(member.user_id)) {
-          return
-        }
-        
-        // Use user data from API response if available, otherwise fallback to state.allUsers
         const userFromApi = member.user
         const userFromState = allUsers.find((u) => u.id === member.user_id)
         const user = userFromApi || userFromState
-        
-        membersMap.set(member.user_id, {
-          id: member.user_id,
-          name: user?.full_name || user?.name || "Unknown",
-          email: user?.email || "",
-          avatar: user?.avatar_url || user?.avatar,
-          role: member.role || "Team Member",
-          joinedAt: member.joined_at,
+
+        const userId =
+          member.user_id ||
+          member.userId ||
+          member.id ||
+          member.employeeId ||
+          user?.id
+
+        if (!userId) return
+
+        if (membersMap.has(userId)) return
+
+        membersMap.set(userId, {
+          id: userId,
+          name:
+            user?.full_name ||
+            user?.name ||
+            member.name ||
+            member.fullName ||
+            member.full_name ||
+            member.employeeName ||
+            "Unknown",
+          email:
+            user?.email ||
+            member.email ||
+            member.mail ||
+            member.workEmail ||
+            "",
+          avatar:
+            user?.avatar_url ||
+            user?.avatar ||
+            member.avatar ||
+            member.avatar_url ||
+            "",
+          role:
+            member.role ||
+            member.jobTitle ||
+            member.title ||
+            member.position ||
+            "Team Member",
+          joinedAt:
+            member.joined_at ||
+            member.joinedAt ||
+            member.hireDate ||
+            member.startDate ||
+            "",
         })
       })
-      
+
       const membersWithUsers = Array.from(membersMap.values())
+
+      console.log("[Team Members] Mapped Members:", membersWithUsers)
+
       setTeamMembers(membersWithUsers)
       onMembersChange(membersWithUsers)
     } catch (error: any) {
-      console.error("[v0] Error loading team members:", error)
+      console.error("[Team Members] Error loading team members:", error)
+
       toast({
         title: "Error",
         description: "Failed to load team members",
         variant: "destructive",
       })
+
       setTeamMembers([])
     } finally {
       setLoadingMembers(false)
     }
   }
 
-  // Load team members on mount to ensure we have the latest data with all user details
   useEffect(() => {
     loadTeamMembers()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teamId]) // Reload when teamId changes
+  }, [teamId])
 
   const handleAddMember = async () => {
     if (!newMemberUserId) {
@@ -122,20 +164,23 @@ export function TeamMembersSection({
       return
     }
 
-    // Check if user is already a member
     const isAlreadyMember = teamMembers.some((m) => m.id === newMemberUserId)
+
     if (isAlreadyMember) {
       const existingMember = teamMembers.find((m) => m.id === newMemberUserId)
+
       toast({
         title: "User Already in Team",
         description: `${existingMember?.name || "This user"} is already a member of this team with role "${existingMember?.role || "Unknown"}".`,
         variant: "destructive",
       })
+
       return
     }
 
     try {
       setSaving(true)
+
       const response = await fetchWithAuth("/api/team-members", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -153,30 +198,31 @@ export function TeamMembersSection({
       }
 
       const result = await response.json()
-      
+
       if (!result.data) {
         console.error("[Team Members] No data in response:", result)
         throw new Error("Server returned success but no data")
       }
 
-      // Check if this was an update vs new addition
-      const wasUpdate = result.data.joined_at && new Date(result.data.joined_at).getTime() < Date.now() - 1000
-      
+      const wasUpdate =
+        result.data.joined_at &&
+        new Date(result.data.joined_at).getTime() < Date.now() - 1000
+
       toast({
         title: "Success",
-        description: wasUpdate 
-          ? "Team member role updated successfully" 
+        description: wasUpdate
+          ? "Team member role updated successfully"
           : "Team member added successfully",
       })
 
       setNewMemberUserId("")
       setNewMemberRole("Team Member")
       setShowAddMemberDialog(false)
-      
-      // Force reload members list
+
       await loadTeamMembers()
     } catch (error: any) {
       console.error("[Team Members] Error adding team member:", error)
+
       toast({
         title: "Error",
         description: error.message || "Failed to add team member",
@@ -199,6 +245,7 @@ export function TeamMembersSection({
 
     try {
       setSaving(true)
+
       const response = await fetchWithAuth("/api/team-members", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -215,6 +262,7 @@ export function TeamMembersSection({
       }
 
       const result = await response.json()
+
       if (!result.data) {
         throw new Error("Server returned success but no data")
       }
@@ -226,9 +274,11 @@ export function TeamMembersSection({
 
       setEditingMember(null)
       setShowEditMemberDialog(false)
+
       await loadTeamMembers()
     } catch (error: any) {
-      console.error("[v0] Error updating team member:", error)
+      console.error("[Team Members] Error updating team member:", error)
+
       toast({
         title: "Error",
         description: error.message || "Failed to update team member",
@@ -246,14 +296,14 @@ export function TeamMembersSection({
 
     try {
       setSaving(true)
+
       const response = await fetchWithAuth(`/api/team-members?teamId=${teamId}&userId=${userId}`, {
         method: "DELETE",
       })
 
-      // HTTP 409: ownership transfer required before the deletion can proceed.
-      // Parse the body first so we can populate the dialog before short-circuiting.
       if (response.status === 409) {
         const result = await response.json().catch(() => ({}))
+
         if (result.status === "OWNERSHIP_TRANSFER_REQUIRED") {
           setTransferDialog({
             open: true,
@@ -271,7 +321,7 @@ export function TeamMembersSection({
         throw new Error(errorData.error || "Failed to remove team member")
       }
 
-      const result = await response.json()
+      await response.json()
 
       toast({
         title: "Success",
@@ -280,7 +330,8 @@ export function TeamMembersSection({
 
       await loadTeamMembers()
     } catch (error: any) {
-      console.error("[v0] Error removing team member:", error)
+      console.error("[Team Members] Error removing team member:", error)
+
       toast({
         title: "Error",
         description: error.message || "Failed to remove team member",
@@ -291,14 +342,11 @@ export function TeamMembersSection({
     }
   }
 
-  // Check if user can manage team members (Team Owner/Admin or Admin/Super Admin)
   const canManageTeamMembers = (): boolean => {
-    // Admins and Super Admins can manage any team
     if (currentUser?.systemRole === "Super Admin" || currentUser?.systemRole === "Admin") {
       return true
     }
-    
-    // Check if user is Team Owner or Team Admin for this team
+
     const teamRole = currentUser?.teamRoles?.find((tr) => tr.teamId === teamId)
     return teamRole?.role === "Team Owner" || teamRole?.role === "Team Admin"
   }
@@ -309,6 +357,7 @@ export function TeamMembersSection({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-foreground">Team Members</h2>
+
         {canManage && (
           <Dialog open={showAddMemberDialog} onOpenChange={setShowAddMemberDialog}>
             <DialogTrigger asChild>
@@ -317,67 +366,82 @@ export function TeamMembersSection({
                 Add Member
               </Button>
             </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Team Member</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="newMemberUser">User</Label>
-                <SearchableSelect
-                  value={newMemberUserId || null}
-                  onValueChange={(val) => setNewMemberUserId(val ?? "")}
-                  placeholder="Select user"
-                  options={allUsers
-                    .filter((user) => {
-                      // Filter out users who are already team members
-                      const isAlreadyMember = teamMembers.some((m) => m.id === user.id)
-                      return !isAlreadyMember
-                    })
-                    .map((user) => ({
-                      value: user.id,
-                      label: user.name,
-                      description: user.email,
-                      meta: user.role,
-                    }))}
-                  variant="inline"
-                  listClassName="max-h-64 overflow-y-auto"
-                />
+
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Team Member</DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="newMemberUser">User</Label>
+
+                  <SearchableSelect
+                    value={newMemberUserId || null}
+                    onValueChange={(val) => setNewMemberUserId(val ?? "")}
+                    placeholder="Select user"
+                    options={allUsers
+                      .filter((user) => {
+                        const isAlreadyMember = teamMembers.some((m) => m.id === user.id)
+                        return !isAlreadyMember
+                      })
+                      .map((user) => ({
+                        value: user.id,
+                        label: user.name,
+                        description: user.email,
+                        meta: user.role,
+                      }))}
+                    variant="inline"
+                    listClassName="max-h-64 overflow-y-auto"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="newMemberRole">Role</Label>
+
+                  <Select value={newMemberRole} onValueChange={setNewMemberRole}>
+                    <SelectTrigger id="newMemberRole">
+                      <SelectValue />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      <SelectItem value="Team Owner">Team Owner</SelectItem>
+                      <SelectItem value="Team Admin">Team Admin</SelectItem>
+                      <SelectItem value="Team Member">Team Member</SelectItem>
+                      <SelectItem value="Team Viewer">Team Viewer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="newMemberRole">Role</Label>
-                <Select value={newMemberRole} onValueChange={setNewMemberRole}>
-                  <SelectTrigger id="newMemberRole">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Team Owner">Team Owner</SelectItem>
-                    <SelectItem value="Team Admin">Team Admin</SelectItem>
-                    <SelectItem value="Team Member">Team Member</SelectItem>
-                    <SelectItem value="Team Viewer">Team Viewer</SelectItem>
-                  </SelectContent>
-                </Select>
+
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAddMemberDialog(false)}
+                  disabled={saving}
+                >
+                  Cancel
+                </Button>
+
+                <Button onClick={handleAddMember} disabled={saving}>
+                  {saving ? "Adding..." : "Add Member"}
+                </Button>
               </div>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowAddMemberDialog(false)} disabled={saving}>
-                Cancel
-              </Button>
-              <Button onClick={handleAddMember} disabled={saving}>
-                {saving ? "Adding..." : "Add Member"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
         )}
       </div>
 
       {loadingMembers ? (
-        <div className="text-center py-8 text-muted-foreground">Loading team members...</div>
+        <div className="text-center py-8 text-muted-foreground">
+          Loading team members...
+        </div>
       ) : teamMembers.length === 0 ? (
         <Card className="p-12 text-center">
           <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-semibold text-foreground">No Team Members Yet</h3>
+          <h3 className="mt-4 text-lg font-semibold text-foreground">
+            No Team Members Yet
+          </h3>
           <p className="mt-2 text-sm text-muted-foreground">
             Add members to this team to get started
           </p>
@@ -394,6 +458,7 @@ export function TeamMembersSection({
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {teamMembers.map((member) => (
                 <TableRow key={member.id}>
@@ -403,8 +468,11 @@ export function TeamMembersSection({
                     <Badge variant="outline">{member.role}</Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : "N/A"}
+                    {member.joinedAt
+                      ? new Date(member.joinedAt).toLocaleDateString()
+                      : "N/A"}
                   </TableCell>
+
                   <TableCell className="text-right">
                     {canManage && (
                       <div className="flex justify-end gap-2">
@@ -418,6 +486,7 @@ export function TeamMembersSection({
                         >
                           <Edit2 className="h-4 w-4" />
                         </Button>
+
                         <Button
                           variant="ghost"
                           size="sm"
@@ -436,22 +505,26 @@ export function TeamMembersSection({
         </div>
       )}
 
-      {/* Edit Member Dialog */}
       <Dialog open={showEditMemberDialog} onOpenChange={setShowEditMemberDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Team Member Role</DialogTitle>
           </DialogHeader>
+
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="editMemberRole">Role</Label>
+
               <Select
                 value={editingMember?.role || "Team Member"}
-                onValueChange={(value) => setEditingMember({ ...editingMember!, role: value })}
+                onValueChange={(value) =>
+                  setEditingMember({ ...editingMember!, role: value })
+                }
               >
                 <SelectTrigger id="editMemberRole">
                   <SelectValue />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="Team Owner">Team Owner</SelectItem>
                   <SelectItem value="Team Admin">Team Admin</SelectItem>
@@ -461,10 +534,16 @@ export function TeamMembersSection({
               </Select>
             </div>
           </div>
+
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowEditMemberDialog(false)} disabled={saving}>
+            <Button
+              variant="outline"
+              onClick={() => setShowEditMemberDialog(false)}
+              disabled={saving}
+            >
               Cancel
             </Button>
+
             <Button onClick={handleEditMember} disabled={saving}>
               {saving ? "Updating..." : "Update Role"}
             </Button>
@@ -472,7 +551,6 @@ export function TeamMembersSection({
         </DialogContent>
       </Dialog>
 
-      {/* Task 7.5: Ownership Transfer Dialog */}
       {transferDialog && (
         <OwnershipTransferDialog
           open={transferDialog.open}
@@ -486,7 +564,11 @@ export function TeamMembersSection({
           teamId={teamId}
           eligibleRecipients={teamMembers
             .filter((m) => m.id !== transferDialog.memberUserId)
-            .map((m) => ({ id: m.id, name: m.name, email: m.email }))}
+            .map((m) => ({
+              id: m.id,
+              name: m.name,
+              email: m.email,
+            }))}
           items={transferDialog.items}
           goals={transferDialog.goals}
         />
@@ -494,4 +576,4 @@ export function TeamMembersSection({
     </div>
   )
 }
-
+   
