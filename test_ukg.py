@@ -17,3 +17,8 @@ response = requests.post(
 
 print("Status:", response.status_code)
 print("Response:", response.text)
+
+
+Invoke-RestMethod -Method POST "https://secure7.saashr.com/oauth2/token" `
+-Headers @{ "Content-Type" = "application/x-www-form-urlencoded" } `
+-Body "grant_type=client_credentials&client_id=YOUR_CLIENT_ID&client_secret=YOUR_CLIENT_SECRET"
