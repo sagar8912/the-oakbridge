@@ -1,0 +1,57 @@
+I am attaching two PowerPoint files:
+
+1. EXL sample PPT — use this only as a design/reference style.
+2. Oakbridge detailed PPT — use this as the source content.
+
+Task:
+Convert the detailed Oakbridge “Our Understanding” PPT into a short, client-ready consulting-style deck of maximum 5 slides.
+
+Important instructions:
+- Follow the EXL sample PPT style: professional consulting layout, clean design, orange/navy/white color theme, executive formatting.
+- Do not copy confidential content from the EXL sample PPT; only use it for visual style and structure.
+- Use the Oakbridge detailed PPT as the actual content source.
+- Reduce the content to only the most important points.
+- Remove repeated, unnecessary, low-value, and overly technical content.
+- Keep the deck readable and presentation-ready.
+- Font size should be minimum 14 pt for body text.
+- Avoid text overlap and cramped boxes.
+- Use diagrams, tables, and flow visuals where possible.
+- Keep the language client-facing, simple, and professional.
+
+Required deck structure:
+
+Slide 1: Our Understanding of Oakbridge Vision and Objectives
+- Explain what Oakbridge application is.
+- Mention that it supports teams, goals, items, lists, collaboration, reporting, and governance.
+- Keep it business-focused.
+
+Slide 2: Existing System Architecture and Application Flow
+- Show a simple flow:
+  User → Next.js Frontend → DataService → API Routes → Authentication/Authorization → Supabase → Database → UI Response
+- Mention frontend, backend API layer, Supabase, authentication, and response flow.
+
+Slide 3: Key Application Modules
+- Include only major modules:
+  Dashboard, Vision, Goals, My Items, My 30 List, My Movements, My To-Dos, Teams, Shared, Notifications, Audit Logs.
+- Show this as a clean module table or icon-based layout.
+
+Slide 4: Data Management, Import/Export, and Backend Flow
+- This slide is important.
+- Explain how data is created, updated, fetched, transformed, and displayed.
+- Include Import/Export as a separate point.
+- Mention DataService, API routes, Supabase database, validation, and error handling.
+- Keep it concise but meaningful.
+
+Slide 5: Key Observations and Recommendations
+- Include only important observations:
+  UI spacing/layout improvement, dropdown visibility issue, 404 on View List, need for better documentation, API flow clarity, import/export usability.
+- Add recommendations:
+  Improve UI responsiveness, fix broken navigation links, improve documentation, optimize API/data flow, maintain clean import/export process.
+
+Output requirement:
+- Create a polished client-ready PowerPoint deck.
+- Maximum 5 slides only.
+- Use professional visuals similar to EXL sample.
+- Keep enough text to explain the understanding, but do not make it too crowded.
+- Do not make heading-only slides.
+- Make it suitable to present to Nishant/Sachin/client.
