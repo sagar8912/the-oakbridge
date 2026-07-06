@@ -1,0 +1,15 @@
+First analyze the existing test setup in this Oakbridge OOO project.
+
+Please check:
+1. Which testing framework is already used: Vitest, Jest, React Testing Library, Playwright, or anything else.
+2. Existing test folders and files.
+3. package.json test scripts.
+4. Current test config files like vitest.config.ts, jest.config.js, playwright.config.ts, etc.
+5. Whether API route tests and component tests already exist.
+
+Do not edit any file yet.
+Only give me:
+- Existing framework found
+- Existing test scripts
+- Recommended unit test approach
+- Exact files where new test cases should be added
