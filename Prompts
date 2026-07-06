@@ -1,21 +1,36 @@
+I can see many existing .test.ts and route.test.ts files in the project.
 
-Good. Now create a proper unit test plan for the Oakbridge OOO project.
+Please inspect the existing test file structure and implement only DataService unit tests now.
 
-Focus only on meaningful unit tests, not dummy tests.
+Target production file:
+apps/ooo/lib/data-service.ts
 
-Cover these areas:
-1. DataService tests
-2. API route tests
-3. Auth and permission helper tests
-4. Team members API tests
-5. Important frontend component tests
+Create the test file in the correct existing test location and follow the same style used in current Vitest tests.
 
-For each area, tell me:
-- Existing file to test
-- Test file to create or update
-- Test cases to cover
-- What needs to be mocked
-- Command to run that test
+Important:
+- Do not modify .env.local
+- Do not modify PROJECT_FLOW.md
+- Do not modify super-admin scripts
+- Do not modify production logic unless absolutely required
+- Only create/update the DataService test file
 
-Do not edit any file yet.
-Only give me the plan.
+Test cases to add:
+1. getItems calls /api/items
+2. getItems with filters builds correct query params
+3. getItem(id) calls /api/items/[id]
+4. createItem sends POST with JSON body
+5. updateItem sends update request with JSON body
+6. deleteItem sends DELETE request
+7. getGoals calls /api/goals
+8. getTeams calls /api/teams
+9. getDashboardStats calls /api/dashboard/stats
+10. getDashboardLeaderboard calls /api/dashboard/leaderboard
+11. getDashboardLeaders calls /api/dashboard/leaders
+12. error response from fetchWithAuth throws a proper error
+
+Mock fetchWithAuth properly.
+
+After implementation, tell me:
+- exact test file changed
+- exact command to run only this test
+
