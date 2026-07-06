@@ -1,15 +1,21 @@
-First analyze the existing test setup in this Oakbridge OOO project.
 
-Please check:
-1. Which testing framework is already used: Vitest, Jest, React Testing Library, Playwright, or anything else.
-2. Existing test folders and files.
-3. package.json test scripts.
-4. Current test config files like vitest.config.ts, jest.config.js, playwright.config.ts, etc.
-5. Whether API route tests and component tests already exist.
+Good. Now create a proper unit test plan for the Oakbridge OOO project.
+
+Focus only on meaningful unit tests, not dummy tests.
+
+Cover these areas:
+1. DataService tests
+2. API route tests
+3. Auth and permission helper tests
+4. Team members API tests
+5. Important frontend component tests
+
+For each area, tell me:
+- Existing file to test
+- Test file to create or update
+- Test cases to cover
+- What needs to be mocked
+- Command to run that test
 
 Do not edit any file yet.
-Only give me:
-- Existing framework found
-- Existing test scripts
-- Recommended unit test approach
-- Exact files where new test cases should be added
+Only give me the plan.
