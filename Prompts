@@ -1,36 +1,34 @@
-I can see many existing .test.ts and route.test.ts files in the project.
 
-Please inspect the existing test file structure and implement only DataService unit tests now.
+For this phase, analyze the complete codebase and identify waste/unused code.
 
-Target production file:
-apps/ooo/lib/data-service.ts
+Focus only on this phase.
 
-Create the test file in the correct existing test location and follow the same style used in current Vitest tests.
+Find:
+1. Unused components
+2. Unused files
+3. Unused functions
+4. Unused imports
+5. Unused variables
+6. Unused test cases
+7. Duplicate code
+8. Commented old code
+9. Code lines that can be removed safely
+10. Components not connected to any active flow
+
+Create a separate markdown report/sheet with:
+
+- Phase name
+- File path
+- Component/function/test case name
+- Unused code type
+- Exact line number if possible
+- Why it is unused
+- Can it be removed? Yes/No/Needs review
+- Impact if removed
+
+- Recommendation
 
 Important:
-- Do not modify .env.local
-- Do not modify PROJECT_FLOW.md
-- Do not modify super-admin scripts
-- Do not modify production logic unless absolutely required
-- Only create/update the DataService test file
-
-Test cases to add:
-1. getItems calls /api/items
-2. getItems with filters builds correct query params
-3. getItem(id) calls /api/items/[id]
-4. createItem sends POST with JSON body
-5. updateItem sends update request with JSON body
-6. deleteItem sends DELETE request
-7. getGoals calls /api/goals
-8. getTeams calls /api/teams
-9. getDashboardStats calls /api/dashboard/stats
-10. getDashboardLeaderboard calls /api/dashboard/leaderboard
-11. getDashboardLeaders calls /api/dashboard/leaders
-12. error response from fetchWithAuth throws a proper error
-
-Mock fetchWithAuth properly.
-
-After implementation, tell me:
-- exact test file changed
-- exact command to run only this test
-
+Do not modify or delete any code.
+Only analyze and create the report.
+Make sure removal should not affect existing functionality.
