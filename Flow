@@ -1,0 +1,21 @@
+Knowledge Base
+      │
+      ├── Policies
+      ├── SOPs
+      ├── Procedures
+      ├── Training Docs
+      └── Markdown Articles
+               │
+               ▼
+          API Layer
+               │
+               ▼
+      TOW Application
+               │
+               ├── Vision
+               ├── Goals
+               ├── Issues
+               └── Knowledge Base
+                       │
+                       ▼
+             Render Markdown Articles
