@@ -1,0 +1,31 @@
+Act as a senior full-stack engineer with 15+ years of experience.
+
+Fix the Voting feature in the Oakbridge OOO app.
+
+Current issue:
+Team members can vote only on P1 items.
+
+Required behavior:
+Every eligible team member should be able to vote on ANY item, regardless of its priority (P1–P5).
+
+Before coding:
+1. Find the complete voting flow: UI, API route, service, database/RPC and permission logic.
+2. Identify exactly where voting is restricted to P1.
+3. Explain the root cause and proposed fix.
+
+Implementation requirements:
+- Remove only the P1 eligibility restriction.
+- Keep existing team-membership and authorization rules.
+- Prevent duplicate votes from the same user if that is the current intended behavior.
+- Ensure vote count updates correctly.
+- Support vote/unvote behavior according to the existing design.
+- Do not modify unrelated production logic, env files or documentation.
+- Add/update Vitest tests for P1, P2, P3, P4 and P5 items, unauthorized users and duplicate voting.
+
+After implementation, provide:
+- Root cause
+- Files changed
+- Database changes, if any
+- Exact test command
+- Manual staging validation steps
+- Any assumptions that still need client confirmation
