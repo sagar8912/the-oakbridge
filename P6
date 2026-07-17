@@ -1,0 +1,134 @@
+Please perform a complete audit of the Goal Levels functionality that we have already implemented and ensure that it covers all required business and UAT scenarios.
+
+Important business requirement:
+
+1. Existing teams:
+   - Existing teams must continue using only their currently configured/predefined goal levels.
+   - Do not automatically assign all goal levels to existing teams.
+   - Existing team-level configurations must not be overwritten during deployment, migration, page refresh, or application restart.
+
+2. Newly created teams:
+   - When a new team is created, all currently available goal levels should be enabled by default.
+   - The authorized user should then be able to modify the selected goal levels according to the existing permission model.
+
+3. Goal creation and editing:
+   - The Goal Level dropdown must show only the goal levels allowed for the selected team.
+   - Goal levels configured for one team must not appear for another team unless they are also enabled there.
+   - Existing goals must not be deleted, corrupted, or silently changed when a team’s allowed goal levels are updated.
+
+4. Preserve the current:
+   - Database schema
+   - API contracts
+   - Authentication model
+   - Team-role permissions
+   - Existing goal data
+
+Do not introduce unnecessary schema or architecture changes.
+
+Your task:
+
+1. Inspect the complete existing Goal Levels implementation, including:
+   - Team creation flow
+   - Team editing/settings flow
+   - Allowed Goal Levels UI
+   - Goal creation form
+   - Goal editing form
+   - Team-selection behaviour
+   - Goal Level dropdown
+   - Goal Level API routes
+   - Team API routes
+   - Database queries and mappings
+   - Permission checks
+   - Default-value logic
+   - Existing migrations or seed data
+   - Existing automated tests
+
+2. Compare the current implementation against every scenario listed below.
+
+3. For every scenario:
+   - Mark it as Covered, Partial, Missing, or Needs Business Confirmation.
+   - Identify the relevant UI, API, database, permission, and test files.
+   - Implement missing or partially covered behaviour.
+   - Do not rewrite working functionality unnecessarily.
+   - Do not modify unrelated features.
+
+A. Existing-team configuration scenarios
+
+1. Every existing team retains its currently configured goal levels.
+2. Existing teams must not automatically receive all goal levels.
+3. Opening an existing team’s settings must show its saved selection correctly.
+4. Refreshing the page must not reset the selected goal levels.
+5. Logging out and logging back in must preserve the configuration.
+6. Restarting the application must not change the configuration.
+7. Deployment or migration must not overwrite existing mappings.
+8. Editing one existing team must not change another team’s goal levels.
+9. Existing teams with no saved mapping must be handled safely.
+10. Do not silently treat missing configuration as “all levels” without checking the intended fallback.
+11. If legacy teams require a fallback, document and implement the safest backward-compatible behaviour.
+
+B. New-team default scenarios
+
+12. When a new team is created, all active goal levels are selected by default.
+13. The default should be applied only once, during team creation.
+14. Reopening the new team must load the saved goal-level mappings rather than reapplying defaults.
+15. Removing one level from a newly created team must persist.
+16. Adding a level back must persist.
+17. Creating multiple new teams must create independent goal-level configurations.
+18. A failure while saving the team or mappings must not leave partially created or inconsistent data.
+19. If the team is created but goal-level mapping fails, handle the failure clearly and consistently.
+20. New inactive, archived, or deprecated goal levels should not be selected by default unless existing business logic requires them.
+
+C. Team-selection scenarios
+
+21. Selecting a team must load only that team’s allowed goal levels.
+22. Changing the selected team must immediately update the Goal Level dropdown.
+23. Previously selected values from Team A must not remain selected after switching to Team B.
+24. Rapidly switching teams must not display stale data.
+25. If the selected team has no available levels, show a clear empty state.
+26. Do not show levels from the previously selected team while the new request is loading.
+27. Loading and disabled states must be shown while team-specific levels are being fetched.
+28. API responses must be associated with the correct selected team to avoid race-condition issues.
+
+D. Goal creation scenarios
+
+29. The Goal Level dropdown must show only levels enabled for the selected team.
+30. Users must not be able to select a disabled level by manually modifying the UI.
+31. Backend validation must reject a goal level that is not allowed for the selected team.
+32. Goal creation must work for every allowed level.
+33. Goal creation must fail safely for disallowed levels.
+34. A clear validation message should be shown when no level is available.
+35. Team selection should be required before selecting a goal level, if that matches the current form flow.
+36. Changing the selected team should clear an incompatible selected goal level.
+37. The form should not submit a stale level belonging to another team.
+38. The selected goal level must be saved correctly in the database.
+39. Goal creation must work for Super Admin, Team Admin, and normal users according to the current permission model.
+40. Users without permission must not create goals by directly calling the API.
+
+E. Goal editing scenarios
+
+41. Editing an existing goal must show its saved team and level correctly.
+42. If the goal’s current level remains allowed, it must remain selectable.
+43. Changing the team must reload the allowed levels for the new team.
+44. If the current level is not allowed for the newly selected team, require the user to select a valid level.
+45. Do not silently replace an existing goal level.
+46. Do not silently delete an existing goal.
+47. Existing goals using a level that was later disabled must remain viewable.
+48. Existing historical data must not be corrupted when a level is disabled.
+49. Decide and document the safest behaviour for editing a goal whose level is no longer enabled:
+    - Preserve the existing value in read-only form, or
+    - Require selection of a currently allowed level before saving.
+50. Backend validation must prevent saving an invalid team-and-level combination.
+
+F. Goal-level settings UI scenarios
+
+51. The team settings page must clearly show all available goal levels.
+52. Currently enabled levels must be visually selected.
+53. Disabled levels must be visually unselected.
+54. Selected state must be clear and accessible.
+55. Save and Cancel behaviour must work correctly.
+56. Cancel must restore the previously saved configuration.
+57. Save must persist only the intended changes.
+58. Show a loading state during save.
+59. Prevent repeated clicks and duplicate requests.
+60. Show a success notification after saving.
+61. Show an error notification
