@@ -1,0 +1,115 @@
+Act as a senior full-stack engineer with 15+ years of experience.
+
+We need to correct the “Allowed Goal Levels” implementation according to the client’s clarified requirement.
+
+IMPORTANT:
+First analyze the current implementation and existing database schema. Do not start coding until you have identified the current hardcoded mapping, current Team Settings override logic, APIs, migrations, and Create Goal filtering flow.
+
+CURRENT INCORRECT BEHAVIOR:
+- The Team Settings page contains “Allowed Goal Levels”.
+- When the team is “Using default” or no custom levels are selected, the system currently allows ALL Goal Levels.
+- Therefore, selecting a team during Create Goal can show every Goal Level.
+- This is not the required behavior.
+
+CLIENT REQUIREMENT:
+Allowed Goal Levels must be managed centrally by Hierarchy Level, not manually configured for every team.
+
+Example hierarchy levels:
+- Company-wide
+- Executive
+- Department
+- Team
+
+Each Hierarchy Level should have an admin-configurable list of Allowed Goal Levels.
+
+All teams assigned to that Hierarchy Level must inherit those configured Goal Levels by default.
+
+REQUIRED IMPLEMENTATION:
+
+1. Central Admin Configuration
+- Add an “Allowed Goal Levels” multi-select to:
+  Admin → Manage Fields / Hierarchy Levels.
+- Only Super Admins or authorized Admins can update this configuration.
+- Admin should be able to open a Hierarchy Level, such as Executive, and select the Goal Levels that all Executive teams can create.
+
+2. Correct Default Behavior
+- “Using default” must mean:
+  inherit Allowed Goal Levels from the team’s assigned Hierarchy Level.
+- It must NOT mean “allow all Goal Levels”.
+- Empty or missing team-specific configuration must fall back to Hierarchy Level configuration.
+
+3. Create Goal Flow
+When a Primary Team is selected:
+- Find the team’s Hierarchy Level.
+- Load the Allowed Goal Levels configured for that Hierarchy Level.
+- Show only those Goal Levels in the Goal Level dropdown.
+- Do not show every Goal Level by default.
+
+4. New Teams
+- A newly created team must automatically inherit the Allowed Goal Levels of its selected Hierarchy Level.
+- New teams must not receive all Goal Levels automatically.
+
+5. Existing Teams and Migration
+- Identify the current hardcoded Team Level → Goal Level mappings.
+- Create a safe database migration that seeds the new Hierarchy Level configuration using the existing mappings.
+- Existing Production teams must initially behave exactly as they do today.
+- Do not require manually updating all existing teams.
+- The migration must be idempotent and safe to run more than once.
+
+6. Team-Level Override
+- If the existing per-team override feature is retained, it must be optional and secondary:
+  a. No team override = inherit Hierarchy Level configuration.
+  b. Explicit override = use the selected team-specific Goal Levels.
+- Do not silently treat an empty override as “allow all”.
+- Clearly label inherited values versus custom overrides in the UI.
+- If the current product requirements do not need team-specific overrides, keep the code extensible but use hierarchy inheritance as the active default behavior.
+
+7. Backend Validation
+- Validate the selected Goal Level during Goal creation and update.
+- Reject a Goal Level that is not allowed for the selected team.
+- UI filtering alone is not sufficient.
+- Return a clear user-facing error instead of a silent failure.
+
+8. UI Expectations
+On Team Settings:
+- Show “Inherited from: <Hierarchy Level>”.
+- Display the inherited Goal Levels.
+- If overrides are supported, provide:
+  “Use hierarchy default” and “Create custom override”.
+- Remove text such as “Leave empty to allow all Goal Levels” and “Defaults include all Goal Levels”.
+
+9. Tests
+Add or update tests for:
+- Company-wide hierarchy mapping.
+- Executive hierarchy mapping.
+- Department hierarchy mapping.
+- Team hierarchy mapping.
+- Existing team inherits hierarchy configuration.
+- New team inherits hierarchy configuration.
+- Changing hierarchy configuration updates all inheriting teams.
+- Team-specific override, if retained.
+- Resetting override returns to hierarchy defaults.
+- Unauthorized Goal Level is rejected by API.
+- Admin permissions.
+- Existing migration data remains backward compatible.
+- Missing configuration produces a safe error or controlled fallback, never “allow all”.
+
+ACCEPTANCE CRITERIA:
+- Selecting a team during Create Goal shows only the Goal Levels allowed by its Hierarchy Level.
+- “Using default” means hierarchy inheritance.
+- New teams do not automatically receive all Goal Levels.
+- Admin can change a Hierarchy Level once, and all teams under that level inherit the change.
+- Existing Production behavior is preserved after migration.
+- Unauthorized Goal Levels cannot be created through UI or direct API calls.
+
+After implementation, provide:
+1. Current root cause.
+2. Architecture before and after.
+3. Database migration details.
+4. All files changed.
+5. API and UI changes.
+6. Exact test commands.
+7. Manual staging validation steps.
+8. Any assumptions requiring client confirmation.
+
+Do not modify unrelated functionality, environment files, or existing business rules.
