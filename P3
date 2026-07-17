@@ -1,0 +1,24 @@
+Do not ask me to manually define the migration matrix.
+
+Search the existing codebase, database migrations, seed files, constants, validation logic, and Create Goal flow to identify the exact current hardcoded Hierarchy Level → Goal Level mapping used in Production.
+
+Use that existing mapping to seed the new central configuration so current Production behavior remains unchanged.
+
+Before implementing:
+1. Show me the discovered mapping for:
+   - Company-Wide
+   - Executive
+   - Department
+   - Team
+   - Region
+   - Employee
+2. Mention the exact files and logic where each mapping was found.
+3. Do not assume that every hierarchy level should receive all Goal Levels.
+4. If Region or Employee currently have no mapping, do not allow all Goal Levels. Leave them unconfigured and return a clear configuration error.
+5. After showing the discovered matrix, proceed with the implementation using that exact mapping.
+
+Continue with the previously confirmed decisions:
+- Retain optional per-team overrides.
+- Configure all hierarchy levels centrally.
+- Missing configuration must reject with a clear error.
+- “Using default” must mean inheriting the hierarchy-level configuration, not allowing all Goal Levels.
