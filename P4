@@ -1,0 +1,110 @@
+Please enhance the existing voting UI without changing the current voting business logic, API contracts, database schema, permissions, or role behaviour.
+
+Current behaviour already works:
+- Super Admin can vote.
+- Normal team users can vote.
+- Voting works for all items, including non-P1 items.
+- Upvote/downvote counts and selected state already exist.
+
+Implement only these two UI enhancements:
+
+1. Combined voting control in the items table
+
+Replace the currently separated thumbs-up, count, and thumbs-down elements with one compact combined voting control inside the existing “Votes” column.
+
+Expected design:
+
+[ 👍  2  |  👎  0 ]
+
+Requirements:
+- Place upvote and downvote inside one rounded container.
+- Show the upvote count next to the thumbs-up icon.
+- Show the downvote count next to the thumbs-down icon.
+- Add a subtle divider between both actions.
+- The user’s selected vote must have a clearly filled/highlighted state.
+- The unselected action should remain outlined or neutral.
+- Clicking the already-selected action should remove the vote if this behaviour is already supported.
+- Switching from upvote to downvote, or vice versa, must continue using the existing voting logic.
+- Update the count immediately after voting.
+- Show a small loading/disabled state while the vote request is processing to prevent repeated clicks.
+- Add tooltips:
+  - “Upvote this item”
+  - “Downvote this item”
+  - “Remove your upvote/downvote” when already selected.
+- Keep the control compact so it fits properly inside the table row.
+- Ensure it is keyboard accessible and add appropriate aria-label attributes.
+- Do not restrict this UI to P1 items. It must appear for every item where the logged-in user has voting permission.
+- Preserve existing permission checks for normal users, team members and Super Admin.
+
+Suggested reusable component:
+
+<VotingControl
+  itemId={item.id}
+  upvoteCount={item.upvoteCount}
+  downvoteCount={item.downvoteCount}
+  currentUserVote={item.currentUserVote}
+  canVote={canVote}
+  onVote={handleVote}
+/>
+
+Create a reusable VotingControl component instead of duplicating the voting UI.
+
+2. Voting information on the item-detail page
+
+Add a dedicated “Voting” section/card on the individual item-detail page.
+
+Suggested UI:
+
+Voting
+Team members can vote on this item.
+
+[ 👍 Upvote  12 ]   [ 👎 Downvote  2 ]
+
+Your vote: Upvote
+
+Requirements:
+- Place the Voting section in a logical visible location on the item-detail page, preferably near the main item information or contributors section.
+- Reuse the same VotingControl component created for the table.
+- Show:
+  - Total upvotes
+  - Total downvotes
+  - Logged-in user’s current vote
+- Clearly highlight the logged-in user’s selected option.
+- If the user has not voted, either show “You have not voted yet” or omit the current-vote label.
+- Show instant count updates after voting without requiring page refresh.
+- Display a loading state during the vote API request.
+- If voting fails, restore the previous count/state and show an existing toast/error message.
+- If the user does not have permission to vote, display the counts in read-only mode and show:
+  “Only eligible team members can vote on this item.”
+- Do not create a new API if existing voting APIs and handlers are already available.
+- Do not modify backend permission rules.
+- Do not change existing vote records, database tables or API response formats unless absolutely required for rendering.
+- Maintain the existing application design system, spacing, typography, colours, dark mode and responsive behaviour.
+
+Implementation approach:
+1. Inspect the existing table voting implementation and identify its vote handler, API call and state.
+2. Extract the current voting behaviour into a reusable VotingControl component.
+3. Replace the existing table voting elements with the combined control.
+4. Import and reuse the same component on the item-detail page.
+5. Keep one shared voting state update pattern so table and detail views behave consistently.
+6. Run linting and TypeScript checks.
+7. Test with both Super Admin and normal user accounts.
+
+Acceptance criteria:
+- A single combined voting control appears in the Votes column.
+- Upvote and downvote counts are both clearly visible.
+- The selected vote is visually obvious.
+- Voting continues to work for P1, P2, P3, P4 and P5 items.
+- The item-detail page contains a dedicated Voting section.
+- Table and detail page use the same reusable component.
+- Counts update immediately.
+- Refreshing the page preserves the vote.
+- Existing Super Admin and normal-user voting permissions continue working.
+- No existing item-list, filtering, sorting or voting functionality is broken.
+
+Before editing, identify and briefly list the files/components that currently handle:
+- The OOO items table
+- Voting API/handler
+- Item-detail page
+
+Then implement the changes and provide a summary of every modified file.
