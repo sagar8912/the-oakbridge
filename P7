@@ -1,0 +1,661 @@
+Please implement and fully validate the feature:
+
+“Transfer Goal Ownership to Another Team”
+
+Business requirement:
+
+We need a safe way to relocate a goal that is assigned to the wrong team.
+
+A goal must belong to a team that also contains the goal owner. Therefore, an authorized user should be able to transfer an existing goal from its current team to another eligible team while preserving the goal and its related data.
+
+Examples:
+- Transfer “OIL Initiatives” goals to the “OIL Team”.
+- Transfer Personal Lines goals to the correct “Personal Lines Team”.
+
+Important constraints:
+
+- Do not delete and recreate the goal.
+- Preserve the same goal ID.
+- Preserve existing goal information and history.
+- Preserve the current database schema and API contracts where practical.
+- Use the existing authentication, authorization, team-membership, goal-level, public/private visibility, and audit patterns.
+- Do not modify unrelated functionality.
+- Do not silently change the goal owner, goal level, visibility, or related records.
+- Do not allow a goal to be transferred into a team where its owner is not an eligible member.
+
+Before implementing anything, inspect the current codebase and identify:
+
+1. Goal detail page
+2. Goal list/table components
+3. Goal edit form
+4. Team membership logic
+5. Goal ownership logic
+6. Goal level configuration
+7. Public/private goal visibility logic
+8. Goal update APIs
+9. Team APIs
+10. Permission middleware
+11. Database tables and relationships
+12. Existing audit/history functionality
+13. Existing goal tests
+
+Provide a short discovery report before editing files.
+
+==================================================
+1. TRANSFER ACTION AND UI
+==================================================
+
+Add a “Transfer to Another Team” action for authorized users.
+
+Preferred locations:
+
+- Goal detail page action menu
+- Goal edit page, where appropriate
+- Optional row action in the Goals table if consistent with the current application design
+
+Do not expose the action to users who do not have permission.
+
+When the user selects “Transfer to Another Team”, open a confirmation modal or drawer.
+
+Suggested UI:
+
+Transfer Goal to Another Team
+
+Goal:
+[Goal title]
+
+Current team:
+[Current Team Name]
+
+Goal owner:
+[Current Owner Name]
+
+Target team:
+[Select target team]
+
+Goal level:
+[Current level or select compatible level]
+
+Reason for transfer:
+[Optional text area]
+
+[Cancel] [Transfer Goal]
+
+The modal must clearly explain:
+
+“This action will move the goal to the selected team. The goal owner must be a member of the target team.”
+
+==================================================
+2. TARGET TEAM SELECTION
+==================================================
+
+The target-team dropdown must:
+
+- Exclude the current team.
+- Show only active teams.
+- Show only teams the authorized user is allowed to manage or transfer goals into.
+- Prevent selecting archived, deleted, unauthorized, or inaccessible teams.
+- Avoid duplicate team entries.
+- Support search when there are many teams.
+- Show loading, empty, and error states.
+
+Do not rely only on UI filtering.
+
+The backend must independently verify that the selected target team is valid and authorized.
+
+==================================================
+3. OWNER AND TEAM-MEMBERSHIP VALIDATION
+==================================================
+
+The current goal owner must be a valid member of the target team.
+
+Before transfer, verify:
+
+- The goal has a valid owner.
+- The owner is an active user.
+- The owner is a member of the target team.
+- The owner has a role that permits them to own a goal in that team, according to existing rules.
+
+When the current owner belongs to the target team:
+
+- Allow the goal to retain the same owner.
+
+When the current owner does not belong to the target team:
+
+- Do not silently transfer the goal.
+- Do not silently add the owner to the team.
+- Do not silently change ownership.
+
+Show a clear message:
+
+“The current goal owner is not a member of the selected team. Select another eligible owner or add the current owner to the target team before transferring this goal.”
+
+If existing business logic allows changing the owner during transfer, provide an “Owner” dropdown containing only eligible target-team members.
+
+If owner reassignment during transfer is not currently supported or has not been approved, block the transfer and explain the issue.
+
+Use the safest existing business rule. Do not invent new role behaviour.
+
+==================================================
+4. GOAL-LEVEL VALIDATION
+==================================================
+
+Goal levels may be configured differently for each team.
+
+When the target team is selected:
+
+- Fetch the target team’s allowed goal levels.
+- Check whether the goal’s current level is allowed for the target team.
+- Preserve the current level when it is valid for the target team.
+- Do not silently replace the level.
+
+When the current level is not valid for the target team:
+
+- Require the authorized user to select a compatible goal level.
+- Show only goal levels enabled for the target team.
+- Disable the Transfer button until a valid level is selected.
+
+Show a clear message:
+
+“The current goal level is not enabled for the selected team. Select a valid level before transferring.”
+
+The backend must reject any invalid team-and-goal-level combination even when the API is called directly.
+
+==================================================
+5. PUBLIC/PRIVATE VISIBILITY
+==================================================
+
+Preserve the goal’s existing public/private visibility during transfer unless the user explicitly changes it through an approved workflow.
+
+Validate the behaviour of:
+
+- Public goals
+- Private goals
+- Team-only goals
+- Shared goals
+- Goals visible through organization-level views
+
+After transfer:
+
+- Public goals should continue following public-goal visibility rules.
+- Private goals must not become visible to unauthorized users.
+- Members of the previous team must not retain access only because the goal previously belonged to their team.
+- Members of the target team should receive access according to existing visibility and permission rules.
+- Do not accidentally display the goal in both the old and new team due to stale mappings or cached data.
+
+==================================================
+6. RELATED DATA PRESERVATION
+==================================================
+
+The transfer must preserve all applicable related data, including:
+
+- Goal ID
+- Goal title
+- Description
+- Owner, unless explicitly reassigned
+- Goal level, unless explicitly changed due to target-team compatibility
+- Status
+- Priority
+- Due date
+- Progress
+- Visibility
+- Contributors
+- RACI assignments
+- To-dos
+- Comments
+- Attachments
+- Meetings
+- Relationships
+- Parent/child goal relationships
+- Tags
+- Activity history
+- Created date
+- Created by
+- Existing audit information
+
+Do not delete and recreate the goal.
+
+Only update the necessary team-related fields and any explicitly approved dependent fields.
+
+==================================================
+7. PARENT, CHILD, AND RELATED GOALS
+==================================================
+
+Inspect how parent goals, child goals, related goals, and hierarchy work.
+
+Before transfer, determine whether the goal has:
+
+- Parent goal
+- Child goals
+- Linked goals
+- Dependent goals
+- Related to-dos
+- Cross-team relationships
+
+Safest default behaviour:
+
+- Transfer only the selected goal.
+- Preserve relationships when they are still valid.
+- Do not automatically transfer child goals or related goals.
+- Do not automatically change the team of related records.
+
+If a relationship becomes invalid because of the transfer:
+
+- Block the transfer or show a clear warning based on existing business rules.
+- Do not silently remove relationships.
+
+Where business behaviour is unclear, report it as “Needs Business Confirmation” rather than guessing.
+
+Potential confirmation question:
+
+“When a parent goal is transferred, should its child goals remain in their current teams or transfer with the parent?”
+
+==================================================
+8. PERMISSIONS
+==================================================
+
+Use the existing permission model.
+
+Validate at least:
+
+- Super Admin
+- Team Admin
+- Goal owner
+- Normal team member
+- Viewer/read-only user
+- User who is not a member of the current team
+- User who is not a member of the target team
+
+Expected safe behaviour:
+
+Super Admin:
+- Can transfer goals according to global administrative permissions.
+
+Team Admin:
+- Can transfer goals only when authorized for the source and target teams according to the current permission model.
+
+Normal user:
+- Must not transfer a goal unless the current business rules explicitly permit it.
+
+Viewer/read-only user:
+- Must not transfer a goal.
+
+Backend requirements:
+
+- Never trust a client-supplied user ID, role, or permission flag.
+- Use the authenticated user.
+- Verify source-team authorization.
+- Verify target-team authorization.
+- Verify access to the goal.
+- Verify owner-team membership.
+- Verify goal-level compatibility.
+
+An unauthorized direct API request must return 403.
+
+==================================================
+9. TRANSFER API
+==================================================
+
+Inspect whether the existing goal update API can safely support the transfer.
+
+Prefer a dedicated transactional endpoint when it provides safer validation and auditability, for example:
+
+POST /api/goals/:goalId/transfer
+
+Example request:
+
+{
+  "targetTeamId": "target-team-id",
+  "ownerId": "optional-owner-id",
+  "goalLevelId": "optional-compatible-level-id",
+  "reason": "Goal was assigned to the wrong team"
+}
+
+Do not treat these client values as trusted.
+
+The server must:
+
+1. Authenticate the user.
+2. Load the goal.
+3. Verify goal access.
+4. Verify source-team permission.
+5. Verify target-team permission.
+6. Verify the target team exists and is active.
+7. Verify the target team is different from the source team.
+8. Verify owner eligibility in the target team.
+9. Verify the goal level is allowed for the target team.
+10. Validate relationships and dependent data.
+11. Update the goal inside a safe transaction where supported.
+12. Add an audit/history entry.
+13. Return the updated goal with the current team and permission data.
+
+Use the current project API pattern. Do not create an unnecessary endpoint if the existing architecture already has a safe transfer action.
+
+==================================================
+10. AUDIT HISTORY
+==================================================
+
+Create an audit/activity record using the existing audit mechanism.
+
+The entry should capture:
+
+- Goal ID
+- Goal title
+- Previous team ID and name
+- New team ID and name
+- Previous owner
+- New owner, if changed
+- Previous goal level
+- New goal level, if changed
+- User who performed the transfer
+- Date and time
+- Optional reason
+- Result/status
+
+Suggested activity text:
+
+“Goal transferred from OIL Initiatives to OIL Team by [User Name].”
+
+When ownership changes:
+
+“Goal transferred from [Old Team] to [New Team] and ownership changed from [Old Owner] to [New Owner].”
+
+Do not expose sensitive internal IDs unnecessarily in the user-facing activity feed.
+
+==================================================
+11. CONFIRMATION AND FEEDBACK
+==================================================
+
+Before final submission, show a confirmation message:
+
+“You are transferring this goal from [Current Team] to [Target Team]. The goal will no longer appear under the original team. Continue?”
+
+During transfer:
+
+- Disable the Transfer button.
+- Show a loading indicator.
+- Prevent duplicate requests.
+- Prevent the modal from submitting multiple times.
+
+After success:
+
+- Show the existing success toast.
+- Close the modal.
+- Refresh or invalidate the correct goal and team caches.
+- Redirect to or refresh the transferred goal detail page.
+- Show the new team immediately.
+- Remove the goal from the previous team’s list.
+- Add it to the target team’s list.
+
+Suggested success message:
+
+“Goal successfully transferred to [Target Team].”
+
+After failure:
+
+- Keep the modal open.
+- Preserve user selections.
+- Show the existing error toast.
+- Do not show the goal under the wrong team.
+- Roll back optimistic UI changes.
+
+==================================================
+12. ERROR HANDLING
+==================================================
+
+Handle these cases safely:
+
+- Goal does not exist: 404
+- Source team does not exist: 404
+- Target team does not exist: 404
+- Target team is inactive or archived: 400 or 409
+- User is unauthorized: 403
+- Current owner is not a target-team member: 400 or 409
+- Invalid target-team goal level: 400
+- Target team equals current team: 400
+- Goal was modified by another user: handle according to existing concurrency pattern
+- Goal was deleted during transfer: 404 or conflict
+- Network failure
+- Database failure
+- Audit-history failure
+- Invalid or missing request values
+- Null or malformed team/owner/level data
+
+The UI must not crash or show a successful state when the transfer fails.
+
+==================================================
+13. CACHE AND SYNCHRONIZATION
+==================================================
+
+After successful transfer, update or invalidate:
+
+- Goal detail data
+- Source-team goal list
+- Target-team goal list
+- My Goals
+- Shared Goals
+- Public Goals
+- Goal counts
+- Dashboard summaries
+- Parent/child goal views
+- Any team-specific goal caches
+
+Verify:
+
+- The goal does not remain visible under the old team due to stale cache.
+- The goal appears only once under the new team.
+- Refreshing the page shows the correct team.
+- Logout/login preserves the updated team.
+- Two browser sessions show consistent data.
+
+==================================================
+14. UAT AND AUTOMATED TEST SCENARIOS
+==================================================
+
+Audit and cover these scenarios:
+
+A. Basic transfer
+
+1. Super Admin transfers a goal from Team A to Team B.
+2. The goal retains the same ID.
+3. The goal disappears from Team A.
+4. The goal appears in Team B.
+5. Refresh preserves the new team.
+6. Logout/login preserves the transfer.
+
+B. Owner validation
+
+7. Current owner is a Team B member: transfer succeeds.
+8. Current owner is not a Team B member: transfer is blocked.
+9. Eligible owner is selected during transfer, if supported.
+10. Inactive user cannot become the new owner.
+11. A user cannot submit an arbitrary owner through the API.
+
+C. Goal-level validation
+
+12. Current level is allowed by Team B: preserve it.
+13. Current level is not allowed: require a compatible level.
+14. API rejects a disallowed level.
+15. Team switching refreshes the compatible-level list.
+16. A stale level from a previous target team cannot be submitted.
+
+D. Permissions
+
+17. Super Admin behaviour works.
+18. Authorized Team Admin behaviour works.
+19. Unauthorized Team Admin cannot transfer into another team.
+20. Normal user cannot transfer unless explicitly allowed.
+21. Viewer cannot transfer.
+22. Direct unauthorized API calls return 403.
+
+E. Visibility
+
+23. Public goal visibility remains correct.
+24. Private goal remains private.
+25. Previous-team users lose team-based access where appropriate.
+26. Target-team users receive access according to existing rules.
+27. The goal does not appear simultaneously under both teams.
+
+F. Data preservation
+
+28. To-dos remain connected.
+29. Comments remain connected.
+30. Attachments remain connected.
+31. Contributors and RACI remain correct.
+32. Relationships remain intact.
+33. Progress and status remain unchanged.
+34. Created date and creator remain unchanged.
+35. Activity history records the transfer.
+
+G. Error and concurrency
+
+36. Repeated clicks create only one transfer operation.
+37. Network failure does not change the displayed team.
+38. API failure rolls back optimistic state.
+39. Two simultaneous transfer requests do not corrupt data.
+40. Transferring to the current team is rejected.
+41. Archived target team is rejected.
+42. Deleted goal is handled safely.
+
+H. Regression
+
+43. Goal creation still works.
+44. Goal editing still works.
+45. Goal level restrictions still work.
+46. Public/private goal behaviour still works.
+47. Team membership still works.
+48. Goal filters, sorting, and pagination still work.
+49. Parent/child relationships still work.
+50. No unrelated functionality is modified.
+
+==================================================
+15. AUTOMATED TEST REQUIREMENTS
+==================================================
+
+Use the existing testing framework.
+
+Add or update:
+
+- Unit tests for the Transfer Goal modal/component
+- Target-team dropdown tests
+- Owner-eligibility tests
+- Goal-level compatibility tests
+- API transfer tests
+- Authentication tests
+- Permission tests
+- Same-team rejection test
+- Archived-team rejection test
+- Data-preservation tests
+- Audit-entry tests
+- Cache/state synchronization tests
+- Loading and duplicate-click tests
+- Error rollback tests
+- Public/private visibility regression tests
+
+Do not introduce a new testing library unless necessary.
+
+Run:
+
+- Relevant unit tests
+- API/integration tests
+- TypeScript/type check
+- Lint
+- Build, if practical
+
+Report unrelated existing failures separately.
+
+==================================================
+16. IMPLEMENTATION PROCESS
+==================================================
+
+Step 1 — Discovery
+
+List all files responsible for:
+
+- Goal detail page
+- Goal list/table
+- Goal editing
+- Team selection
+- Goal ownership
+- Team membership
+- Goal levels
+- Visibility
+- Transfer/update APIs
+- Permissions
+- Database operations
+- Audit history
+- Cache/state handling
+- Existing tests
+
+Step 2 — Coverage audit
+
+Create a table:
+
+| Scenario | Status | Relevant File | Required Change | Test Coverage |
+|----------|--------|---------------|-----------------|---------------|
+
+Use these statuses:
+
+- Covered
+- Partial
+- Missing
+- Needs Business Confirmation
+
+Step 3 — Clarify critical ambiguities
+
+Before making broad business-logic changes, identify questions such as:
+
+- Can Team Admin transfer a goal into a team they do not manage?
+- Can the owner be changed within the same transfer?
+- Should child goals transfer with the parent?
+- Should to-dos remain assigned to users outside the target team?
+- Should contributors outside the target team remain?
+- Can completed or archived goals be transferred?
+
+Use the safest existing behaviour and report unresolved questions.
+
+Step 4 — Implementation
+
+Implement only missing or partially covered behaviour.
+
+Step 5 — Validation
+
+Run tests, type checks, lint, and build.
+
+Step 6 — Final report
+
+Provide:
+
+1. Existing behaviour found
+2. Missing scenarios found
+3. Business assumptions used
+4. Changes implemented
+5. Files modified
+6. APIs added or updated
+7. Tests added or updated
+8. Test results
+9. Remaining risks
+10. Manual UAT cases
+11. Confirmation that the goal ID and related data are preserved
+
+==================================================
+ACCEPTANCE CRITERIA
+==================================================
+
+The feature is complete only when:
+
+- An authorized user can transfer a goal to another eligible team.
+- The target team cannot be the same as the current team.
+- The current owner is eligible in the target team, or an approved eligible owner is explicitly selected.
+- The target team allows the selected goal level.
+- The goal keeps the same ID.
+- Existing related data is preserved.
+- Public/private visibility remains correct.
+- Unauthorized users cannot transfer through UI or API.
+- The goal disappears from the previous team and appears under the target team.
+- Transfer history is recorded.
+- Transfer survives refresh and re-login.
+- Loading and error states work correctly.
+- Duplicate requests cannot cause data corruption.
+- Existing goal, team, permission, and visibility features are not broken.
+- No unrelated schema or files are changed unnecessarily.
