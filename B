@@ -1,0 +1,17 @@
+Approve the draft as a PROPOSED architecture note only, not as a final implementation decision.
+
+Please do not make assumptions or implement the three open architectural decisions yet:
+
+1. Which traffic classes should go through APIM first
+2. Whether Entra app roles should directly feed the SQL PDP or continue through the existing provisioning/role model
+3. Whether policy authoring should move to a declarative store that compiles to SQL + APIM
+
+Keep all three clearly marked as “TBD – client/architecture confirmation required”.
+
+The existing SQL PDP/PEP and shared session/cookie architecture remains the current source of truth until an approved migration decision exists.
+
+You may add only a short cross-reference/pointer in the local permission-architecture.md explaining that Azure/Entra/APIM is a future extension direction.
+
+Do not duplicate the full architecture locally and do not create a second source of truth.
+
+Do not modify production authorization logic based only on this draft.
