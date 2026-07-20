@@ -1,0 +1,73 @@
+Act as a Principal Full-Stack / Platform Architect with 15+ years of experience.
+
+We are starting Phase 1.B — Knowledge Base Completion.
+
+IMPORTANT:
+Do NOT modify any code in this step.
+
+First perform a complete architecture audit of the existing Knowledge Base implementation across the monorepo.
+
+Business context:
+- Knowledge Base = approved/current source of truth for policies, procedures, standards, training, business processes and technical documentation.
+- TOW/OOO = problems, bugs, features, goals and improvements being worked on.
+- Chatbot/RAG is NOT part of the current implementation phase.
+
+Analyze and report:
+
+1. Existing KB database tables:
+   - articles
+   - article_content
+   - article_versions
+   - categories/collections
+   - permissions/roles
+   - related tables
+
+2. Existing KB APIs:
+   - article list
+   - article detail
+   - article content/body
+   - create/update
+   - publish/version
+   - search
+   - cache/revalidation
+
+3. Existing KB-Admin UI:
+   - article creation
+   - editing
+   - publishing
+   - versioning
+   - rendering
+
+4. Existing end-user KB pages:
+   - /kb routes
+   - pages returning null/stubs
+   - incomplete pages
+
+5. Existing rendering approach:
+   - react-markdown
+   - RichTextDisplay
+   - HTML/Markdown handling
+
+6. Existing authorization:
+   - kb_role
+   - Viewer/User/Admin/Super Admin
+   - server/service access
+
+7. Existing caching:
+   - unstable_cache
+   - cache tags
+   - revalidate APIs
+
+8. Existing TOW/OOO → KB integration.
+
+9. Identify the top gaps blocking Phase 1.B.
+
+Return:
+- Current architecture flow
+- Exact files involved
+- Existing reusable components
+- Missing functionality
+- Security concerns
+- Recommended implementation order
+
+Do NOT implement anything yet.
