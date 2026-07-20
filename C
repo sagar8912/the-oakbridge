@@ -1,73 +1,44 @@
-Act as a Principal Full-Stack / Platform Architect with 15+ years of experience.
+Good. The architecture audit is complete.
 
-We are starting Phase 1.B — Knowledge Base Completion.
+Do NOT implement code yet.
 
-IMPORTANT:
-Do NOT modify any code in this step.
+Now convert the audit into a detailed Phase 1.B implementation plan.
 
-First perform a complete architecture audit of the existing Knowledge Base implementation across the monorepo.
+For each implementation slice, provide:
 
-Business context:
-- Knowledge Base = approved/current source of truth for policies, procedures, standards, training, business processes and technical documentation.
-- TOW/OOO = problems, bugs, features, goals and improvements being worked on.
-- Chatbot/RAG is NOT part of the current implementation phase.
+1. Exact problem/gap being solved
+2. Existing files/components/APIs that will be reused
+3. Exact files likely to be changed
+4. Database migration required or not
+5. API changes required
+6. Permission/security impact
+7. Tests required
+8. Dependencies on earlier steps
+9. Acceptance criteria
 
-Analyze and report:
+Use this implementation order unless your audit found a critical dependency requiring adjustment:
 
-1. Existing KB database tables:
-   - articles
-   - article_content
-   - article_versions
-   - categories/collections
-   - permissions/roles
-   - related tables
+1. Authorization/security prerequisites required for safe KB reads
+2. Approved/current article body API
+3. Publish → cache revalidation flow
+4. End-user Knowledge Base reader/navigation
+5. KB role/admin operations validation
+6. TOW/OOO item/goal/Vision → KB article linking
+7. Version history/restore validation
+8. Search/interlinked article improvements
+9. Retrieval-readiness cleanup only — no RAG/chatbot implementation
 
-2. Existing KB APIs:
-   - article list
-   - article detail
-   - article content/body
-   - create/update
-   - publish/version
-   - search
-   - cache/revalidation
+Also clearly separate:
 
-3. Existing KB-Admin UI:
-   - article creation
-   - editing
-   - publishing
-   - versioning
-   - rendering
+MUST HAVE FOR PHASE 1.B
+vs
+NICE TO HAVE / FUTURE
 
-4. Existing end-user KB pages:
-   - /kb routes
-   - pages returning null/stubs
-   - incomplete pages
+Important:
+- Do not modify production code yet.
+- Do not implement RAG, chatbot, embeddings, MCP, or Azure migration.
+- Do not create duplicate KB architecture.
+- Preserve existing production behavior.
+- Highlight any business requirement that needs client confirmation before coding.
 
-5. Existing rendering approach:
-   - react-markdown
-   - RichTextDisplay
-   - HTML/Markdown handling
-
-6. Existing authorization:
-   - kb_role
-   - Viewer/User/Admin/Super Admin
-   - server/service access
-
-7. Existing caching:
-   - unstable_cache
-   - cache tags
-   - revalidate APIs
-
-8. Existing TOW/OOO → KB integration.
-
-9. Identify the top gaps blocking Phase 1.B.
-
-Return:
-- Current architecture flow
-- Exact files involved
-- Existing reusable components
-- Missing functionality
-- Security concerns
-- Recommended implementation order
-
-Do NOT implement anything yet.
+At the end, recommend the smallest first coding slice we should implement and test independently.
