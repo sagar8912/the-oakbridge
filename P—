@@ -1,0 +1,23 @@
+Proceed with the following decisions:
+
+A. Destination:
+Choose Option 1 — use the existing List/Item architecture with a configurable destination List UUID. Do not create a parallel Oakes-specific database table.
+
+B. Authentication:
+Choose Option 2 — reuse/implement the existing FE-006 approach so eligible @oakbridgeinsurance.com users signing in through Azure SSO can be auto-provisioned as Viewers even if they have not completed the normal TOW kickoff/onboarding.
+
+C. Viewer creation permission:
+Choose Option 2, but enforce it strictly:
+A Viewer may create an item only on a PUBLIC list that is explicitly configured with can_add=all or the equivalent existing permission.
+This must not give Viewers general create permission on all lists or access to private/internal records.
+
+D. Form:
+Reuse the standard Item creation model (Title + Description and existing metadata) unless the repository already contains defined Oakes Award-specific fields. Do not invent a new schema without an existing requirement.
+
+Important:
+- Viewer access must remain least-privilege.
+- Enforce all permissions server-side.
+- Do not implement a truly anonymous public form.
+- Do not expose private teams, lists, goals, or items.
+- Use existing Azure SSO, Viewer role, list permissions, audit, and item creation patterns.
+- First show the exact files/FE-006 logic you found, then implement the smallest safe change.
