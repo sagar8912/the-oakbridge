@@ -1,59 +1,19 @@
-Proceed with ONLY Slice 1a — Mutation Authorization Hardening.
+Slice 1a tests are passing.
 
-Do NOT assume or decide C1–C5 yet. Keep all C1–C5 marked as TBD / client confirmation required.
+Before moving to Slice 2, perform a final verification of Slice 1a only.
 
-Scope for this implementation only:
+Confirm:
+1. Viewer cannot mutate KB content.
+2. Authorized Editor can save/edit permitted KB content.
+3. Admin/Super Admin behavior is preserved.
+4. Unauthenticated mutation is blocked.
+5. Direct server/API mutation bypass is blocked.
+6. No SQL PDP/PEP behavior was redesigned.
+7. No unrelated functionality was modified.
 
-1. Find and secure any unguarded "use server" + service-role Knowledge Base content mutation paths.
+Also review the remaining risks you identified and classify each as:
+- Must fix before Slice 2
+- Later Phase 1.B work
+- Out of scope
 
-2. Ensure article/content save and allowed workflow-transition operations use the correct existing EDIT authorization capability.
-
-3. Do not incorrectly require ADMIN/MANAGE permission for normal editor operations if the existing permission model defines EDIT separately.
-
-4. Enforce authorization server-side for every mutation.
-UI hiding alone is not sufficient.
-
-5. Preserve the current SQL PDP/PEP architecture.
-Do NOT redesign or change SQL PDP/PEP logic in this slice.
-
-6. Do NOT change:
-- KB read-access rules
-- C1 reader decision
-- approve/publish semantics
-- C2 reader route/home
-- C3 linking scope
-- C4 version restore behavior
-- RAG/chatbot/embeddings
-- Azure migration
-- unrelated TOW functionality
-
-Required permission behavior:
-- Viewer: cannot mutate KB content
-- Editor/authorized content editor: can perform permitted edit/save operations
-- Admin/Super Admin: retains existing authorized capabilities
-- Direct server/API mutation attempts must also be protected
-
-Before editing:
-- Show the exact vulnerable mutation paths/files you found
-- Explain the current authorization gap
-- Explain the smallest safe fix
-
-Then implement Slice 1a only.
-
-Add/update tests for:
-1. Viewer mutation blocked
-2. Editor permitted edit/save succeeds
-3. Admin permitted operation succeeds
-4. Unauthenticated mutation blocked
-5. Direct mutation/API bypass blocked
-6. Existing allowed behavior is not broken
-
-After implementation provide:
-- Root cause
-- Exact files changed
-- Authorization logic before vs after
-- Tests added
-- Exact test commands and results
-- Any remaining risks
-
-Do not proceed to Slice 2 / Approved Body API until I explicitly tell you.
+Do not start Slice 2 yet.
