@@ -1,0 +1,22 @@
+I have created the staging list:
+
+Team: Oakes Award - Nominations
+List: Oakes Award Recommendations
+
+The list URL shows this UUID:
+45a32244-0ca0-4f83-9224-7f3d7da62d3a
+
+Please verify this UUID against the staging database before using it.
+
+Also verify the list configuration:
+- Create = Everyone
+- A valid Default Owner is configured
+- Viewer/non-team users can submit safely
+- Viewers cannot read or modify other users' nominations
+- Delete remains restricted to Team Admin
+- No private team/list data is exposed
+
+Once verified, configure this as the staging OAKES_AWARD_LIST_ID and complete the smallest safe implementation.
+
+Do not use this staging UUID for production.
+Do not weaken global Viewer permissions.
