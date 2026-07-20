@@ -1,51 +1,89 @@
-C1 Decision: Use a HYBRID read-access model.
+Proceed with ONLY Slice 3 — Knowledge Base Publish → Cache Revalidation.
 
-Proceed with this rule:
+Do NOT start Reader UI, Vision integration, search, RAG, chatbot, MCP, or unrelated work.
 
-1. Approved/Published Knowledge Base content that is explicitly referenced by an authorized TOW/OOO context (for example a Vision section) may be read by an authenticated user who already has permission to view that TOW context.
+Current state:
+- Slice 1a authorization hardening is complete.
+- Slice 2 approved/current article body API is complete.
+- Hybrid scoped read model is established.
+- Remaining identified gap: cache invalidation is not yet correctly wired from publish/update flows.
 
-2. This scoped access must NOT grant the user unrestricted access to the entire Knowledge Base.
+GOAL:
+When an authorized KB article is published or an approved article is updated, all relevant cached approved-content reads must be invalidated so users never continue seeing permanently stale content.
 
-3. Draft, unpublished, private, restricted, authoring, editing, and admin KB functionality must continue to follow the existing kb_role / authorization model.
+Before coding:
 
-4. Enforce this server-side through a scoped approved-content read path. Do not simply remove kb_role checks globally.
+1. Trace the complete existing publish/update flow.
+2. Identify:
+   - unstable_cache usage
+   - cache keys
+   - cache tags
+   - POST /api/kb/revalidate or equivalent
+   - article publish/approve actions
+   - approved body API caching from Slice 2
+3. Show exactly where stale-cache risk currently exists.
+4. Propose the smallest safe fix.
 
-5. The read endpoint must return only the approved/current version and must not expose draft/version history or privileged metadata unnecessarily.
+IMPLEMENTATION REQUIREMENTS:
 
-Now proceed with ONLY Slice 2 — Approved/Current Article Body API.
+1. Publishing an article must invalidate the cached approved/current article body.
 
-Requirements:
-- Identify the correct approved/current article version.
-- Return stable article ID/slug, title, approved body, metadata required for rendering, status/version/last-updated where appropriate.
-- Never silently return null when valid approved content exists.
-- Clear 403, 404 and error responses.
-- No draft leakage.
-- Preserve caching/revalidation architecture.
-- Remove or avoid hidden write side-effects from the read path where safely possible; specifically review the previously identified getArticleContent quiet UPDATE behavior.
-- Do not start Reader UI, TOW Vision integration, search, RAG, chatbot, MCP, or unrelated work yet.
+2. Updating and publishing a new approved version must invalidate:
+   - article-detail cache
+   - relevant article-list/category cache only where required
+   - any scoped approved-content cache introduced in Slice 2
 
-Add tests for:
-1. Approved article retrieval
-2. Scoped authenticated TOW-context read
-3. User without valid TOW context or KB permission blocked
-4. Draft/unpublished content not exposed
-5. Missing article returns 404
-6. Correct current approved version returned
-7. Read operation does not perform unintended content mutation
+3. Prefer targeted cache invalidation.
+Do NOT clear the entire Knowledge Base cache unnecessarily.
 
-Before editing, show:
-- Current API/data flow
-- Exact root gap
-- Files to change
-- Proposed smallest safe solution
+4. Cache tags/keys must use stable identifiers such as article ID/slug/code.
 
-Then implement Slice 2 only.
+5. Draft edits that are NOT published should NOT unnecessarily invalidate the public/approved reader cache unless required by the current architecture.
+
+6. After publish/revalidation:
+   Old approved content
+       ↓
+   cache invalidated
+       ↓
+   next authorized read
+       ↓
+   new approved/current content
+
+7. Preserve:
+   - authorization
+   - existing publish semantics
+   - versioning
+   - SQL PDP/PEP architecture
+
+8. Do not decide or modify unrelated C2-C5 business decisions.
+
+TESTS REQUIRED:
+
+1. Fetch approved article and populate cache.
+2. Update draft without publishing → approved reader still receives existing approved content.
+3. Publish new approved version.
+4. Relevant cache invalidates.
+5. Next read returns new approved content.
+6. Unrelated article cache is not unnecessarily invalidated.
+7. Unauthorized publish/revalidation blocked.
+8. Failed publish does not incorrectly invalidate valid content.
+9. Repeated revalidation is safe/idempotent.
+
+Before editing show:
+- Current publish flow
+- Current cache flow
+- Root cause/gap
+- Exact files proposed for change
+
+Then implement Slice 3 only.
 
 After implementation provide:
-- Files changed
-- API contract
-- Authorization behavior
-- Tests and exact commands/results
-- Remaining risks
+1. Files changed
+2. Cache flow before vs after
+3. Cache tags/keys used
+4. Publish/revalidation sequence
+5. Tests added
+6. Exact test commands and results
+7. Remaining risks
 
-Do not proceed to Slice 3 until I explicitly approve it.
+Stop after Slice 3. Do not start Reader UI or Vision integration until I explicitly approve.
