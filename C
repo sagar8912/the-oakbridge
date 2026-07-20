@@ -1,768 +1,419 @@
 Act as a Principal Full-Stack Engineer / Solution Architect with 15+ years of production experience.
 
-We are continuing:
+We have completed Phase 1.B Slice 4 — Knowledge Base Reader UI and Navigation.
 
-PHASE 1.B — KNOWLEDGE BASE COMPLETION
+DO NOT start Slice 5 yet.
 
-Completed or already implemented in previous slices:
+Before moving forward, perform a complete stabilization, dependency reconciliation, regression review, and validation of Slices 1a through 4.
 
-- Slice 1a: Knowledge Base mutation authorization hardening
-- Slice 2: Approved/current Knowledge Base article body retrieval
-- Slice 3: Publish → Cache Revalidation flow
+This is a RELEASE-GATE validation step.
+
+==================================================
+CURRENT STATE
+==================================================
+
+Completed:
+
+Slice 1a:
+Knowledge Base mutation authorization hardening
+
+Slice 2:
+Approved/current Knowledge Base article body API
+
+Slice 3:
+Publish → Cache Revalidation
+
+Slice 4:
+Knowledge Base Reader UI / Navigation / Approved Content Consumption
+
+You identified the following remaining items:
+
+1. Full search not built
+   Classification: FUTURE PHASE / Slice 8
+
+2. kb_role is not available in client user context, which can cause:
+   navigation visible → user clicks → API returns 403
+   Classification: TECHNICAL DEBT
+
+3. package.json dependency changes require pnpm install / lockfile reconciliation
+   Classification: BLOCKER
+
+4. Hierarchy currently shows all approved nodes without article-count filtering
+   Classification: TECHNICAL DEBT
+
+There are currently approximately 55 changed files across the work done so far.
+
+DO NOT blindly continue development until the current state is clean and validated.
+
+==================================================
+STEP 1 — REVIEW ALL CHANGED FILES
+==================================================
+
+Inspect every changed file from Slices 1a–4.
+
+Group them into:
+
+A. Slice 1a — Authorization
+B. Slice 2 — Approved Body API
+C. Slice 3 — Cache/Revalidation
+D. Slice 4 — Reader UI
+E. Tests
+F. Documentation
+G. Dependency/package changes
+H. Potentially unrelated changes
+
+For every potentially unrelated file:
+
+Explain:
+- why it changed
+- whether the change is required
+- whether it should remain
+
+Do NOT keep unrelated modifications simply because they already exist.
+
+Check specifically that we did NOT unintentionally modify:
+
+- TOW business logic
+- Goals
+- Items
+- Todos
+- Voting
+- Team permissions unrelated to KB
+- RAG
+- chatbot
+- embeddings
+- MCP
+- Azure migration
+- production environment configuration
+- unrelated authentication logic
+
+Return a concise changed-files audit before making additional production changes.
+
+==================================================
+STEP 2 — FIX THE DEPENDENCY / LOCKFILE BLOCKER
+==================================================
+
+You reported:
+
+“Lockfile needs pnpm install after package.json deps — BLOCKER until install”
+
+Analyze exactly:
+
+1. Which package.json file(s) changed?
+2. Which dependencies were added/removed/updated?
+3. Why was each dependency required?
+4. Was a new dependency actually necessary, or could an existing repository dependency have been reused?
+5. Is the workspace lockfile currently inconsistent?
+
+If the new dependency is genuinely required:
+
+Provide the exact correct pnpm install command from the correct repository directory.
+
+Use the monorepo’s existing package-manager/workspace conventions.
+
+Update the lockfile normally through pnpm.
+
+DO NOT manually edit pnpm-lock.yaml.
+
+If the dependency is unnecessary:
+
+Remove it and reuse existing packages instead.
+
+After reconciliation verify:
+
+- package.json
+- pnpm-lock.yaml
+- workspace resolution
+- no accidental dependency version drift
+
+Do not upgrade unrelated dependencies.
+
+==================================================
+STEP 3 — BUILD / TYPECHECK VALIDATION
+==================================================
+
+Validate every affected application.
+
+At minimum inspect:
+
+- kb-admin
+- OOO/TOW if Reader UI touches it
+- shared packages used by these apps
+
+Run the existing repository-supported commands for:
+
+1. TypeScript typecheck
+2. Build
+3. Lint where configured
+4. Dependency resolution
+
+Do not invent new scripts.
+
+If Cursor shell is blocked by PowerShell ExecutionPolicy:
+
+Give me exact copy-pasteable commands with:
+
+- exact folder
+- exact command
+- purpose
+- expected success result
+
+Never claim a command passed if it was not actually executed.
+
+==================================================
+STEP 4 — RUN COMPLETE TARGETED TEST SUITE
+==================================================
+
+Validate all functionality introduced in Slices 1a–4.
+
+SLICE 1A TESTS:
+
+- Unauthenticated KB mutation blocked
+- Viewer mutation blocked
+- Editor permitted edit succeeds
+- Admin/Super Admin behavior preserved
+- Direct mutation bypass blocked
+
+SLICE 2 TESTS:
+
+- Approved/current article body returned
+- Correct version returned
+- Draft not leaked
+- Unauthorized read blocked
+- Missing article handled properly
+- No silent valid-result null
+
+SLICE 3 TESTS:
+
+- Publish triggers cache revalidation
+- Updated approved body becomes available
+- Cache does not remain permanently stale
+- Revalidation key behavior is correct
+- Failed revalidation behaves safely
+
+SLICE 4 TESTS:
+
+- KB home loads
+- Hierarchy/category navigation works
+- Approved articles listed
+- Article detail renders
+- Markdown renders correctly
+- Draft/unpublished articles hidden
+- Unauthorized article protected
+- Missing article handled
+- Empty category handled
+- API failure handled
+- Internal navigation works
+- No mutation access introduced through reader UI
+
+Provide:
+
+PASS
+FAIL
+NOT RUN
+
+for every test category.
+
+Never label NOT RUN as PASS.
+
+==================================================
+STEP 5 — VERIFY THE READER END-TO-END FLOW
+==================================================
+
+Trace this flow manually and technically:
+
+Authorized user
+    ↓
+Knowledge Base navigation
+    ↓
+KB Home
+    ↓
+Category / hierarchy
+    ↓
+Approved article list
+    ↓
+Article detail
+    ↓
+Approved/current article body
+    ↓
+Markdown rendering
+    ↓
+Internal navigation
+
+Then verify negative paths:
+
+Unauthorized user
+    ↓
+Direct URL
+    ↓
+Correct 403 / access behavior
+
+Draft article
+    ↓
+Normal reader
+    ↓
+Must not leak
+
+Missing article
+    ↓
+Meaningful 404 UX
+
+API failure
+    ↓
+Meaningful error
+    ↓
+No blank/null page
+
+==================================================
+STEP 6 — ANALYZE kb_role CLIENT CONTEXT ISSUE
+==================================================
+
+Do NOT blindly fix it yet.
+
+Analyze this known technical debt:
+
+“kb_role not on client user context → navigation visible, then API returns 403”
+
+Explain:
+
+1. Where server-side KB authorization currently gets kb_role.
+2. What client-side user/session context currently contains.
+3. Why navigation can be visible to a user who receives 403.
+4. Whether adding kb_role to client context is safe.
+5. Whether the better solution is:
+   A. permission-aware navigation endpoint
+   B. server-rendered authorization
+   C. enriched session/user context
+   D. another existing project pattern
+
+Do NOT expose sensitive authorization internals unnecessarily to the client.
+
+Recommend the safest smallest solution.
+
+Mark whether this should be:
+
+BLOCKER before Slice 5
+
+or
+
+First task inside Slice 5.
+
+==================================================
+STEP 7 — REVIEW HIERARCHY TECHNICAL DEBT
+==================================================
+
+You reported:
+
+“Hierarchy shows all approved nodes — no article-count filter”
+
+Analyze:
+
+- Does this cause empty categories/sections to appear?
+- Is it functionally incorrect or simply UX improvement?
+- Does fixing it require expensive N+1 queries?
+- Can existing metadata/count APIs solve it efficiently?
+
+Do NOT implement a complex query redesign now.
+
+Classify as:
+
+BLOCKER
+
+SLICE 5/8 enhancement
+
+or
+
+ACCEPTABLE TECHNICAL DEBT
+
+==================================================
+STEP 8 — VERIFY CACHE CONFIGURATION RISKS
+==================================================
+
+Revalidate Slice 3 known concerns:
+
+- KB_REVALIDATE_API_KEY behavior
+- KB Admin ↔ OOO/TOW revalidation path
+- getOOOOrigin configuration
+- localhost/staging behavior
+- failure handling
+- stale-until-TTL behavior
+
+Do not expose secrets.
+
+Do not modify env files.
+
+Tell me exactly which environment variable names must be configured, but never print secret values.
+
+==================================================
+STEP 9 — CHECK PRODUCTION SAFETY
+==================================================
+
+Confirm:
+
+- No database destructive migration
+- No broad authorization weakening
+- No draft data leakage
+- No service-role credential exposed client-side
+- No public endpoint accidentally created
+- No existing KB Admin workflow broken
+- No unrelated TOW workflow broken
+- No environment-specific localhost URL hardcoded for deployed environments
+
+==================================================
+STEP 10 — FINAL RELEASE-GATE REPORT
+==================================================
+
+Give me a structured report:
+
+1. FILE CHANGE AUDIT
+Total files changed and categorized by slice.
+
+2. DEPENDENCY STATUS
+Whether pnpm/lockfile blocker is resolved.
+
+3. BUILD STATUS
+For each affected app:
+PASS / FAIL / NOT RUN
+
+4. TEST STATUS
+Slice 1a:
+PASS / FAIL / NOT RUN
+
+Slice 2:
+PASS / FAIL / NOT RUN
+
+Slice 3:
+PASS / FAIL / NOT RUN
+
+Slice 4:
+PASS / FAIL / NOT RUN
+
+5. SECURITY STATUS
+
+6. READER END-TO-END STATUS
+
+7. BLOCKERS BEFORE SLICE 5
+
+8. TECHNICAL DEBT
+
+9. FUTURE-SCOPE ITEMS
+
+10. EXACT MANUAL UAT STEPS
+
+11. EXACT COMMANDS I SHOULD RUN MANUALLY IF ANYTHING COULD NOT BE EXECUTED
 
 IMPORTANT:
 
-Do NOT reimplement or redesign completed slices unless you discover a genuine defect that blocks this task.
-
-We are now starting ONLY:
-
-SLICE 4 — KNOWLEDGE BASE END-USER READER UI, NAVIGATION, AND SAFE CONTENT CONSUMPTION
-
-This should be treated as a complete production-quality implementation slice, not a superficial UI patch.
-
-==================================================
-BUSINESS CONTEXT
-==================================================
-
-The client’s vision for the Knowledge Base is NOT currently a chatbot.
-
-The Knowledge Base should function as the current approved source of truth for:
-
-- Business policies
-- Procedures
-- Standards
-- Operating processes
-- Employee guidance
-- Training documentation
-- Technical documentation
-- Engineering documentation
-- Application documentation
-
-The user experience should feel like a structured internal knowledge repository, similar conceptually to navigating a SharePoint-style knowledge/documentation site.
-
-Users should be able to:
-
-Knowledge Base
-        ↓
-Browse Categories / Collections
-        ↓
-Find relevant Articles
-        ↓
-Open an Article
-        ↓
-Read the current APPROVED content
-        ↓
-Navigate related/interlinked knowledge
+Do NOT start Slice 5 automatically.
 
 Do NOT implement:
-
-- Chatbot
-- RAG answer generation
-- LLM assistant
-- MCP
-- Agent orchestration
-- Embedding generation redesign
-- Azure migration
-- TOW Vision integration yet unless a tiny shared component is absolutely required
-
-Those are outside this slice.
-
-==================================================
-STEP 1 — RE-AUDIT THE READER-SIDE IMPLEMENTATION
-==================================================
-
-Before modifying code, inspect the current repository and identify the exact existing reader-side Knowledge Base architecture.
-
-Inspect:
-
-1. Existing routes such as:
-   - /kb
-   - /knowledge
-   - /knowledge-base
-   - dynamic article routes
-   - category/collection routes
-
-2. Identify:
-   - existing placeholder pages
-   - routes returning null
-   - incomplete reader components
-   - duplicate implementations
-   - dead/stub code
-
-3. Existing article APIs:
-   - approved/current body endpoint from Slice 2
-   - article metadata/list APIs
-   - category/collection APIs
-   - search APIs if present
-
-4. Existing shared components:
-   - article renderer
-   - react-markdown components
-   - RichTextDisplay
-   - breadcrumbs
-   - cards
-   - sidebar/navigation
-   - loading states
-   - error states
-
-5. Existing KB-Admin article rendering.
-
-Determine whether KB-Admin already has a working article renderer that should be reused/shared.
-
-6. Existing permissions:
-   - reader authorization
-   - kb_role
-   - Viewer/User/Admin/Super Admin behavior
-
-Do not weaken authorization.
-
-7. Existing cache behavior:
-   - cached article content
-   - revalidation tags from Slice 3
-
-Before coding, briefly report:
-
-- Current reader architecture
-- Exact reader gaps
-- Existing reusable components
-- Files/routes likely to be changed
-- Any blocker that could affect the implementation
-
-Then continue with implementation unless a truly destructive architectural ambiguity exists.
-
-Do not stop for minor implementation choices that can safely follow existing project patterns.
-
-==================================================
-STEP 2 — KNOWLEDGE BASE LANDING PAGE
-==================================================
-
-Implement or complete a proper end-user Knowledge Base landing page.
-
-The landing page should provide a clear entry point into the Knowledge Base.
-
-It should use real data from the existing Knowledge Base architecture.
-
-Provide, based on what the existing data model supports:
-
-- Knowledge Base title/header
-- Short description/purpose
-- Search entry point if existing search architecture can be safely reused
-- Categories or collections
-- Recently updated or relevant articles only if existing APIs/data support it safely
-- Clear navigation
-
-Do not invent fake static Knowledge Base categories.
-
-Use database/API-backed data.
-
-The page must have:
-
-- Loading state
-- Empty state
-- Error state
-- Permission-aware behavior
-
-An empty Knowledge Base should not show a blank screen or null.
-
-Example:
-
-Knowledge Base
-
-[Search knowledge...]
-
-Policies
-Procedures
-Training
-Engineering
-Applications
-
-Recently Updated
-- Article A
-- Article B
-
-This is conceptual only.
-
-Follow the existing application design system.
-
-==================================================
-STEP 3 — CATEGORY / COLLECTION NAVIGATION
-==================================================
-
-Implement category/collection browsing using the existing data model.
-
-When a user opens a category/collection:
-
-Show eligible APPROVED articles.
-
-Display useful metadata where available:
-
-- Article title
-- Short description/excerpt if safely available
-- Last updated
-- Category
-- Status only where useful to readers
-
-Do NOT expose:
-
-- unauthorized articles
-- drafts
-- unpublished private content
-- admin-only metadata unnecessarily
-
-Support:
-
-- Empty category
-- Missing category
-- Unauthorized category/content
-- API failure
-
-Use meaningful UI states.
-
-Do not silently show:
-
-“No results”
-
-when an API actually failed.
-
-Differentiate:
-
-EMPTY
-vs
-ERROR
-vs
-UNAUTHORIZED.
-
-==================================================
-STEP 4 — ARTICLE DETAIL PAGE
-==================================================
-
-Implement a complete production-quality article reader.
-
-Use the APPROVED/current article body API implemented in Slice 2.
-
-An article page should display:
-
-1. Title
-
-2. Approved/current article content
-
-3. Useful metadata:
-   - category/collection
-   - last updated
-   - version if appropriate
-   - status only if relevant to the reader
-
-4. Breadcrumb navigation:
-
-Knowledge Base
-   >
-Category
-   >
-Article
-
-5. Back/navigation behavior.
-
-6. Internal Knowledge Base links.
-
-7. Proper content formatting.
-
-==================================================
-STEP 5 — MARKDOWN / CONTENT RENDERING
-==================================================
-
-Use ONE consistent rendering model whenever possible.
-
-Inspect KB-Admin.
-
-If KB-Admin already has a reliable Markdown renderer, reuse or extract a shared renderer rather than implementing an unrelated second rendering architecture.
-
-Support according to existing architecture:
-
-- Headings
-- Paragraphs
-- Bold / italic
-- Ordered lists
-- Unordered lists
-- Links
-- Tables if currently supported
-- Code blocks if currently supported
-- Blockquotes if currently supported
-
-Do not add unnecessary third-party packages if existing libraries already solve this.
-
-Security:
-
-- Avoid unsafe raw HTML execution.
-- Sanitize rendered content according to existing project patterns.
-- Do not introduce XSS risks.
-
-==================================================
-STEP 6 — INTERNAL KB ARTICLE LINKS
-==================================================
-
-Articles should be able to link to other Knowledge Base articles.
-
-Inspect how Markdown links are currently stored.
-
-Where possible:
-
-Use stable:
-- slug
-OR
-- article ID
-
-for internal KB navigation.
-
-Internal article links should:
-
-- Open the correct reader route
-- Preserve stable navigation
-- Not hardcode localhost
-- Not depend on environment-specific absolute URLs
-
-Handle:
-
-- valid KB article links
-- missing/deleted target
-- unpublished target
-- unauthorized target
-
-A broken internal link must not crash the page.
-
-==================================================
-STEP 7 — READER PERMISSIONS
-==================================================
-
-This is critical.
-
-Do not solve reader accessibility by globally weakening Knowledge Base authorization.
-
-Preserve the current authorized read model from previous slices.
-
-Server-side authorization must remain authoritative.
-
-Ensure:
-
-- authorized users can read approved content they are allowed to access
-- unauthorized users cannot access restricted article bodies by manually entering URLs
-- drafts cannot leak
-- unpublished content cannot leak
-- Viewer/User roles do not accidentally receive admin/edit privileges
-- Admin/Super Admin behavior remains intact
-
-If C1 reader policy is still marked TBD:
-
-Do NOT invent a new broad access policy.
-
-Implement the UI using the currently approved authorization behavior.
-
-Keep C1 documented as TBD where necessary.
-
-Do not block the entire reader implementation merely because future cross-app read-policy decisions are unresolved.
-
-==================================================
-STEP 8 — LOADING, EMPTY, ERROR, AND ACCESS STATES
-==================================================
-
-Remove silent-null UX.
-
-Every reader flow should clearly distinguish:
-
-LOADING
-
-EMPTY
-
-NOT FOUND
-
-UNAUTHORIZED
-
-UNPUBLISHED
-
-SERVER/API ERROR
-
-Examples:
-
-Instead of:
-
-blank page
-
-show:
-
-“No published articles are available in this category.”
-
-Instead of silently returning null:
-
-“We couldn’t load this article. Please try again.”
-
-Use the application’s existing error/toast/state patterns.
-
-Do not expose technical database errors to normal users.
-
-Log useful server-side details according to existing project patterns.
-
-==================================================
-STEP 9 — NAVIGATION UX
-==================================================
-
-Ensure a user never feels trapped inside an article.
-
-Provide sensible navigation:
-
-KB Home
-    ↓
-Category
-    ↓
-Article
-    ↓
-Related/internal links
-    ↓
-Back / breadcrumbs
-
-Where existing app layout supports it, consider:
-
-- sidebar category navigation
-- breadcrumbs
-- search link
-- article navigation
-
-Do not over-engineer a completely new design system.
-
-Reuse existing layout/styles.
-
-Responsive behavior should not break existing mobile/tablet layouts.
-
-==================================================
-STEP 10 — SEARCH ENTRY POINT
-==================================================
-
-Do NOT redesign full search yet.
-
-Search improvements are a later slice.
-
-However:
-
-If an existing functional KB search endpoint/component exists, expose a safe search entry point in the Reader UI.
-
-Do not duplicate search implementations.
-
-If search architecture is incomplete:
-
-Add a clear extension point/place for search but do not build a new complex search engine in this slice.
-
-Document it as pending Slice 8/Search work.
-
-==================================================
-STEP 11 — CACHE INTEGRATION
-==================================================
-
-The Reader UI must use the approved content/cache architecture established in Slice 2 and Slice 3.
-
-Validate:
-
-Published article
-       ↓
-Approved article API
-       ↓
-Cached reader response
-       ↓
-Reader UI
-
-Then:
-
-Article updated/published
-       ↓
-Revalidation
-       ↓
-Reader receives latest approved content
-
-Do not create an independent client-side cache that causes permanently stale article content.
-
-Use the existing cache strategy.
-
-==================================================
-STEP 12 — PERFORMANCE
-==================================================
-
-Avoid obvious N+1 API/database patterns.
-
-Do not load full article bodies when merely rendering large article lists unless necessary.
-
-Article listing should preferably retrieve metadata.
-
-Article detail should retrieve body/content.
-
-Respect pagination where existing APIs support it.
-
-Do not fetch every Knowledge Base article on every page load.
-
-==================================================
-STEP 13 — TESTING
-==================================================
-
-Add/update tests using the repository’s existing testing architecture.
-
-Do not introduce a new test framework.
-
-Cover at minimum:
-
-TEST 1:
-Knowledge Base landing page loads successfully.
-
-TEST 2:
-Categories/collections display correctly.
-
-TEST 3:
-Approved article appears in appropriate listing.
-
-TEST 4:
-Draft article does NOT appear to unauthorized/normal reader.
-
-TEST 5:
-Published article detail loads correct approved body.
-
-TEST 6:
-Latest approved version is displayed.
-
-TEST 7:
-Missing article returns proper Not Found UX.
-
-TEST 8:
-Unauthorized article returns correct access behavior.
-
-TEST 9:
-Unpublished article does not leak.
-
-TEST 10:
-Empty category displays meaningful empty state.
-
-TEST 11:
-API failure displays proper error state rather than blank/null.
-
-TEST 12:
-Markdown headings/lists/links render correctly.
-
-TEST 13:
-Internal KB link navigates to target article.
-
-TEST 14:
-Broken internal link fails gracefully.
-
-TEST 15:
-Reader cannot gain mutation/edit access.
-
-TEST 16:
-Cache/revalidation integration continues to work.
-
-TEST 17:
-Existing KB-Admin workflows are not broken.
-
-Where feasible, run:
-
-- targeted Vitest tests
-- component tests
-- API tests
-- typecheck
-- lint
-
-If PowerShell ExecutionPolicy blocks Cursor's shell:
-
-Do not silently claim tests passed.
-
-Give me exact commands to execute manually.
-
-==================================================
-STEP 14 — SCOPE CONTROL
-==================================================
-
-Strictly do NOT implement:
-
-- TOW Vision → KB integration
-- Item/Goal → KB linking
-- Full search redesign
-- Chatbot
-- RAG
-- Embeddings redesign
-- MCP
-- Azure migration
-- Version restore changes
-- Unrelated authorization redesign
-- Production environment configuration changes
-
-Do not modify .env files.
-
-Do not add secrets.
-
-Do not modify unrelated TOW functionality.
-
-==================================================
-STEP 15 — IMPLEMENTATION STRATEGY
-==================================================
-
-Implement this as a coherent production slice.
-
-Prefer:
-
-Existing components
-       +
-Existing APIs
-       +
-Shared renderer
-       +
-Existing permissions
-       +
-Existing cache
-       ↓
-Complete Reader experience
-
-over creating parallel systems.
-
-Do not create:
-
-- duplicate article APIs without reason
-- duplicate Markdown renderers
-- duplicate category models
-- duplicate authorization logic
-
-==================================================
-STEP 16 — FINAL VALIDATION
-==================================================
-
-Before declaring Slice 4 complete:
-
-Trace this scenario end-to-end:
-
-Authorized User
-       ↓
-Knowledge Base Home
-       ↓
-Select Category
-       ↓
-See approved articles
-       ↓
-Open Article
-       ↓
-Approved/current body displayed
-       ↓
-Follow internal KB link
-       ↓
-Open related article
-
-Then test:
-
-Unauthorized User
-       ↓
-Direct article URL
-       ↓
-Protected correctly
-
-Then:
-
-Admin publishes updated article
-       ↓
-Cache revalidation
-       ↓
-Reader displays updated approved version
-
-Confirm all three flows.
-
-==================================================
-FINAL RESPONSE REQUIRED FROM CURSOR
-==================================================
-
-After implementation provide a structured report:
-
-1. ROOT CAUSE / PREVIOUS GAPS
-
-Explain why the Knowledge Base reader experience was incomplete.
-
-2. ARCHITECTURE BEFORE
-
-Show:
-
-DB
-→ APIs
-→ incomplete/null reader
-
-3. ARCHITECTURE AFTER
-
-Show:
-
-KB database
-→ Approved/current body API
-→ Cache
-→ Reader routes
-→ Category/article navigation
-→ Rendered approved content
-
-4. EXACT FILES CHANGED
-
-Group by:
-
-- Reader pages/routes
-- Shared components
-- APIs if changed
-- Authorization
-- Tests
-- Documentation
-
-5. REUSED EXISTING COMPONENTS
-
-Explain what was reused rather than duplicated.
-
-6. PERMISSION BEHAVIOR
-
-Reader vs Editor vs Admin/Super Admin.
-
-7. ROUTE STRUCTURE
-
-List all reader-facing routes implemented/changed.
-
-8. CACHE BEHAVIOR
-
-Explain integration with Slice 3.
-
-9. TEST RESULTS
-
-Show actual PASS/FAIL.
-
-Never say tests passed if they were not executed.
-
-10. EXACT MANUAL COMMANDS
-
-Give copy-pasteable commands if shell execution was blocked.
-
-11. MANUAL STAGING UAT
-
-Give exact click-by-click validation steps.
-
-12. REMAINING RISKS
-
-Classify each as:
-
-BLOCKER
-TECHNICAL DEBT
-FUTURE PHASE
-OUT OF SCOPE
-
-13. CONFIRM SCOPE
-
-Explicitly confirm that you did NOT implement:
-
-- Vision integration
+- Search engine
+- Vision → KB
+- Item/Goal linking
 - RAG
 - chatbot
 - MCP
 - Azure migration
-
-IMPORTANT:
-
-Do not move to the next Phase 1.B slice automatically.
-
-STOP after Slice 4 is fully implemented and reported.
-
-Wait for my explicit approval before starting:
-- KB role/admin operations
-- TOW/OOO → KB linking
-- Search improvements
 - Version restore
-- Retrieval readiness
+
+Stop after the stabilization report and wait for my approval.
