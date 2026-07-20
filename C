@@ -1,44 +1,59 @@
-Good. The architecture audit is complete.
+Proceed with ONLY Slice 1a — Mutation Authorization Hardening.
 
-Do NOT implement code yet.
+Do NOT assume or decide C1–C5 yet. Keep all C1–C5 marked as TBD / client confirmation required.
 
-Now convert the audit into a detailed Phase 1.B implementation plan.
+Scope for this implementation only:
 
-For each implementation slice, provide:
+1. Find and secure any unguarded "use server" + service-role Knowledge Base content mutation paths.
 
-1. Exact problem/gap being solved
-2. Existing files/components/APIs that will be reused
-3. Exact files likely to be changed
-4. Database migration required or not
-5. API changes required
-6. Permission/security impact
-7. Tests required
-8. Dependencies on earlier steps
-9. Acceptance criteria
+2. Ensure article/content save and allowed workflow-transition operations use the correct existing EDIT authorization capability.
 
-Use this implementation order unless your audit found a critical dependency requiring adjustment:
+3. Do not incorrectly require ADMIN/MANAGE permission for normal editor operations if the existing permission model defines EDIT separately.
 
-1. Authorization/security prerequisites required for safe KB reads
-2. Approved/current article body API
-3. Publish → cache revalidation flow
-4. End-user Knowledge Base reader/navigation
-5. KB role/admin operations validation
-6. TOW/OOO item/goal/Vision → KB article linking
-7. Version history/restore validation
-8. Search/interlinked article improvements
-9. Retrieval-readiness cleanup only — no RAG/chatbot implementation
+4. Enforce authorization server-side for every mutation.
+UI hiding alone is not sufficient.
 
-Also clearly separate:
+5. Preserve the current SQL PDP/PEP architecture.
+Do NOT redesign or change SQL PDP/PEP logic in this slice.
 
-MUST HAVE FOR PHASE 1.B
-vs
-NICE TO HAVE / FUTURE
+6. Do NOT change:
+- KB read-access rules
+- C1 reader decision
+- approve/publish semantics
+- C2 reader route/home
+- C3 linking scope
+- C4 version restore behavior
+- RAG/chatbot/embeddings
+- Azure migration
+- unrelated TOW functionality
 
-Important:
-- Do not modify production code yet.
-- Do not implement RAG, chatbot, embeddings, MCP, or Azure migration.
-- Do not create duplicate KB architecture.
-- Preserve existing production behavior.
-- Highlight any business requirement that needs client confirmation before coding.
+Required permission behavior:
+- Viewer: cannot mutate KB content
+- Editor/authorized content editor: can perform permitted edit/save operations
+- Admin/Super Admin: retains existing authorized capabilities
+- Direct server/API mutation attempts must also be protected
 
-At the end, recommend the smallest first coding slice we should implement and test independently.
+Before editing:
+- Show the exact vulnerable mutation paths/files you found
+- Explain the current authorization gap
+- Explain the smallest safe fix
+
+Then implement Slice 1a only.
+
+Add/update tests for:
+1. Viewer mutation blocked
+2. Editor permitted edit/save succeeds
+3. Admin permitted operation succeeds
+4. Unauthenticated mutation blocked
+5. Direct mutation/API bypass blocked
+6. Existing allowed behavior is not broken
+
+After implementation provide:
+- Root cause
+- Exact files changed
+- Authorization logic before vs after
+- Tests added
+- Exact test commands and results
+- Any remaining risks
+
+Do not proceed to Slice 2 / Approved Body API until I explicitly tell you.
