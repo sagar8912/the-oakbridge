@@ -1,0 +1,324 @@
+I need you to analyze the existing codebase and implement/fix the following feature completely.
+
+FEATURE: Ability to Delete / Archive Goals
+
+Business Requirement:
+Users need the ability to remove a goal that is no longer valid without being forced to mark it as Pass or Fail, because doing so incorrectly affects reporting/metrics.
+
+Only the ACCOUNTABLE party/person assigned to that specific goal should be allowed to delete/archive it.
+
+Please first inspect the existing Goal architecture, database schema, RACI/contributor model, authentication, authorization, API routes, UI components, reporting logic, and existing delete/archive patterns before making changes.
+
+Do NOT create a completely separate implementation if an existing reusable pattern already exists.
+
+--------------------------------------------------
+1. AUTHORIZATION RULE
+--------------------------------------------------
+
+A goal can only be deleted/archived by the user who is assigned as the "Accountable" person for that goal.
+
+Example:
+
+Goal:
+Responsible: User A
+Accountable: John
+Consulted: User B
+Informed: User C
+
+Expected behavior:
+
+John → Can delete/archive the goal.
+
+User A → Cannot delete/archive it unless User A is also Accountable.
+
+User B → Cannot delete/archive it.
+
+User C → Cannot delete/archive it.
+
+Owner/Creator → Should NOT automatically get deletion permission unless the existing business rules explicitly make Owner equivalent to Accountable.
+
+Normal team members → Cannot delete/archive it.
+
+Do not rely only on frontend visibility.
+
+The backend/API MUST independently verify that:
+current logged-in user === goal's Accountable user.
+
+If unauthorized users manually call the API, return an appropriate 403 Forbidden response.
+
+Use stable user IDs for permission checks rather than comparing display names.
+
+--------------------------------------------------
+2. DELETE VS ARCHIVE
+--------------------------------------------------
+
+Analyze the existing architecture and determine whether the application already supports:
+
+- soft deletion
+- archived status
+- deleted_at
+- is_archived
+- lifecycle/status fields
+
+Prefer a soft-delete/archive approach if possible so historical/audit data is not unnecessarily lost.
+
+The important business behavior is:
+
+A removed/archived goal must NOT be treated as Passed or Failed.
+
+It must therefore NOT incorrectly affect:
+
+- pass/fail statistics
+- goal completion metrics
+- success-rate calculations
+- active goal counts
+- dashboards
+- reporting
+
+Do not change existing Pass/Fail behavior.
+
+If the application already has an archive pattern for similar entities, reuse that pattern.
+
+Avoid destructive hard deletion if the goal has relationships, todos, comments, votes, audit history, or other dependent records unless the existing architecture explicitly supports safe cascading deletion.
+
+--------------------------------------------------
+3. UI / UX
+--------------------------------------------------
+
+On the Goal Detail/Edit page:
+
+Show a clearly labeled action such as:
+
+"Archive Goal"
+or
+"Delete Goal"
+
+ONLY when the logged-in user is the Accountable person for that goal.
+
+Unauthorized users should not see an enabled delete/archive action.
+
+Do not disturb the existing Edit, Pass/Fail, Todo, Relationship, Voting, or other functionality.
+
+Before removal, show a confirmation dialog.
+
+Example:
+
+Archive Goal?
+
+Are you sure you want to archive this goal?
+This will remove the goal from active views and it will not be counted as Pass or Fail.
+
+[Cancel] [Archive Goal]
+
+For destructive deletion, make the warning appropriately stronger.
+
+After successful action:
+
+- Show a success notification/toast.
+- Remove the goal from active goal views.
+- Redirect the user to the appropriate previous/list page.
+- Do not leave stale UI state.
+
+Handle API errors gracefully.
+
+--------------------------------------------------
+4. DATA / QUERY BEHAVIOR
+--------------------------------------------------
+
+Review all queries that load goals.
+
+Archived/deleted goals should not appear in normal active-goal views unless there is an intentional Archived/History view.
+
+Check at minimum:
+
+- Goal list
+- Team goal pages
+- Goal detail
+- Public/private goal views
+- Dashboard
+- Search/filter results
+- Todo relationships
+- Related goals
+- Metrics/reporting
+
+Do not accidentally break historical references.
+
+If archived goals must remain visible in history/audit screens, preserve that behavior.
+
+--------------------------------------------------
+5. IMPORTANT PERMISSION SCENARIOS
+--------------------------------------------------
+
+Test all of these cases:
+
+Scenario 1:
+Logged-in user is Accountable
+→ Delete/Archive action visible
+→ Action succeeds.
+
+Scenario 2:
+Logged-in user is Responsible but NOT Accountable
+→ Action unavailable
+→ Direct API attempt returns 403.
+
+Scenario 3:
+Logged-in user is Consulted/Informed
+→ Cannot delete/archive.
+
+Scenario 4:
+Logged-in user created/owns the goal but another user is Accountable
+→ Do not allow deletion solely because they created/own it, unless existing confirmed business rules explicitly permit this.
+
+Scenario 5:
+Same user is both Owner and Accountable
+→ Can delete/archive.
+
+Scenario 6:
+Goal has no Accountable person
+→ Do not allow normal users to delete/archive.
+→ Handle safely without null/undefined errors.
+
+Scenario 7:
+Accountable assignment changes
+→ Old Accountable immediately loses permission.
+→ New Accountable receives permission.
+
+Scenario 8:
+Unauthorized user manipulates frontend/client request
+→ Backend still rejects action with 403.
+
+Scenario 9:
+Archived/deleted goal
+→ Must not be counted as Pass or Fail.
+
+Scenario 10:
+Refresh/re-login
+→ Archived/deleted goal must remain correctly removed from active views.
+
+--------------------------------------------------
+6. RELATED DATA
+--------------------------------------------------
+
+Before implementation, inspect what is linked to a Goal:
+
+- Todos
+- Relationships
+- Votes
+- Contributors / RACI assignments
+- Comments
+- Attachments
+- Notifications
+- Audit records
+
+Do not create orphaned records or broken foreign-key relationships.
+
+Use the safest existing application pattern.
+
+--------------------------------------------------
+7. PUBLIC / PRIVATE GOALS
+--------------------------------------------------
+
+Ensure this permission works consistently for both Public and Private goals.
+
+Visibility and deletion authorization are separate concerns.
+
+A user being able to VIEW a goal must not automatically mean they can DELETE it.
+
+Only the Accountable-user rule should determine this deletion/archive permission unless another existing explicitly documented higher-level authorization rule applies.
+
+--------------------------------------------------
+8. CONCURRENCY / EDGE CASES
+--------------------------------------------------
+
+Handle safely when:
+
+- Goal was already archived/deleted.
+- Goal no longer exists.
+- Accountable user changed before the request completed.
+- User session is invalid/expired.
+- API request fails.
+- User clicks Archive/Delete more than once.
+
+Return appropriate responses and avoid duplicate operations.
+
+--------------------------------------------------
+9. TESTING
+--------------------------------------------------
+
+Add/update tests covering:
+
+Frontend:
+- Action visibility for Accountable user.
+- Action hidden/disabled for unauthorized users.
+- Confirmation dialog.
+- Successful action.
+- Failed API action.
+
+Backend:
+- Accountable user → success.
+- Non-accountable user → 403.
+- Unauthenticated user → authentication failure.
+- Missing goal → 404.
+- Already archived/deleted goal handled safely.
+- Permission check based on user ID.
+- Archived/deleted goal excluded correctly from active queries and metrics.
+
+Regression test existing:
+
+- Goal creation
+- Goal editing
+- Pass/Fail completion
+- Goal Levels
+- Public/private visibility
+- Todos
+- Relationships
+- Voting
+- RACI/contributor assignments
+
+--------------------------------------------------
+10. IMPLEMENTATION PROCESS
+--------------------------------------------------
+
+Before editing code:
+
+1. Trace the complete Goal flow:
+   UI → API → auth → database → reporting.
+
+2. Identify:
+   - Goal detail component
+   - Goal APIs/routes
+   - Goal database model/table
+   - RACI/Accountable storage
+   - Authentication/current-user implementation
+   - Existing authorization helpers
+   - Existing archive/delete patterns
+   - Goal metrics/reporting queries
+
+3. Explain briefly:
+   - Root cause/current limitation
+   - Files that need changes
+   - Proposed implementation
+
+4. Then implement the minimum clean changes required.
+
+5. Reuse existing components, permission helpers, API patterns, and UI styles.
+
+6. Do not introduce unrelated refactoring.
+
+7. Run all relevant tests/build/lint/type checks.
+
+Finally provide me with:
+
+A. What was implemented
+B. Exact files changed
+C. How Accountable-user authorization works
+D. Whether Archive or Delete was used and why
+E. How you ensured removed goals do not affect Pass/Fail metrics
+F. Test scenarios covered
+G. Any remaining edge cases or assumptions
+
+IMPORTANT:
+Do not only hide the Delete/Archive button in the UI.
+Authorization MUST be enforced server-side as well.
+
+Do not assume Owner, Creator, Admin, or Responsible automatically means Accountable. Trace the existing data model and implement according to the actual Accountable/RACI relationship.
