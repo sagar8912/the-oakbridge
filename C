@@ -1,19 +1,51 @@
-Slice 1a tests are passing.
+C1 Decision: Use a HYBRID read-access model.
 
-Before moving to Slice 2, perform a final verification of Slice 1a only.
+Proceed with this rule:
 
-Confirm:
-1. Viewer cannot mutate KB content.
-2. Authorized Editor can save/edit permitted KB content.
-3. Admin/Super Admin behavior is preserved.
-4. Unauthenticated mutation is blocked.
-5. Direct server/API mutation bypass is blocked.
-6. No SQL PDP/PEP behavior was redesigned.
-7. No unrelated functionality was modified.
+1. Approved/Published Knowledge Base content that is explicitly referenced by an authorized TOW/OOO context (for example a Vision section) may be read by an authenticated user who already has permission to view that TOW context.
 
-Also review the remaining risks you identified and classify each as:
-- Must fix before Slice 2
-- Later Phase 1.B work
-- Out of scope
+2. This scoped access must NOT grant the user unrestricted access to the entire Knowledge Base.
 
-Do not start Slice 2 yet.
+3. Draft, unpublished, private, restricted, authoring, editing, and admin KB functionality must continue to follow the existing kb_role / authorization model.
+
+4. Enforce this server-side through a scoped approved-content read path. Do not simply remove kb_role checks globally.
+
+5. The read endpoint must return only the approved/current version and must not expose draft/version history or privileged metadata unnecessarily.
+
+Now proceed with ONLY Slice 2 — Approved/Current Article Body API.
+
+Requirements:
+- Identify the correct approved/current article version.
+- Return stable article ID/slug, title, approved body, metadata required for rendering, status/version/last-updated where appropriate.
+- Never silently return null when valid approved content exists.
+- Clear 403, 404 and error responses.
+- No draft leakage.
+- Preserve caching/revalidation architecture.
+- Remove or avoid hidden write side-effects from the read path where safely possible; specifically review the previously identified getArticleContent quiet UPDATE behavior.
+- Do not start Reader UI, TOW Vision integration, search, RAG, chatbot, MCP, or unrelated work yet.
+
+Add tests for:
+1. Approved article retrieval
+2. Scoped authenticated TOW-context read
+3. User without valid TOW context or KB permission blocked
+4. Draft/unpublished content not exposed
+5. Missing article returns 404
+6. Correct current approved version returned
+7. Read operation does not perform unintended content mutation
+
+Before editing, show:
+- Current API/data flow
+- Exact root gap
+- Files to change
+- Proposed smallest safe solution
+
+Then implement Slice 2 only.
+
+After implementation provide:
+- Files changed
+- API contract
+- Authorization behavior
+- Tests and exact commands/results
+- Remaining risks
+
+Do not proceed to Slice 3 until I explicitly approve it.
