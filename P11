@@ -1,0 +1,80 @@
+Act as a senior full-stack engineer with 15+ years of experience.
+
+Fix the “Relating Items to Items – Search Dialogue” issue in the Oakbridge OOO application.
+
+Do NOT start coding immediately. First trace the complete existing flow for:
+- Item-to-item relationship search dialog
+- Search API/data fetching
+- Permission/visibility filtering
+- Record selection state
+- Relationship creation
+
+CURRENT ISSUES:
+
+1. Selected records have no clear visual indication.
+   - When a user selects one or more records in the relationship search dialog, it must be obvious which records are selected.
+   - Add a clear selected state such as checkbox/checkmark, highlighted row, and selected count.
+   - Selection must remain visible while searching/filtering until the dialog is closed or selection is cleared.
+
+2. Permission handling is unclear.
+   - Search results must respect the same authorization/visibility rules used elsewhere in the application.
+   - Users must never be able to search, see, select, or relate records they are not authorized to access.
+   - Do not create separate weaker permission logic just for this dialog.
+   - Reuse the existing centralized visibility/permission logic where possible.
+
+3. Add Team search/filter.
+   - User should be able to search/select a Team and see only eligible items belonging to that Team.
+   - Team options themselves must respect user permissions.
+
+4. Add “Select All”.
+   - Provide Select All for the currently visible/filtered eligible search results.
+   - Select All must NOT select hidden, unauthorized, or unrelated results outside the current filtered result set.
+   - Provide a clear way to deselect all.
+   - Prevent duplicate relationships and prevent selecting the current item itself.
+
+EXPECTED UX:
+- Search items by existing supported fields.
+- Optionally filter/search by Team.
+- Clearly see selected records.
+- Show selected item count.
+- Select All / Deselect All eligible filtered results.
+- Confirm/Add relationships only when at least one valid item is selected.
+- Show clear success/error feedback; no silent failures.
+
+IMPORTANT EDGE CASES:
+- User changes search after selecting records.
+- User changes Team filter after selecting records.
+- Already-related items.
+- Current item appears in search.
+- Unauthorized/private items.
+- No search results.
+- Large result sets/pagination.
+- Select All with filters active.
+- Partial API failure.
+
+TESTS:
+Add/update tests for:
+1. Single item selection visual state.
+2. Multiple selections.
+3. Selection persistence across search/filter changes.
+4. Team filtering.
+5. Select All and Deselect All.
+6. Unauthorized items are never returned/selectable.
+7. Already-related/current item cannot create duplicate or self-relationship.
+8. Successful relationship creation.
+9. Clear error handling.
+
+Before implementation, tell me:
+- Root cause
+- Files involved
+- Current permission flow
+- Proposed solution
+
+Then implement the smallest safe change without modifying unrelated functionality, env files, or existing business rules.
+
+After implementation provide:
+- Files changed
+- What was fixed
+- Exact test commands
+- Manual staging/UAT steps
+- Any assumptions that still require client confirmation
