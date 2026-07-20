@@ -1,0 +1,113 @@
+Act as a senior full-stack engineer with 15+ years of experience.
+
+Implement the feature:
+“Publicly Available Form (for Oakes Award?)”
+
+BUSINESS REQUIREMENT:
+Users who have not yet completed the TOW kickoff/onboarding should still be able to submit an Oakes Award recommendation.
+
+The ticket also mentions a possible broader solution:
+Allow users to sign up/access the application as a Viewer so they can access limited public functionality.
+
+IMPORTANT:
+Do not start coding immediately.
+
+First analyze the existing application and determine:
+1. Current authentication/login flow.
+2. Viewer role and its existing permissions.
+3. User onboarding/TOW kickoff restrictions.
+4. Existing recommendation/nomination or form-submission functionality.
+5. Whether an Oakes Award form or related Goal/List already exists.
+6. How public/unauthenticated routes are currently secured.
+7. Existing APIs, database tables, RLS/security policies, notifications, and audit logging that can be reused.
+
+Then implement the safest solution that satisfies the requirement.
+
+PREFERRED FUNCTIONAL BEHAVIOR:
+
+A. Oakes Award Recommendation Form
+- Provide an easy way for an eligible user who has not completed TOW onboarding to submit an Oakes Award recommendation.
+- Do not require full TOW application access just to submit the recommendation.
+- Reuse the existing application design and form components where possible.
+- Clearly validate required fields.
+- Show a clear success confirmation after submission.
+- Prevent duplicate submissions caused by double-click/retries.
+- Do not expose internal application data to users who only have form access.
+
+B. Authentication / Viewer Access
+Before creating any new auth model, inspect whether the existing Viewer role can safely support this workflow.
+
+If Viewer access is the intended existing architecture:
+- Allow the minimum necessary signup/access flow.
+- Viewer must have read-only/limited permissions.
+- Viewer must NOT automatically gain access to private teams, goals, items, admin pages, or sensitive records.
+- Viewer should only access explicitly public functionality and the Oakes Award submission flow.
+
+Do NOT automatically make every external/unauthenticated user a full application user.
+
+C. Submission Destination
+- Determine from the existing code/data where Oakes Award recommendations should be stored.
+- If there is an existing Team/List/Goal/workflow for recommendations, reuse it.
+- Do not create a parallel duplicate workflow unnecessarily.
+- Preserve ownership, team/list association, status, audit information, and notifications according to existing patterns.
+
+D. Security
+This is critical:
+- Enforce permissions server-side, not only in UI.
+- Validate and sanitize all public form inputs.
+- Add rate limiting / abuse protection using existing project patterns if available.
+- Do not expose service-role credentials or privileged APIs.
+- Respect Supabase RLS/security architecture.
+- Avoid enumeration of users, teams, or internal data.
+- Log/audit submissions appropriately.
+
+E. UX
+The user journey should be simple:
+
+User opens Oakes Award recommendation link
+        ↓
+Allowed to access recommendation form
+        ↓
+Completes required information
+        ↓
+Submits
+        ↓
+Clear confirmation
+        ↓
+Authorized internal users can review it in the normal TOW workflow
+
+Do not force an un-onboarded user through unrelated TOW functionality.
+
+TEST CASES:
+Add/update tests for:
+1. User without completed TOW kickoff can access the allowed recommendation flow.
+2. Authorized Viewer can submit a recommendation.
+3. Unauthorized user cannot access internal/private application areas.
+4. Successful recommendation submission.
+5. Required-field validation.
+6. Duplicate/double submission handling.
+7. Invalid/malicious input handling.
+8. Viewer permissions remain read-only/limited.
+9. Internal users can see the submitted recommendation in the expected workflow.
+10. API/RLS authorization cannot be bypassed directly.
+
+Before implementation, report:
+- Current architecture found
+- Existing Viewer behavior
+- Existing Oakes Award/recommendation workflow found
+- Root gap preventing un-onboarded users from submitting today
+- Recommended implementation approach
+- Any ambiguity that could materially change the business behavior
+
+Then implement the smallest safe solution.
+
+After implementation provide:
+1. Files changed
+2. Database/migration changes
+3. API changes
+4. Permission/security changes
+5. Exact test commands
+6. Manual Staging UAT steps
+7. Any assumptions that still require client confirmation
+
+Do not modify unrelated features, env files, authentication behavior, or production business rules.
