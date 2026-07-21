@@ -1,54 +1,35 @@
-Continue Phase 1.B — Slice 7: Article Version Restore.
+Continue Phase 1.B — Slice 9: Vision ↔ Knowledge Base integration.
 
 OBJECTIVE:
-Implement safe restoration of historical article versions.
+Map Vision sections to authoritative KB articles so strategy content points to living documentation.
 
 IMPLEMENTATION:
 
-1. VERSION HISTORY
-    Expose a complete version timeline with:
+1. MAPPING MODEL
+    Create a mapping between Vision section identifiers and KB articles.
+2. VISION RENDERING
+    When a Vision section has a mapping:
 
-* version number
-* author
-* timestamp
-* approval state
-* summary
+* show a ‘Read the authoritative article’ card
+* display article status and last updated timestamp
+* deep-link to the reader article
 
-2. DIFF VIEW
-    Add side-by-side diff support for:
+3. KB RENDERING
+    On article pages, show:
 
-* title
-* body markdown
-* metadata
+* linked Vision sections
+* strategic context
+* navigation back to Vision
 
-3. RESTORE FLOW
-    Implement:
-
-* Restore as Draft (required)
-* Direct restore to Approved (NOT allowed)
-
-Restoring a version must:
-
-* create a new draft version
-* preserve historical versions
-* not overwrite history
-
-4. API
-    Add:
-
-* GET /api/knowledge/articles/:id/versions
-* POST /api/knowledge/articles/:id/restore
-
-5. SECURITY
-    Only editors/managers may restore.
-    Readers have view-only access.
-6. TESTS
+4. CACHE
+    Vision pages must refresh when a mapped article is published.
+5. TESTS
     Cover:
 
-* restore creates new version
-* history preserved
-* unauthorized restore blocked
-* diff generation
+* mapped section rendering
+* unmapped fallback
+* publish refresh
+* broken mapping handling
 
-7. STOP
-    Provide migration changes (if any), APIs, UI routes, and UAT steps.
+6. STOP
+    Provide final integration summary and remaining out-of-scope items.
