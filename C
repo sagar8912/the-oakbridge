@@ -1,164 +1,20 @@
-Act as a Principal Full-Stack Engineer debugging a production UAT blocker.
+MOM – John Action Items (Short Summary)
 
-Context:
+Date: 21 July 2026
+Project: TOW App & Knowledge Base
 
-* Repo: the-oakbridge-way
-* Apps: apps/kb-admin and apps/ooo
-* Phase 1.B migration is largely complete.
-* The remaining blocker is Knowledge Article linking from Goals/Items.
+Key Instructions from John
 
-What I manually verified in the UI:
-
-1. KB Admin article exists: TOW App → Technical Documents.
-2. Article status is APPROVED (Version 2).
-3. Reader URL works: /Knowledge/TOWApp/technical-documents.
-4. Article is visible in the end-user Knowledge reader.
-5. Goal/Item → “Link Knowledge Article” modal cannot find the article.
-6. Searching “UAT” or “UAT Final Test” returns “No approved articles matched.”
-
-This means:
-
-* Publish pipeline works.
-* Reader visibility works.
-* Approved article retrieval for the linking modal is failing.
-
-Your task is to debug and fix ONLY this bug.
-
-⸻
-
-STEP 1 — Trace the modal request
-
-Find the component that opens the “Add Knowledge Article” modal and identify:
-
-* the API endpoint it calls
-* the query parameters sent during search
-* whether it searches by title, slug, code, or content
-
-Check files such as:
-
-* goal detail page
-* item detail page
-* knowledge article linking modal
-* relationship/linking components
-* any search hooks or query helpers
-
-Do not change code yet.
-
-Provide:
-
-* exact frontend file path
-* exact API route
-* example request URL generated when typing “UAT”
-
-⸻
-
-STEP 2 — Inspect backend search API
-
-Open the endpoint used by the modal and verify:
-
-* approved status filter
-* knowledge base filter
-* tenant/workspace filter
-* soft-delete filter
-* published/body existence filter
-* search field used (title vs name)
-
-Add temporary debug logging if needed.
-
-Then compare the query against the actual article row that is visible in the reader.
-
-⸻
-
-STEP 3 — Verify database data
-
-Without making schema changes, inspect the article record for “UAT Final Test” and check:
-
-* status
-* is_published
-* published_at
-* current_version_id
-* title
-* slug
-* knowledge_base_id
-* category_id
-* deleted_at
-
-Explain which field causes the search query to exclude the article.
-
-⸻
-
-STEP 4 — Implement the fix
-
-Apply the smallest possible production-safe fix.
-
-Requirements:
-
-* Linking modal must return all APPROVED and visible articles.
-* Search by partial title must work (“UAT” should find “UAT Final Test”).
-* KB dropdown filter must continue to work.
-* Reader visibility rules must remain unchanged.
-* No schema redesign.
-* No unrelated refactors.
-
-⸻
-
-STEP 5 — Add regression tests
-
-Add tests for:
-
-* approved article appears in linking search
-* draft article does not appear
-* partial title search works
-* KB filter restricts results correctly
-* goal and item linking both use the same search behavior
-
-Run only the affected test suites.
-
-⸻
-
-STEP 6 — Manual UAT checklist
-
-After the fix, verify in the UI:
-
-A. KB Admin
-
-* Article shows APPROVED.
-
-B. Reader
-
-* Article page opens and displays content.
-
-C. Goal linking
-
-* Open any Goal.
-* Click Link Knowledge Article.
-* Type “UAT”.
-* “UAT Final Test” appears.
-* Select it and save.
-* Related article appears on the Goal page.
-
-D. Item linking
-
-* Repeat the same flow for an OOO Item.
-
-⸻
-
-Important constraints
-
-Do NOT:
-
-* start RAG/chatbot work
-* modify Vision integration
-* redesign authentication
-* change migration history
-* touch Azure/MCP/vector DB code
-* change unrelated APIs
-
-Deliverables:
-
-1. Root cause summary.
-2. Files changed.
-3. Before vs after behavior.
-4. Test results.
-5. Remaining risks (if any).
-6. Exact manual UAT steps to reproduce and verify the fix.
+* Push the current TOW features to Staging for broader UAT.
+* Share a clear Staging vs Production change summary before testing.
+* Allow additional users to perform UAT on Staging and collect feedback before creating a Production PR.
+* Implement Vote Reset functionality so weekly meetings can start with a fresh voting state.
+* Update vote sorting to use Net Score (Upvotes − Downvotes) instead of only upvote count.
+* Keep the existing 👍 / 👎 UI unchanged.
+* Add the Goal Transfer Approval Process to the backlog (pending movement → approve/reject workflow).
+* Continue using the current transfer feature for now and it can be pushed to Production.
+* Do not prioritize the generic Knowledge Base issues list.
+* Use the Git repository documentation as the source of truth for Knowledge Base work.
+* Focus on stabilizing the Knowledge Base infrastructure and deployment (Vercel).
+* Deliver a Minimally Viable Knowledge Base (MVP) first, then gather user feedback for future features.
+* Begin designing the future ABAC / PDP / PEP permission scaffolding with a centralized permission-attribute table while keeping the current RBAC model operational for this release.
