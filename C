@@ -1,73 +1,54 @@
-Continue Phase 1.B — Slice 8: Real Search & Retrieval Readiness.
+Continue Phase 1.B — Slice 7: Article Version Restore.
 
 OBJECTIVE:
-Replace the disabled placeholder search with production-ready full-text retrieval.
-
-SCOPE:
-Traditional retrieval only. Do NOT implement embeddings, vector DB, RAG, chatbot, or MCP.
+Implement safe restoration of historical article versions.
 
 IMPLEMENTATION:
 
-1. INDEXING
-    Create searchable indexes for:
+1. VERSION HISTORY
+    Expose a complete version timeline with:
 
-* article title
-* body markdown/plain text
-* tags
-* KB name
-* hierarchy path
+* version number
+* author
+* timestamp
+* approval state
+* summary
 
-2. SEARCH SERVICE
-    Implement a dedicated search service with:
+2. DIFF VIEW
+    Add side-by-side diff support for:
 
-* query normalization
-* typo tolerance (if supported)
-* ranking by title > heading > body
-* approved-only filtering
-* pagination
-
-3. API
-    Add:
-
-* GET /api/knowledge/search?q=&kb=&page=
-
-Return:
-
-* article id
 * title
-* excerpt/snippet
-* matched section
-* KB
-* hierarchy path
-* score
+* body markdown
+* metadata
 
-4. READER UI
-    Upgrade /knowledge search:
+3. RESTORE FLOW
+    Implement:
 
-* live results
-* highlighted matches
-* keyboard navigation
-* empty states
-* loading states
-* recent searches
+* Restore as Draft (required)
+* Direct restore to Approved (NOT allowed)
 
-5. PERFORMANCE
-    Target:
+Restoring a version must:
 
-* <300ms local query
-* indexed queries
-* no N+1 lookups
+* create a new draft version
+* preserve historical versions
+* not overwrite history
 
-6. TESTS
+4. API
     Add:
 
-* ranking tests
-* snippet generation
-* approved filtering
-* pagination
-* performance smoke test
+* GET /api/knowledge/articles/:id/versions
+* POST /api/knowledge/articles/:id/restore
 
-7. DOCUMENTATION
-    Document retrieval architecture and why vector search is intentionally deferred to a future phase.
-8. STOP
-    Provide benchmark numbers, API contract, and manual search UAT checklist.
+5. SECURITY
+    Only editors/managers may restore.
+    Readers have view-only access.
+6. TESTS
+    Cover:
+
+* restore creates new version
+* history preserved
+* unauthorized restore blocked
+* diff generation
+
+7. STOP
+    Provide migration changes (if any), APIs, UI routes, and UAT steps.
