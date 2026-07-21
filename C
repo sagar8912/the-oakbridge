@@ -1,54 +1,58 @@
-Continue Phase 1.B — Slice 7: Article Version Restore.
+Continue Phase 1\.B — Slice 6B: UI linking experience\.
+
+Assume Slice 6A backend APIs are complete\.
 
 OBJECTIVE:
-Implement safe restoration of historical article versions.
+Allow users to create and view article links directly from Goal, Item, and KB Article screens\.
 
 IMPLEMENTATION:
 
-1. VERSION HISTORY
-    Expose a complete version timeline with:
+1. GOAL PAGE
+   On /goal/&#91;id&#93;:
 
-* version number
-* author
-* timestamp
-* approval state
-* summary
+- Add a ‘Knowledge Articles’ section\.
+- Show linked articles with title, KB name, relationship type, and status\.
+- Add an ‘Add Article’ button that opens a searchable modal\.
 
-2. DIFF VIEW
-    Add side-by-side diff support for:
+2. ITEM PAGE
+   On /item/&#91;id&#93;:
 
-* title
-* body markdown
-* metadata
+- Add the same Knowledge Articles section and linking modal\.
 
-3. RESTORE FLOW
-    Implement:
+3. ARTICLE PAGE
+   In KB Admin article detail:
 
-* Restore as Draft (required)
-* Direct restore to Approved (NOT allowed)
+- Add a ‘Linked Goals & Items’ panel\.
+- Show reverse relationships\.
 
-Restoring a version must:
+4. SEARCHABLE MODAL
+   Implement a reusable article picker:
 
-* create a new draft version
-* preserve historical versions
-* not overwrite history
+- Search by title
+- Filter by KB
+- Show approved status
+- Keyboard accessible
+- Debounced API search
 
-4. API
-    Add:
+5. UX RULES
 
-* GET /api/knowledge/articles/:id/versions
-* POST /api/knowledge/articles/:id/restore
+- Only approved articles can be linked\.
+- Duplicate links must be disabled in the UI\.
+- Relationship type must be selectable\.
 
-5. SECURITY
-    Only editors/managers may restore.
-    Readers have view-only access.
-6. TESTS
-    Cover:
+6. TESTING
+   Add component/integration tests for:
 
-* restore creates new version
-* history preserved
-* unauthorized restore blocked
-* diff generation
+- opening modal
+- searching articles
+- creating link
+- removing link
+- reverse relationship rendering
 
 7. STOP
-    Provide migration changes (if any), APIs, UI routes, and UAT steps.
+   After completion, STOP and provide:
+
+- routes updated
+- components created
+- screenshots/expected UI states
+- manual UAT checklist
