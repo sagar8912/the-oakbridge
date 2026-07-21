@@ -1,35 +1,51 @@
-Continue Phase 1.B — Slice 9: Vision ↔ Knowledge Base integration.
+Perform a complete Phase 1.B production-readiness closeout.
 
-OBJECTIVE:
-Map Vision sections to authoritative KB articles so strategy content points to living documentation.
+Generate:
 
-IMPLEMENTATION:
+1. End-to-end UAT matrix
 
-1. MAPPING MODEL
-    Create a mapping between Vision section identifiers and KB articles.
-2. VISION RENDERING
-    When a Vision section has a mapping:
+* Admin
+* Editor
+* Viewer
+* Anonymous
+* Goal linking
+* Item linking
+* Search
+* Publish
+* Version restore
 
-* show a ‘Read the authoritative article’ card
-* display article status and last updated timestamp
-* deep-link to the reader article
+2. Staging smoke checklist
 
-3. KB RENDERING
-    On article pages, show:
+* article create
+* approve
+* cache invalidate
+* reader refresh
+* search result
+* goal/article link
+* item/article link
+* restore draft
+* permission gate
 
-* linked Vision sections
-* strategic context
-* navigation back to Vision
+3. Deployment checklist
 
-4. CACHE
-    Vision pages must refresh when a mapped article is published.
-5. TESTS
-    Cover:
+* migrations
+* env vars
+* cache keys
+* rollback steps
+* CI gates
+* monitoring hooks
 
-* mapped section rendering
-* unmapped fallback
-* publish refresh
-* broken mapping handling
+4. Release notes
+    Summarize all implemented Phase 1.B capabilities.
+5. Explicitly list what is still OUT OF SCOPE:
 
-6. STOP
-    Provide final integration summary and remaining out-of-scope items.
+* RAG
+* embeddings
+* vector DB
+* chatbot
+* MCP wrappers
+* Azure migration
+* auth redesign
+* cross-app SSO redesign
+
+Do not make additional code changes in this step; produce the final release artifact and sign-off checklist only.
