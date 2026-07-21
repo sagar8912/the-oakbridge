@@ -1,58 +1,54 @@
-Continue Phase 1.B — Slice 6B: UI linking experience.
-
-Assume Slice 6A backend APIs are complete.
+Continue Phase 1.B — Slice 7: Article Version Restore.
 
 OBJECTIVE:
-Allow users to create and view article links directly from Goal, Item, and KB Article screens.
+Implement safe restoration of historical article versions.
 
 IMPLEMENTATION:
 
-1. GOAL PAGE
-    On /goal/[id]:
+1. VERSION HISTORY
+    Expose a complete version timeline with:
 
-* Add a ‘Knowledge Articles’ section.
-* Show linked articles with title, KB name, relationship type, and status.
-* Add an ‘Add Article’ button that opens a searchable modal.
+* version number
+* author
+* timestamp
+* approval state
+* summary
 
-2. ITEM PAGE
-    On /item/[id]:
+2. DIFF VIEW
+    Add side-by-side diff support for:
 
-* Add the same Knowledge Articles section and linking modal.
+* title
+* body markdown
+* metadata
 
-3. ARTICLE PAGE
-    In KB Admin article detail:
+3. RESTORE FLOW
+    Implement:
 
-* Add a ‘Linked Goals & Items’ panel.
-* Show reverse relationships.
+* Restore as Draft (required)
+* Direct restore to Approved (NOT allowed)
 
-4. SEARCHABLE MODAL
-    Implement a reusable article picker:
+Restoring a version must:
 
-* Search by title
-* Filter by KB
-* Show approved status
-* Keyboard accessible
-* Debounced API search
+* create a new draft version
+* preserve historical versions
+* not overwrite history
 
-5. UX RULES
+4. API
+    Add:
 
-* Only approved articles can be linked.
-* Duplicate links must be disabled in the UI.
-* Relationship type must be selectable.
+* GET /api/knowledge/articles/:id/versions
+* POST /api/knowledge/articles/:id/restore
 
-6. TESTING
-    Add component/integration tests for:
+5. SECURITY
+    Only editors/managers may restore.
+    Readers have view-only access.
+6. TESTS
+    Cover:
 
-* opening modal
-* searching articles
-* creating link
-* removing link
-* reverse relationship rendering
+* restore creates new version
+* history preserved
+* unauthorized restore blocked
+* diff generation
 
 7. STOP
-    After completion, STOP and provide:
-
-* routes updated
-* components created
-* screenshots/expected UI states
-* manual UAT checklist
+    Provide migration changes (if any), APIs, UI routes, and UAT steps.
