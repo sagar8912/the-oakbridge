@@ -1,77 +1,58 @@
-Act as a Principal Full-Stack Engineer with 15+ years of production experience.
+Continue Phase 1.B — Slice 6B: UI linking experience.
 
-We are continuing Phase 1.B — Slice 6A: Goal/Item ↔ Knowledge Article linking foundation.
-
-CURRENT STATE:
-
-* Slice 1–5 are already implemented.
-* KB Admin, approved-body API, publish workflow, cache revalidation, reader UI, and role admin ops are complete.
-* Do NOT modify those completed slices.
-* Do NOT start search, RAG, MCP, Azure migration, or Vision integration yet.
+Assume Slice 6A backend APIs are complete.
 
 OBJECTIVE:
-Create a generic relationship model so any Goal or Item can be linked to one or more KB articles, and any KB article can be linked back to Goals/Items.
+Allow users to create and view article links directly from Goal, Item, and KB Article screens.
 
-IMPLEMENTATION REQUIREMENTS:
+IMPLEMENTATION:
 
-1. DATABASE
-    Create a migration for a polymorphic link table, for example:
+1. GOAL PAGE
+    On /goal/[id]:
 
-* entity_article_links
-* id
-* entity_type (‘goal’ | ‘item’)
-* entity_id (UUID)
-* article_id (UUID)
-* relationship_type (‘supports’ | ‘references’ | ‘implementation’ | ‘policy’)
-* created_by
-* created_at
+* Add a ‘Knowledge Articles’ section.
+* Show linked articles with title, KB name, relationship type, and status.
+* Add an ‘Add Article’ button that opens a searchable modal.
 
-Add proper indexes and unique constraints to prevent duplicate links.
+2. ITEM PAGE
+    On /item/[id]:
 
-2. BACKEND SERVICES
-    Implement reusable repository/service functions:
+* Add the same Knowledge Articles section and linking modal.
 
-* linkArticleToEntity()
-* unlinkArticleFromEntity()
-* getArticlesForEntity()
-* getEntitiesForArticle()
+3. ARTICLE PAGE
+    In KB Admin article detail:
 
-3. API ROUTES
-    Add authenticated API endpoints for:
+* Add a ‘Linked Goals & Items’ panel.
+* Show reverse relationships.
 
-* POST /api/knowledge/links
-* DELETE /api/knowledge/links/:id
-* GET /api/knowledge/entity/:type/:id/articles
-* GET /api/knowledge/article/:id/entities
+4. SEARCHABLE MODAL
+    Implement a reusable article picker:
 
-4. AUTHORIZATION
-    Reuse existing PDP/RBAC patterns.
-    Only users with edit/manage permission on the target entity may create or remove links.
-    Reader users may only read approved article links.
-5. TESTS
-    Add unit tests for:
+* Search by title
+* Filter by KB
+* Show approved status
+* Keyboard accessible
+* Debounced API search
 
-* duplicate prevention
-* authorization
-* create/delete flows
-* entity lookup
-* article lookup
+5. UX RULES
 
-6. DOCUMENTATION
-    Update docs/02_plans/kb-phase-1b-completion-implementation.md with:
+* Only approved articles can be linked.
+* Duplicate links must be disabled in the UI.
+* Relationship type must be selectable.
 
-* schema
-* API contract
-* authorization rules
-* migration notes
+6. TESTING
+    Add component/integration tests for:
 
-7. STOP CONDITION
-    After implementation, STOP and provide:
+* opening modal
+* searching articles
+* creating link
+* removing link
+* reverse relationship rendering
 
-* files changed
-* migration name
-* API endpoints added
-* test commands to run locally
-* any blockers
+7. STOP
+    After completion, STOP and provide:
 
-Do NOT build UI in this slice. This slice is backend foundation only.
+* routes updated
+* components created
+* screenshots/expected UI states
+* manual UAT checklist
