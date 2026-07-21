@@ -1,145 +1,306 @@
-Act as a Principal Full-Stack Engineer with 15+ years of experience building enterprise collaboration and prioritization systems.
 
-We need to enhance the existing Voting functionality in the TOW application based on today’s client (John) feedback.
+Act as a Principal Full-Stack Engineer / Solution Architect with 15+ years of enterprise workflow experience.
 
-Current Behavior
+We need to implement the Goal Transfer Approval Process exactly as discussed with the client (John) in today’s meeting.
 
-* One user can cast only one vote per item.
-* Vote options: Upvote (👍), Downvote (👎), or No Vote (null).
-* Switching a vote automatically removes the previous vote and applies the new one.
-* UI already displays 👍 count and 👎 count.
-* Sorting currently uses only the Upvote count, which is incorrect.
+Important Context
 
-Client Requirement (John)
+The current Goal Transfer functionality is already working and can be pushed to production.
 
-1. Keep the existing UI
+Current behavior:
 
-Do NOT remove the 👍 / 👎 columns.
-John explicitly likes the current visual design.
+* Super Admin can transfer a goal directly from Team A → Team B.
+* The goal is immediately moved.
+* Owner and goal level can be changed during transfer.
+* Normal users do not have transfer access.
 
-2. Introduce a Net Vote Score
+John approved this for the immediate release, but requested a future-state movement approval workflow to avoid Super Admin becoming responsible for all data cleanliness decisions.
 
-Add an internal calculation:
+This work should be implemented as a new approval scaffolding, not by breaking the current transfer functionality.
 
-Net Score = Upvotes − Downvotes
+⸻
 
-Examples:
+John’s Exact Requirement
 
-* 10 up / 5 down → Net = +5
-* 7 up / 0 down → Net = +7
-* 1 up / 1 down → Net = 0
+A transfer should not always move the goal immediately.
 
-3. Update Sorting Logic
+Instead:
 
-When the user clicks the Votes column header (ascending/descending), sorting must use the Net Score, not just the Upvote count.
+User requests transfer
+→ Transfer enters a Pending Movement queue
+→ Appropriate permissioned reviewer receives the request
+→ Reviewer can Approve or Reject
+→ Goal moves only after approval
 
-Expected order (descending):
+Example:
 
-1. Net +7
-2. Net +5
-3. Net +2
-4. Net 0
-5. Net -1
+* John Sweet transfers a goal to another team.
+* A Team Admin or designated reviewer checks the request.
+* Reviewer may reject it if the goal belongs to a different team.
 
-4. Add Weekly Reset Functionality
+John specifically wants this integrated into:
 
-Implement a Reset Votes action.
+* My Items
+* Pending Movements
+* Approval queue / transfer workflow
 
-Requirements:
+⸻
 
-* Visible only to authorized users (Admin / Super Admin).
-* Can be placed near the Votes column or in an Actions menu.
-* Reset sets every user’s vote on the selected scope back to NULL (no vote).
-* After reset:
-    * Upvotes = 0
-    * Downvotes = 0
-    * Net Score = 0
-    * Individual vote records are cleared or marked inactive.
+Architecture Requirements
 
-5. Preserve Auditability
+1. New Transfer Request Entity
 
-Even after reset, we should be able to know that a reset occurred.
+Create a dedicated workflow entity instead of directly updating the goal.
 
-Add:
+Suggested table: goal_transfer_requests
 
-* reset_by
-* reset_at
-* reset_scope (item/list/team/global)
+Fields:
 
-6. Database / Backend
+* id
+* goal_id
+* source_team_id
+* target_team_id
+* requested_owner_id
+* requested_goal_level
+* requested_by_user_id
+* status (PENDING | APPROVED | REJECTED | CANCELLED)
+* approval_notes
+* approved_by_user_id
+* approved_at
+* rejected_by_user_id
+* rejected_at
+* created_at
+* updated_at
 
-Review the current vote schema and implement the minimal safe changes.
+Add indexes and foreign keys.
 
-Ensure:
+⸻
 
-* One active vote per user per item.
-* Unique constraint enforcement.
-* Efficient aggregation queries for large lists.
+2. Permission Model
 
-7. API Requirements
+Implement using the current RBAC model, but keep it compatible with future ABAC/PDP migration.
 
-Support:
+Can Request Transfer
 
-* Cast vote
-* Change vote
-* Remove vote (back to null)
-* Fetch aggregated counts
-* Fetch current user vote
-* Reset votes (admin only)
+* Super Admin
+* Team Admin
+* Team Owner
+* Any role that currently has transfer capability
 
-8. UI Requirements
+Can Approve/Reject
 
-Display:
+* Target Team Admin
+* Super Admin
+* Explicitly designated approver (future ABAC hook)
 
-* 👍 count
-* 👎 count
-* Optional hidden/internal net score
+Cannot Approve
 
-Sorting must visually work even if the net score column is not shown.
+* Standard users
+* Editors
+* Viewers
+
+Do NOT implement full ABAC yet, but create clean authorization hooks for future attribute-based policies.
+
+⸻
+
+3. UI Changes
+
+Goal Page
+
+Replace direct transfer with:
+
+Step 1 — Create Transfer Request
+
+* Select target team
+* Select owner
+* Select goal level
+* Submit Request
+
+Step 2 — Confirmation
+
+Show:
+
+* Request ID
+* Status = Pending
+* Awaiting approval by target team
+
+Do NOT move the goal yet.
+
+⸻
+
+4. Pending Movement Queue
+
+Add a new section in the existing workflow/navigation:
+
+My Items → Pending Movements
+
+Show:
+
+* Goal name
+* Source team
+* Target team
+* Requested by
+* Requested owner
+* Requested goal level
+* Request date
+* Status
+
+Approvers should see:
+
+* Approve button
+* Reject button
+* Comment box
+
+Requestors should see:
+
+* Pending
+* Approved
+* Rejected
+* Cancel Request (while pending)
+
+⸻
+
+5. Approval Behavior
+
+Approve
+
+When approved:
+
+* Goal.team_id = target_team_id
+* Goal.owner_id = requested_owner_id
+* Goal.goal_level = requested_goal_level
+* Create audit log entry
+* Mark request APPROVED
+* Send notification to requestor
+
+Reject
+
+When rejected:
+
+* Goal remains unchanged
+* Request marked REJECTED
+* Store rejection reason
+* Notify requestor
+
+⸻
+
+6. Audit & Compliance
+
+Create immutable audit events:
+
+* goal.transfer.requested
+* goal.transfer.approved
+* goal.transfer.rejected
+* goal.transfer.cancelled
+
+Audit must include:
+
+* actor
+* timestamp
+* old values
+* requested values
+* final decision
+
+This is important for future enterprise governance.
+
+⸻
+
+7. Backward Compatibility
+
+Critical:
+
+* Keep the existing direct-transfer endpoint operational for the current production release.
+* Add a feature flag or workflow mode if needed.
+* The new approval workflow should be introduced without breaking current staging functionality.
+
+Suggested:
+TRANSFER_APPROVAL_ENABLED=true
+
+When false:
+
+* Current direct transfer behavior.
+
+When true:
+
+* Create transfer request workflow.
+
+⸻
+
+8. Notifications
+
+Implement lightweight notifications (reuse existing patterns if available):
+
+Request Created
+
+Target team approvers are notified.
+
+Request Approved
+
+Requestor is notified.
+
+Request Rejected
+
+Requestor is notified with reason.
+
+⸻
 
 9. Manual UAT Scenarios
 
 Implement and verify:
 
-Scenario A — First vote
+Scenario A — Team Admin requests transfer
 
-User A upvotes → 👍1 👎0 Net+1
+Expected:
 
-Scenario B — Switch vote
+* Request created.
+* Goal remains in original team.
+* Status = Pending.
 
-User A changes to downvote → 👍0 👎1 Net-1
+Scenario B — Approver approves
 
-Scenario C — Multiple users
+Expected:
 
-User A upvote, User B upvote, User C downvote → 👍2 👎1 Net+1
+* Goal moves to target team.
+* Owner updates.
+* Goal level updates.
+* Audit log created.
 
-Scenario D — Sorting
+Scenario C — Approver rejects
 
-Items are ordered by Net Score.
+Expected:
 
-Scenario E — Reset
+* Goal stays in source team.
+* Status = Rejected.
+* Rejection reason visible.
 
-Admin clicks Reset → all counts become zero and users can vote again.
+Scenario D — Unauthorized user
 
-10. Constraints
+Expected:
 
-Do NOT:
+* No transfer request UI.
+* API returns 403.
 
-* Change the existing thumbs-up/thumbs-down UI.
-* Introduce real-time sockets unless already present.
-* Modify unrelated goal/item logic.
-* Touch KB, RAG, MCP, Azure, or permission architecture work.
+Scenario E — Pending queue
 
-Deliverables
+Expected:
+
+* Request visible in My Items → Pending Movements.
+
+⸻
+
+10. Deliverables
 
 Provide:
 
-1. Root cause of current sorting behavior.
-2. Files changed.
-3. Schema changes (if any).
-4. API changes.
-5. UI changes.
-6. Test results.
-7. Exact manual steps to verify the feature in Staging.
+1. Database migration.
+2. New API routes.
+3. UI components added.
+4. Authorization rules.
+5. Audit implementation.
+6. Feature flag behavior.
+7. Test results.
+8. Exact manual staging UAT steps.
 
-Implement this as a production-ready enhancement suitable for immediate Staging deployment and subsequent client UAT.
+Important:
+Do NOT work on voting, KB, RAG, MCP, Azure migration, or unrelated permissions in this task.
+Focus only on the Goal Transfer Approval Process scaffolding requested by John.
