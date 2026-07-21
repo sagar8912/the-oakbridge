@@ -1,419 +1,191 @@
 Act as a Principal Full-Stack Engineer / Solution Architect with 15+ years of production experience.
 
-We have completed Phase 1.B Slice 4 — Knowledge Base Reader UI and Navigation.
+We have COMPLETED Phase 1.B Slices 1-4 in the TOW mono-repo.
 
-DO NOT start Slice 5 yet.
+Current completed work:
 
-Before moving forward, perform a complete stabilization, dependency reconciliation, regression review, and validation of Slices 1a through 4.
+* Slice 1: Mutation authorization hardening
+* Slice 2: Approved-body Source-of-Truth API
+* Slice 3: Publish workflow + cache revalidation
+* Slice 4: Reader UI + approved article rendering
 
-This is a RELEASE-GATE validation step.
+Now proceed with ONLY Slice 5 — Knowledge Base Role Administration, TOW Linking, Search Foundation, and Retrieval Readiness.
 
-==================================================
-CURRENT STATE
-==================================================
+CRITICAL SCOPE RULES:
 
-Completed:
+* Do NOT touch Vision→KB integration.
+* Do NOT implement RAG, chatbot, MCP, embeddings pipeline, or Azure migration.
+* Do NOT redesign the SQL PDP/PEP architecture.
+* Do NOT change existing auth/session model.
+* Do NOT modify production environment secrets.
+* Keep C1-C5 decisions marked as TBD / client confirmation required.
 
-Slice 1a:
-Knowledge Base mutation authorization hardening
+OBJECTIVE:
+Prepare the Knowledge Base to behave like a SharePoint-style policy repository with proper role administration, cross-linking from TOW entities, foundational search, and retrieval-ready metadata.
 
-Slice 2:
-Approved/current Knowledge Base article body API
+IMPLEMENTATION PLAN
 
-Slice 3:
-Publish → Cache Revalidation
+STEP 1 — ROLE ADMIN OPERATIONS
 
-Slice 4:
-Knowledge Base Reader UI / Navigation / Approved Content Consumption
+Goal:
+Allow admins to manage KB roles without changing the underlying authorization architecture.
 
-You identified the following remaining items:
+Tasks:
 
-1. Full search not built
-   Classification: FUTURE PHASE / Slice 8
+1. Add admin UI for kb_role management.
+2. Support assigning/removing:
+    * kb_admin
+    * kb_editor
+    * kb_reviewer
+    * kb_reader
+3. Validate permissions server-side.
+4. Prevent privilege escalation.
+5. Add audit logging for role changes.
+6. Show role badges in the admin UI.
 
-2. kb_role is not available in client user context, which can cause:
-   navigation visible → user clicks → API returns 403
-   Classification: TECHNICAL DEBT
+Files to inspect:
 
-3. package.json dependency changes require pnpm install / lockfile reconciliation
-   Classification: BLOCKER
+* apps/kb-admin/src/app/admin/*
+* apps/kb-admin/src/lib/auth/*
+* shared role utilities
 
-4. Hierarchy currently shows all approved nodes without article-count filtering
-   Classification: TECHNICAL DEBT
+Acceptance:
 
-There are currently approximately 55 changed files across the work done so far.
+* Admin can assign and revoke KB roles.
+* Non-admin receives 403.
+* Audit entry is created for every role change.
 
-DO NOT blindly continue development until the current state is clean and validated.
+STEP 2 — TOW ITEM/GOAL ↔ KB ARTICLE LINKING
 
-==================================================
-STEP 1 — REVIEW ALL CHANGED FILES
-==================================================
+Goal:
+Enable items and goals to reference KB articles.
 
-Inspect every changed file from Slices 1a–4.
+Tasks:
 
-Group them into:
+1. Add article reference model.
+2. Support linking from:
+    * Items
+    * Goals
+3. Store stable article identifiers (slug or article_id).
+4. Add UI picker/search for approved articles.
+5. Render linked articles in the item/goal detail sidebar.
+6. Support multiple linked articles.
 
-A. Slice 1a — Authorization
-B. Slice 2 — Approved Body API
-C. Slice 3 — Cache/Revalidation
-D. Slice 4 — Reader UI
-E. Tests
-F. Documentation
-G. Dependency/package changes
-H. Potentially unrelated changes
+Files to inspect:
 
-For every potentially unrelated file:
+* apps/tow-app/src/app/item/*
+* apps/tow-app/src/app/goal/*
+* KB API routes
 
-Explain:
-- why it changed
-- whether the change is required
-- whether it should remain
+Acceptance:
 
-Do NOT keep unrelated modifications simply because they already exist.
+* A goal can link multiple approved KB articles.
+* Links survive article edits and new versions.
+* Unapproved articles cannot be linked.
 
-Check specifically that we did NOT unintentionally modify:
+STEP 3 — SEARCH FOUNDATION (NOT FULL SEARCH ENGINE)
 
-- TOW business logic
-- Goals
-- Items
-- Todos
-- Voting
-- Team permissions unrelated to KB
-- RAG
-- chatbot
-- embeddings
-- MCP
-- Azure migration
-- production environment configuration
-- unrelated authentication logic
+Goal:
+Create a safe foundation for future search without implementing full-text infrastructure yet.
 
-Return a concise changed-files audit before making additional production changes.
+Tasks:
 
-==================================================
-STEP 2 — FIX THE DEPENDENCY / LOCKFILE BLOCKER
-==================================================
-
-You reported:
-
-“Lockfile needs pnpm install after package.json deps — BLOCKER until install”
-
-Analyze exactly:
-
-1. Which package.json file(s) changed?
-2. Which dependencies were added/removed/updated?
-3. Why was each dependency required?
-4. Was a new dependency actually necessary, or could an existing repository dependency have been reused?
-5. Is the workspace lockfile currently inconsistent?
-
-If the new dependency is genuinely required:
-
-Provide the exact correct pnpm install command from the correct repository directory.
-
-Use the monorepo’s existing package-manager/workspace conventions.
-
-Update the lockfile normally through pnpm.
-
-DO NOT manually edit pnpm-lock.yaml.
-
-If the dependency is unnecessary:
-
-Remove it and reuse existing packages instead.
-
-After reconciliation verify:
-
-- package.json
-- pnpm-lock.yaml
-- workspace resolution
-- no accidental dependency version drift
-
-Do not upgrade unrelated dependencies.
-
-==================================================
-STEP 3 — BUILD / TYPECHECK VALIDATION
-==================================================
-
-Validate every affected application.
-
-At minimum inspect:
-
-- kb-admin
-- OOO/TOW if Reader UI touches it
-- shared packages used by these apps
-
-Run the existing repository-supported commands for:
-
-1. TypeScript typecheck
-2. Build
-3. Lint where configured
-4. Dependency resolution
-
-Do not invent new scripts.
-
-If Cursor shell is blocked by PowerShell ExecutionPolicy:
-
-Give me exact copy-pasteable commands with:
-
-- exact folder
-- exact command
-- purpose
-- expected success result
-
-Never claim a command passed if it was not actually executed.
-
-==================================================
-STEP 4 — RUN COMPLETE TARGETED TEST SUITE
-==================================================
-
-Validate all functionality introduced in Slices 1a–4.
-
-SLICE 1A TESTS:
-
-- Unauthenticated KB mutation blocked
-- Viewer mutation blocked
-- Editor permitted edit succeeds
-- Admin/Super Admin behavior preserved
-- Direct mutation bypass blocked
-
-SLICE 2 TESTS:
-
-- Approved/current article body returned
-- Correct version returned
-- Draft not leaked
-- Unauthorized read blocked
-- Missing article handled properly
-- No silent valid-result null
-
-SLICE 3 TESTS:
-
-- Publish triggers cache revalidation
-- Updated approved body becomes available
-- Cache does not remain permanently stale
-- Revalidation key behavior is correct
-- Failed revalidation behaves safely
-
-SLICE 4 TESTS:
-
-- KB home loads
-- Hierarchy/category navigation works
-- Approved articles listed
-- Article detail renders
-- Markdown renders correctly
-- Draft/unpublished articles hidden
-- Unauthorized article protected
-- Missing article handled
-- Empty category handled
-- API failure handled
-- Internal navigation works
-- No mutation access introduced through reader UI
-
-Provide:
-
-PASS
-FAIL
-NOT RUN
-
-for every test category.
-
-Never label NOT RUN as PASS.
-
-==================================================
-STEP 5 — VERIFY THE READER END-TO-END FLOW
-==================================================
-
-Trace this flow manually and technically:
-
-Authorized user
-    ↓
-Knowledge Base navigation
-    ↓
-KB Home
-    ↓
-Category / hierarchy
-    ↓
-Approved article list
-    ↓
-Article detail
-    ↓
-Approved/current article body
-    ↓
-Markdown rendering
-    ↓
-Internal navigation
-
-Then verify negative paths:
-
-Unauthorized user
-    ↓
-Direct URL
-    ↓
-Correct 403 / access behavior
-
-Draft article
-    ↓
-Normal reader
-    ↓
-Must not leak
-
-Missing article
-    ↓
-Meaningful 404 UX
-
-API failure
-    ↓
-Meaningful error
-    ↓
-No blank/null page
-
-==================================================
-STEP 6 — ANALYZE kb_role CLIENT CONTEXT ISSUE
-==================================================
-
-Do NOT blindly fix it yet.
-
-Analyze this known technical debt:
-
-“kb_role not on client user context → navigation visible, then API returns 403”
-
-Explain:
-
-1. Where server-side KB authorization currently gets kb_role.
-2. What client-side user/session context currently contains.
-3. Why navigation can be visible to a user who receives 403.
-4. Whether adding kb_role to client context is safe.
-5. Whether the better solution is:
-   A. permission-aware navigation endpoint
-   B. server-rendered authorization
-   C. enriched session/user context
-   D. another existing project pattern
-
-Do NOT expose sensitive authorization internals unnecessarily to the client.
-
-Recommend the safest smallest solution.
-
-Mark whether this should be:
-
-BLOCKER before Slice 5
-
-or
-
-First task inside Slice 5.
-
-==================================================
-STEP 7 — REVIEW HIERARCHY TECHNICAL DEBT
-==================================================
-
-You reported:
-
-“Hierarchy shows all approved nodes — no article-count filter”
-
-Analyze:
-
-- Does this cause empty categories/sections to appear?
-- Is it functionally incorrect or simply UX improvement?
-- Does fixing it require expensive N+1 queries?
-- Can existing metadata/count APIs solve it efficiently?
-
-Do NOT implement a complex query redesign now.
-
-Classify as:
-
-BLOCKER
-
-SLICE 5/8 enhancement
-
-or
-
-ACCEPTABLE TECHNICAL DEBT
-
-==================================================
-STEP 8 — VERIFY CACHE CONFIGURATION RISKS
-==================================================
-
-Revalidate Slice 3 known concerns:
-
-- KB_REVALIDATE_API_KEY behavior
-- KB Admin ↔ OOO/TOW revalidation path
-- getOOOOrigin configuration
-- localhost/staging behavior
-- failure handling
-- stale-until-TTL behavior
-
-Do not expose secrets.
-
-Do not modify env files.
-
-Tell me exactly which environment variable names must be configured, but never print secret values.
-
-==================================================
-STEP 9 — CHECK PRODUCTION SAFETY
-==================================================
-
-Confirm:
-
-- No database destructive migration
-- No broad authorization weakening
-- No draft data leakage
-- No service-role credential exposed client-side
-- No public endpoint accidentally created
-- No existing KB Admin workflow broken
-- No unrelated TOW workflow broken
-- No environment-specific localhost URL hardcoded for deployed environments
-
-==================================================
-STEP 10 — FINAL RELEASE-GATE REPORT
-==================================================
-
-Give me a structured report:
-
-1. FILE CHANGE AUDIT
-Total files changed and categorized by slice.
-
-2. DEPENDENCY STATUS
-Whether pnpm/lockfile blocker is resolved.
-
-3. BUILD STATUS
-For each affected app:
-PASS / FAIL / NOT RUN
-
-4. TEST STATUS
-Slice 1a:
-PASS / FAIL / NOT RUN
-
-Slice 2:
-PASS / FAIL / NOT RUN
-
-Slice 3:
-PASS / FAIL / NOT RUN
-
-Slice 4:
-PASS / FAIL / NOT RUN
-
-5. SECURITY STATUS
-
-6. READER END-TO-END STATUS
-
-7. BLOCKERS BEFORE SLICE 5
-
-8. TECHNICAL DEBT
-
-9. FUTURE-SCOPE ITEMS
-
-10. EXACT MANUAL UAT STEPS
-
-11. EXACT COMMANDS I SHOULD RUN MANUALLY IF ANYTHING COULD NOT BE EXECUTED
-
-IMPORTANT:
-
-Do NOT start Slice 5 automatically.
+1. Add search service abstraction.
+2. Implement article title/slug search.
+3. Add approved-only filtering.
+4. Add hierarchy/category filters.
+5. Add pagination and sorting.
+6. Keep implementation database-friendly.
 
 Do NOT implement:
-- Search engine
-- Vision → KB
-- Item/Goal linking
-- RAG
-- chatbot
-- MCP
-- Azure migration
-- Version restore
 
-Stop after the stabilization report and wait for my approval.
+* Vector search
+* Semantic search
+* Embeddings
+* External search engine
+
+Acceptance:
+
+* Search returns approved articles by title/slug.
+* Filters work.
+* API contract is stable for future expansion.
+
+STEP 4 — RETRIEVAL-READY METADATA
+
+Goal:
+Prepare KB content for future RAG/retrieval without enabling RAG yet.
+
+Tasks:
+
+1. Add metadata fields:
+    * canonical_slug
+    * article_version
+    * published_at
+    * approved_by
+    * source_system
+    * section_path
+    * retrieval_tags
+    * content_hash
+2. Populate metadata during publish.
+3. Backfill existing approved articles where possible.
+4. Keep metadata immutable for published versions.
+
+Acceptance:
+
+* Every approved article has retrieval metadata.
+* Metadata is available via API.
+* Existing published articles are not broken.
+
+STEP 5 — NAVIGATION & UX STABILIZATION
+
+Goal:
+Make KB navigation reliable for authenticated users.
+
+Tasks:
+
+1. Hide KB nav when user lacks kb_role.
+2. Remove visible-then-403 behavior.
+3. Add graceful empty states.
+4. Add breadcrumb navigation.
+5. Add hierarchy tree expansion persistence.
+
+Acceptance:
+
+* Unauthorized users never see broken KB routes.
+* Navigation is consistent across refreshes.
+
+STEP 6 — TESTING & QUALITY GATE
+
+Run or prepare commands:
+
+* pnpm exec vitest run
+* pnpm exec tsc –noEmit
+* pnpm lint
+* pnpm build (if dependencies are available)
+
+Add tests for:
+
+* Role assignment permissions
+* Article linking rules
+* Search filtering
+* Retrieval metadata generation
+* Navigation visibility
+
+OUTPUT FORMAT
+
+When finished, provide:
+
+1. Files changed grouped by slice.
+2. Migrations added.
+3. APIs added or modified.
+4. Tests added.
+5. Manual UAT checklist.
+6. Remaining risks.
+7. Explicit PASS/FAIL gate for:
+    * TypeScript
+    * Lint
+    * Tests
+    * Build
+
+IMPORTANT:
+Work slice-by-slice and stop only if you encounter a true blocker (missing dependency, migration conflict, or architectural contradiction). Otherwise continue through all Slice 5 tasks and produce a complete implementation summary.
