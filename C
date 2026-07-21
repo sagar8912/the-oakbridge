@@ -1,20 +1,145 @@
-MOM – John Action Items (Short Summary)
+Act as a Principal Full-Stack Engineer with 15+ years of experience building enterprise collaboration and prioritization systems.
 
-Date: 21 July 2026
-Project: TOW App & Knowledge Base
+We need to enhance the existing Voting functionality in the TOW application based on today’s client (John) feedback.
 
-Key Instructions from John
+Current Behavior
 
-* Push the current TOW features to Staging for broader UAT.
-* Share a clear Staging vs Production change summary before testing.
-* Allow additional users to perform UAT on Staging and collect feedback before creating a Production PR.
-* Implement Vote Reset functionality so weekly meetings can start with a fresh voting state.
-* Update vote sorting to use Net Score (Upvotes − Downvotes) instead of only upvote count.
-* Keep the existing 👍 / 👎 UI unchanged.
-* Add the Goal Transfer Approval Process to the backlog (pending movement → approve/reject workflow).
-* Continue using the current transfer feature for now and it can be pushed to Production.
-* Do not prioritize the generic Knowledge Base issues list.
-* Use the Git repository documentation as the source of truth for Knowledge Base work.
-* Focus on stabilizing the Knowledge Base infrastructure and deployment (Vercel).
-* Deliver a Minimally Viable Knowledge Base (MVP) first, then gather user feedback for future features.
-* Begin designing the future ABAC / PDP / PEP permission scaffolding with a centralized permission-attribute table while keeping the current RBAC model operational for this release.
+* One user can cast only one vote per item.
+* Vote options: Upvote (👍), Downvote (👎), or No Vote (null).
+* Switching a vote automatically removes the previous vote and applies the new one.
+* UI already displays 👍 count and 👎 count.
+* Sorting currently uses only the Upvote count, which is incorrect.
+
+Client Requirement (John)
+
+1. Keep the existing UI
+
+Do NOT remove the 👍 / 👎 columns.
+John explicitly likes the current visual design.
+
+2. Introduce a Net Vote Score
+
+Add an internal calculation:
+
+Net Score = Upvotes − Downvotes
+
+Examples:
+
+* 10 up / 5 down → Net = +5
+* 7 up / 0 down → Net = +7
+* 1 up / 1 down → Net = 0
+
+3. Update Sorting Logic
+
+When the user clicks the Votes column header (ascending/descending), sorting must use the Net Score, not just the Upvote count.
+
+Expected order (descending):
+
+1. Net +7
+2. Net +5
+3. Net +2
+4. Net 0
+5. Net -1
+
+4. Add Weekly Reset Functionality
+
+Implement a Reset Votes action.
+
+Requirements:
+
+* Visible only to authorized users (Admin / Super Admin).
+* Can be placed near the Votes column or in an Actions menu.
+* Reset sets every user’s vote on the selected scope back to NULL (no vote).
+* After reset:
+    * Upvotes = 0
+    * Downvotes = 0
+    * Net Score = 0
+    * Individual vote records are cleared or marked inactive.
+
+5. Preserve Auditability
+
+Even after reset, we should be able to know that a reset occurred.
+
+Add:
+
+* reset_by
+* reset_at
+* reset_scope (item/list/team/global)
+
+6. Database / Backend
+
+Review the current vote schema and implement the minimal safe changes.
+
+Ensure:
+
+* One active vote per user per item.
+* Unique constraint enforcement.
+* Efficient aggregation queries for large lists.
+
+7. API Requirements
+
+Support:
+
+* Cast vote
+* Change vote
+* Remove vote (back to null)
+* Fetch aggregated counts
+* Fetch current user vote
+* Reset votes (admin only)
+
+8. UI Requirements
+
+Display:
+
+* 👍 count
+* 👎 count
+* Optional hidden/internal net score
+
+Sorting must visually work even if the net score column is not shown.
+
+9. Manual UAT Scenarios
+
+Implement and verify:
+
+Scenario A — First vote
+
+User A upvotes → 👍1 👎0 Net+1
+
+Scenario B — Switch vote
+
+User A changes to downvote → 👍0 👎1 Net-1
+
+Scenario C — Multiple users
+
+User A upvote, User B upvote, User C downvote → 👍2 👎1 Net+1
+
+Scenario D — Sorting
+
+Items are ordered by Net Score.
+
+Scenario E — Reset
+
+Admin clicks Reset → all counts become zero and users can vote again.
+
+10. Constraints
+
+Do NOT:
+
+* Change the existing thumbs-up/thumbs-down UI.
+* Introduce real-time sockets unless already present.
+* Modify unrelated goal/item logic.
+* Touch KB, RAG, MCP, Azure, or permission architecture work.
+
+Deliverables
+
+Provide:
+
+1. Root cause of current sorting behavior.
+2. Files changed.
+3. Schema changes (if any).
+4. API changes.
+5. UI changes.
+6. Test results.
+7. Exact manual steps to verify the feature in Staging.
+
+Implement this as a production-ready enhancement suitable for immediate Staging deployment and subsequent client UAT.
