@@ -1,58 +1,73 @@
-Continue Phase 1\.B — Slice 6B: UI linking experience\.
-
-Assume Slice 6A backend APIs are complete\.
+Continue Phase 1.B — Slice 8: Real Search & Retrieval Readiness.
 
 OBJECTIVE:
-Allow users to create and view article links directly from Goal, Item, and KB Article screens\.
+Replace the disabled placeholder search with production-ready full-text retrieval.
+
+SCOPE:
+Traditional retrieval only. Do NOT implement embeddings, vector DB, RAG, chatbot, or MCP.
 
 IMPLEMENTATION:
 
-1. GOAL PAGE
-   On /goal/&#91;id&#93;:
+1. INDEXING
+    Create searchable indexes for:
 
-- Add a ‘Knowledge Articles’ section\.
-- Show linked articles with title, KB name, relationship type, and status\.
-- Add an ‘Add Article’ button that opens a searchable modal\.
+* article title
+* body markdown/plain text
+* tags
+* KB name
+* hierarchy path
 
-2. ITEM PAGE
-   On /item/&#91;id&#93;:
+2. SEARCH SERVICE
+    Implement a dedicated search service with:
 
-- Add the same Knowledge Articles section and linking modal\.
+* query normalization
+* typo tolerance (if supported)
+* ranking by title > heading > body
+* approved-only filtering
+* pagination
 
-3. ARTICLE PAGE
-   In KB Admin article detail:
+3. API
+    Add:
 
-- Add a ‘Linked Goals & Items’ panel\.
-- Show reverse relationships\.
+* GET /api/knowledge/search?q=&kb=&page=
 
-4. SEARCHABLE MODAL
-   Implement a reusable article picker:
+Return:
 
-- Search by title
-- Filter by KB
-- Show approved status
-- Keyboard accessible
-- Debounced API search
+* article id
+* title
+* excerpt/snippet
+* matched section
+* KB
+* hierarchy path
+* score
 
-5. UX RULES
+4. READER UI
+    Upgrade /knowledge search:
 
-- Only approved articles can be linked\.
-- Duplicate links must be disabled in the UI\.
-- Relationship type must be selectable\.
+* live results
+* highlighted matches
+* keyboard navigation
+* empty states
+* loading states
+* recent searches
 
-6. TESTING
-   Add component/integration tests for:
+5. PERFORMANCE
+    Target:
 
-- opening modal
-- searching articles
-- creating link
-- removing link
-- reverse relationship rendering
+* <300ms local query
+* indexed queries
+* no N+1 lookups
 
-7. STOP
-   After completion, STOP and provide:
+6. TESTS
+    Add:
 
-- routes updated
-- components created
-- screenshots/expected UI states
-- manual UAT checklist
+* ranking tests
+* snippet generation
+* approved filtering
+* pagination
+* performance smoke test
+
+7. DOCUMENTATION
+    Document retrieval architecture and why vector search is intentionally deferred to a future phase.
+8. STOP
+    Provide benchmark numbers, API contract, and manual search UAT checklist.
