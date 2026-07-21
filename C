@@ -1,51 +1,70 @@
-Perform a complete Phase 1.B production-readiness closeout.
+Act as a Principal Full-Stack Engineer.
 
-Generate:
+We have completed these UATs successfully:
 
-1. End-to-end UAT matrix
+* Article create = PASS
+* Save draft = PASS
+* Publish/Approve = PASS
+* Reader visibility = PASS
 
-* Admin
-* Editor
-* Viewer
-* Anonymous
-* Goal linking
-* Item linking
-* Search
-* Publish
-* Version restore
+Current failing scenario:
+GOAL ↔ KNOWLEDGE ARTICLE LINKING SEARCH
 
-2. Staging smoke checklist
+Observed behavior:
 
-* article create
-* approve
-* cache invalidate
-* reader refresh
-* search result
-* goal/article link
-* item/article link
-* restore draft
-* permission gate
+1. Approved article exists in KB:
+    * Knowledge Base: TOW App
+    * Journey: Technical Documents
+    * Article title: UAT Final Test
+    * Status: APPROVED
+    * Reader URL works and displays the article.
+2. On a Goal page, clicking “Add Knowledge Article” opens the modal.
+3. Searching for “UAT Final Test” returns:
+    “No approved articles matched.”
 
-3. Deployment checklist
+This means the article is published for readers but is NOT discoverable by the Goal-linking search endpoint/query.
 
-* migrations
-* env vars
-* cache keys
-* rollback steps
-* CI gates
-* monitoring hooks
+Your task is to DEBUG and FIX ONLY this scenario.
 
-4. Release notes
-    Summarize all implemented Phase 1.B capabilities.
-5. Explicitly list what is still OUT OF SCOPE:
+Investigation checklist:
 
-* RAG
-* embeddings
-* vector DB
-* chatbot
-* MCP wrappers
-* Azure migration
-* auth redesign
-* cross-app SSO redesign
+1. Identify the API/Server Action used by the “Add Knowledge Article” modal.
+2. Trace the query that fetches approved articles.
+3. Compare the query with the reader-side approved article query.
+4. Verify whether the search is filtering by:
+    * is_approved
+    * status = APPROVED
+    * is_published
+    * deleted_at
+    * journey visibility
+    * knowledge base code
+    * search index table
+5. Check whether the article was approved but not inserted into the lookup/search table.
+6. Check cache/revalidation behavior for the linking modal.
+7. Verify slug/title normalization (spaces, casing, markdown title vs DB title).
+8. Verify whether the modal searches only the currently selected KB and whether “All KBs” is actually respected.
 
-Do not make additional code changes in this step; produce the final release artifact and sign-off checklist only.
+Implementation requirements:
+
+* Do NOT redesign the feature.
+* Keep existing relationship model.
+* Make approved articles immediately discoverable after approval.
+* Ensure the modal can find articles by title substring.
+* Preserve permission checks.
+
+Acceptance criteria:
+
+* Search “UAT Final Test” returns the approved article.
+* Selecting it creates a Supports relationship.
+* The Goal page shows the linked article card.
+* The KB article Relationships tab shows the linked Goal.
+* Reloading either page preserves the relationship.
+* No regression to publish or reader flows.
+
+Provide:
+
+* Root cause summary.
+* Files changed.
+* Query before/after.
+* Manual verification steps.
+* Any migration/index/cache updates required.
