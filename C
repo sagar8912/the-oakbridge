@@ -1,16 +1,77 @@
-Perform a final Slice 5 closeout.
+Act as a Principal Full-Stack Engineer with 15+ years of production experience.
 
-Provide:
+We are continuing Phase 1.B — Slice 6A: Goal/Item ↔ Knowledge Article linking foundation.
 
-* Exact files changed
-* Database migrations
-* New APIs
-* UI screens added
-* Test results
-* TypeScript result
-* Lint result
-* Build result
-* Manual UAT steps for staging
-* Any remaining technical debt
+CURRENT STATE:
 
-Then create a concise 10-point deployment checklist for moving Phase 1.B Slice 5 from local → staging → production.
+* Slice 1–5 are already implemented.
+* KB Admin, approved-body API, publish workflow, cache revalidation, reader UI, and role admin ops are complete.
+* Do NOT modify those completed slices.
+* Do NOT start search, RAG, MCP, Azure migration, or Vision integration yet.
+
+OBJECTIVE:
+Create a generic relationship model so any Goal or Item can be linked to one or more KB articles, and any KB article can be linked back to Goals/Items.
+
+IMPLEMENTATION REQUIREMENTS:
+
+1. DATABASE
+    Create a migration for a polymorphic link table, for example:
+
+* entity_article_links
+* id
+* entity_type (‘goal’ | ‘item’)
+* entity_id (UUID)
+* article_id (UUID)
+* relationship_type (‘supports’ | ‘references’ | ‘implementation’ | ‘policy’)
+* created_by
+* created_at
+
+Add proper indexes and unique constraints to prevent duplicate links.
+
+2. BACKEND SERVICES
+    Implement reusable repository/service functions:
+
+* linkArticleToEntity()
+* unlinkArticleFromEntity()
+* getArticlesForEntity()
+* getEntitiesForArticle()
+
+3. API ROUTES
+    Add authenticated API endpoints for:
+
+* POST /api/knowledge/links
+* DELETE /api/knowledge/links/:id
+* GET /api/knowledge/entity/:type/:id/articles
+* GET /api/knowledge/article/:id/entities
+
+4. AUTHORIZATION
+    Reuse existing PDP/RBAC patterns.
+    Only users with edit/manage permission on the target entity may create or remove links.
+    Reader users may only read approved article links.
+5. TESTS
+    Add unit tests for:
+
+* duplicate prevention
+* authorization
+* create/delete flows
+* entity lookup
+* article lookup
+
+6. DOCUMENTATION
+    Update docs/02_plans/kb-phase-1b-completion-implementation.md with:
+
+* schema
+* API contract
+* authorization rules
+* migration notes
+
+7. STOP CONDITION
+    After implementation, STOP and provide:
+
+* files changed
+* migration name
+* API endpoints added
+* test commands to run locally
+* any blockers
+
+Do NOT build UI in this slice. This slice is backend foundation only.
