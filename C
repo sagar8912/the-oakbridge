@@ -1,588 +1,1093 @@
 
-Act as a Principal Full-Stack Engineer / Solution Architect with strong experience in enterprise approval workflows, authorization, RBAC/ABAC, PDP/PEP, auditability, and secure multi-user applications.
+Act as a Principal Software Architect / Staff Full-Stack Engineer specializing in enterprise authorization systems, PDP/PEP architecture, RBAC, ABAC, Microsoft Entra ID integration, secure multi-tenant applications, and production-grade permission migrations.
 
-We need to refine the existing Goal Transfer Approval Process / Pending Movements functionality according to the requirement discussed with John.
+We need to evolve the existing authorization architecture based on the requirements discussed with John.
+
+This is NOT a request to rewrite authentication or immediately replace every existing permission check.
+
+The objective is to establish production-safe SCAFFOLDING for a centralized PDP/PEP authorization model that can gradually replace hard-coded role-based authorization.
 
 IMPORTANT:
-First audit the complete existing implementation before changing anything.
 
-Do NOT blindly rewrite the existing Goal Transfer workflow.
-Do NOT break the existing Item Movements workflow.
-Do NOT change unrelated functionality.
-Reuse the existing architecture, database schema, authorization utilities, UI patterns, and APIs wherever possible.
+Before writing any code, perform a complete audit of the existing authorization implementation.
 
-CURRENT FUNCTIONALITY:
+Do not make assumptions about the current schema.
 
-We already have:
+Do not break existing working role permissions.
 
-My Items / Pending Movements
-    ├── Item Movements
-    └── Goal Transfers
+Do not perform a big-bang authorization rewrite.
 
-Under Goal Transfers, a transfer request displays information such as:
+Do not change unrelated business functionality.
 
-- Goal
-- Source Team
-- Target Team
-- Requested By
-- Owner
-- Goal Level
-- Requested Date
-- Status
-- Actions:
-    - Approve
-    - Reject
-
-Currently, a Goal Transfer request can appear in Pending Movements with Approve/Reject actions.
-
-We need to make the visibility and authorization USER-SPECIFIC.
+Preserve backward compatibility while introducing a clean migration path.
 
 ==================================================
-CORE BUSINESS REQUIREMENT
+1. BUSINESS CONTEXT / JOHN'S REQUIREMENT
 ==================================================
 
-The user who INITIATES / REQUESTS a Goal Transfer must NOT be able to approve or reject their own transfer request.
+Today, much of the application's authorization appears to be based on predefined roles such as:
+
+- Super Admin
+- Admin
+- Team Admin
+- Team Owner
+- Member / Normal User
+
+For example, the application may currently have logic conceptually similar to:
+
+if user.role === "super_admin":
+    allow delete goal
+
+or:
+
+if isSuperAdmin(user):
+    allow transfer goal
+
+This works for basic role-based authorization but becomes restrictive as business requirements evolve.
+
+John wants the authorization model to support BOTH:
+
+1. Role-based default capabilities
+
+AND
+
+2. Individual/user-specific permissions or attributes.
 
 Example:
 
-User A requests:
+A Super Admin may automatically receive:
 
-Goal:
-Testing Goal Delete
-
-Source:
-CLAIMS
-
-Target:
-Private Team Test
-
-Requested By:
-User A
-
-Target Owner / appropriate receiving user:
-User B
-
-After User A submits the transfer:
-
-User A must NOT receive Approve/Reject authority for their own request.
-
-The approval request should instead become actionable for the appropriate authorized user responsible for approving the movement/transfer.
-
-In simple terms:
-
-REQUESTER != APPROVER
-
-A user must never be able to approve/reject their own Goal Transfer request.
-
-==================================================
-1. REQUESTER EXPERIENCE
-==================================================
-
-When User A initiates a Goal Transfer:
-
-1. Create a transfer request with status PENDING.
-2. Do NOT immediately transfer the goal.
-3. Store the requester identity securely using the authenticated user's server-side identity.
-4. Determine the appropriate approver based on the existing team/permission model.
-5. The requester must not receive Approve/Reject actions.
-
-If the product should allow requesters to track their own submitted requests, they may see them in a separate read-only context such as:
-
-"My Requests"
-
-or an equivalent existing UI pattern.
-
-For their own request they may see:
-
-Goal
-Source
-Target
-Requested Owner
-Requested Date
-Status = Pending / Approved / Rejected
-
-But they MUST NOT see:
-
-Approve
-Reject
-
-Do not create a new "My Requests" UI unnecessarily if an equivalent existing pattern already exists.
-
-==================================================
-2. APPROVER EXPERIENCE
-==================================================
-
-The transfer request should appear as actionable under:
-
-My Items
-    → Pending Movements
-        → Goal Transfers
-
-ONLY for users who are authorized to act on that request.
-
-For an authorized approver, display:
-
-Goal
-Source Team
-Target Team
-Requested By
-Proposed Owner
-Goal Level
-Requested Date
-Status
-Approve
-Reject
-
-The Approve and Reject buttons must only appear when:
-
-1. Request status = PENDING
-2. Current user is authorized to approve the request
-3. Current user is NOT the requester
-
-Example:
-
-User A creates request
-        ↓
-Request becomes PENDING
-        ↓
-User A cannot approve/reject
-        ↓
-Authorized User B logs in
-        ↓
-Pending Movements → Goal Transfers
-        ↓
-User B sees request + Approve/Reject
-        ↓
-User B Approves or Rejects
-
-==================================================
-3. WHO SHOULD RECEIVE THE APPROVAL?
-==================================================
-
-Do NOT simply send approval actions to every user.
-
-Audit the existing application's:
-
-- team membership model
-- team owner/admin roles
-- Super Admin permissions
-- existing Pending Movements authorization
-- goal ownership
-- target-team permissions
-- PDP/PEP or permission helpers if already implemented
-
-Determine the appropriate approver using the existing business rules.
-
-Prefer the appropriate permissioned user associated with the TARGET team if that matches the current architecture/business rules.
-
-Possible authorized approvers may include:
-
-- target team owner
-- target team admin
-- appropriately permissioned user
-- Super Admin as fallback/override if existing policy permits it
-
-Do NOT hard-code a specific person's email/name/user ID.
-
-Use IDs and permission relationships.
-
-If the exact approver rule is ambiguous in the existing codebase, do not invent a silent business rule.
-
-Implement the safest architecture using an explicit:
-
-approver_user_id
-
-or
-
-approval_scope / permission check
-
-and clearly document the assumption.
-
-==================================================
-4. CRITICAL SECURITY RULE — NO SELF APPROVAL
-==================================================
-
-This must be enforced at BOTH UI and backend levels.
-
-Frontend hiding is NOT sufficient.
-
-Backend rule:
-
-if current_user.id == transfer_request.requested_by_user_id:
-    reject authorization
-
-Even if the requester manually calls the API using Postman/dev tools/direct HTTP request, they must NOT be able to approve or reject their own request.
-
-Return an appropriate authorization response such as:
-
-403 Forbidden
-
-with a meaningful message:
-
-"You cannot approve or reject your own goal transfer request."
-
-Use the project's existing API/error conventions.
-
-==================================================
-5. PENDING MOVEMENTS VISIBILITY
-==================================================
-
-Fix the Pending Movements query so users only receive requests relevant to them.
-
-Do NOT fetch every pending Goal Transfer and rely only on frontend filtering.
-
-Server-side authorization/filtering is required.
+- goal.delete
+- goal.archive
+- goal.transfer
+- goal.transfer.approve
+- item.delete
+- item.archive
+- user.manage
+- etc.
 
 Conceptually:
 
-Actionable Pending Movements =
-    pending requests
-    where current user is an authorized approver
-    AND current user != requester
+SUPER_ADMIN
+    ↓
+Collection of default permissions
+    ↓
+permission A
+permission B
+permission C
+...
+permission N
 
-If requester tracking is supported:
+However, John wants us to be able to take a user who is NOT a Super Admin and grant that person one specific capability.
 
-Submitted Requests =
-    requests where requested_by_user_id = current_user.id
+Example:
 
-These two concepts must not be confused.
+Normal User / Team Admin
+    +
+explicit permission:
+        goal.delete
+    ↓
+User can delete Goals
 
-"Pending Movements requiring my action"
+WITHOUT:
 
-is different from:
+- promoting them to Super Admin
+- giving them every Super Admin capability
+- hard-coding their email/name/user ID
+- creating another special role just for this case
 
-"Requests submitted by me."
+Therefore:
 
-==================================================
-6. APPROVE FLOW
-==================================================
+ROLE = baseline/default capabilities
 
-When an authorized approver clicks Approve:
+USER-SPECIFIC ATTRIBUTES/PERMISSIONS = additive or potentially policy-driven capabilities
 
-Validate again on the server:
-
-- request exists
-- request status is PENDING
-- current user is authorized
-- current user != requester
-- source/target teams still exist
-- goal still exists
-- transfer is still valid
-- request has not already been processed
-
-Then perform the transfer atomically.
-
-Update:
-
-status = APPROVED
-approved_by = current_user.id
-approved_at = timestamp
-
-Apply the approved changes:
-
-- target team
-- selected owner
-- goal level, if part of the transfer request
-- other approved transfer metadata
-
-The actual Goal must NOT move before approval.
-
-After success:
-
-- remove it from actionable Pending Movements
-- show success feedback
-- refresh relevant UI/cache
-- preserve audit history
+The architecture must support this future state.
 
 ==================================================
-7. REJECT FLOW
+2. TARGET AUTHORIZATION MODEL
 ==================================================
 
-When an authorized approver clicks Reject:
+Design the system around:
 
-The Goal must remain unchanged.
+Authentication
+      ↓
+Authenticated User Context
+      ↓
+PEP — Policy Enforcement Point
+      ↓
+PDP — Policy Decision Point
+      ↓
+Centralized Permission / Attribute Policy Data
+      ↓
+ALLOW / DENY
+      ↓
+Business Action
 
-Update request:
+Conceptual request:
 
-status = REJECTED
-rejected_by = current_user.id
-rejected_at = timestamp
+canUser({
+    subject: currentUser,
+    action: "goal.delete",
+    resource: goal,
+    context: {
+        teamId,
+        ownerId,
+        environment
+    }
+})
 
-If the application already supports comments/reasons, capture:
+PDP evaluates:
 
-rejection_reason
+- user's roles
+- role permissions
+- explicit user permissions
+- relevant attributes
+- team membership
+- resource ownership
+- contextual rules where required
 
-If not, structure the implementation so it can be added later without major redesign.
+Then returns:
 
-Rejected requests must disappear from the actionable Pending list but remain available in audit/history where appropriate.
-
-==================================================
-8. CONCURRENCY / DUPLICATE ACTION PROTECTION
-==================================================
-
-Prevent:
-
-- double approval
-- approve after reject
-- reject after approve
-- duplicate button clicks
-- stale requests being processed twice
-
-Use transactional/atomic database behavior where supported.
-
-Only a PENDING request can transition to:
-
-PENDING → APPROVED
+ALLOW
 
 or
 
-PENDING → REJECTED
+DENY
 
-Never:
+Optionally include:
 
-APPROVED → REJECTED
+reason
+policy/source
+matchedPermission
 
-or
-
-REJECTED → APPROVED
-
-through normal approval endpoints.
+The business code should not need to understand all authorization internals.
 
 ==================================================
-9. AUDIT TRAIL
+3. FIRST: AUDIT THE EXISTING SYSTEM
 ==================================================
 
-Every request should preserve enough information to answer:
+Before implementation, search the entire repository for authorization logic.
 
-Who requested the transfer?
-When?
-From which team?
-To which team?
-Who was the proposed/new owner?
-What goal level was requested?
-Who approved/rejected?
-When?
-What was the final status?
+Identify:
 
-Reuse existing audit infrastructure if available.
+- role checks
+- Super Admin checks
+- Admin checks
+- Team Admin checks
+- Team Owner checks
+- permission helpers
+- middleware
+- route guards
+- API authorization
+- server actions
+- database/RLS authorization
+- Entra-derived roles/groups
+- hard-coded role strings
+- hard-coded user/email checks
+- frontend visibility checks
 
-Do not introduce unnecessary duplicate audit systems.
+Search patterns such as:
+
+role ===
+role !==
+super_admin
+superAdmin
+isSuperAdmin
+admin
+team_admin
+team_owner
+canDelete
+canEdit
+canArchive
+canTransfer
+hasPermission
+permissions.includes
+authorize
+isOwner
+
+Produce an authorization inventory.
+
+For every important permission check identify:
+
+FILE
+FEATURE
+CURRENT CHECK
+ROLE/PERMISSION USED
+FRONTEND/BACKEND
+SECURITY IMPACT
+MIGRATION CANDIDATE
+
+Do not blindly replace everything.
 
 ==================================================
-10. AUTHORIZATION / FUTURE PDP-PEP-ABAC READINESS
+4. CENTRAL PERMISSION CATALOG
 ==================================================
 
-John specifically wants the system to evolve away from hard-coded role-only permissions.
+Introduce or extend a centralized permission catalog.
 
-Therefore, do not write logic everywhere like:
-
-if role === "super_admin"
-
-Centralize authorization behind a permission/policy abstraction where possible.
+Do not scatter arbitrary strings throughout the code.
 
 Example conceptual permissions:
 
-goal.transfer.request
+GOALS
+
+goal.create
+goal.read
+goal.update
+goal.delete
+goal.archive
+goal.restore
+goal.transfer
 goal.transfer.approve
 goal.transfer.reject
 
-The current role model may grant these permissions today, but the implementation should be compatible with future user-specific/attribute-based permissions.
+ITEMS / TODOS
 
-This should support the future model:
+item.create
+item.read
+item.update
+item.delete
+item.archive
+item.restore
+item.transfer
+item.transfer.approve
 
-Role
+TEAMS
+
+team.create
+team.update
+team.delete
+team.manage_members
+
+KNOWLEDGE BASE
+
+knowledge.read
+knowledge.create
+knowledge.update
+knowledge.publish
+knowledge.delete
+
+ADMINISTRATION
+
+user.manage
+role.manage
+permission.manage
+
+Do NOT invent every possible permission if unnecessary.
+
+First derive the initial catalog from actual existing application capabilities.
+
+Use stable machine-readable permission keys.
+
+==================================================
+5. ROLE → DEFAULT PERMISSIONS
+==================================================
+
+Roles should become collections of default capabilities.
+
+Conceptually:
+
+SUPER_ADMIN
     ↓
-Default permissions
+many/all administrative permissions
 
+ADMIN
+    ↓
+defined administrative subset
+
+TEAM_ADMIN
+    ↓
+team-scoped permissions
+
+TEAM_OWNER
+    ↓
+owner/team-specific permissions
+
+MEMBER
+    ↓
+basic permissions
+
+Create or extend a centralized mapping such as:
+
+role_permissions
+
+Conceptual schema:
+
+role
+permission_key
+scope
+created_at
+updated_at
+
+Avoid embedding permission lists separately in dozens of components.
+
+IMPORTANT:
+
+Do not change existing effective permissions accidentally.
+
+The first migration should preserve current behavior.
+
+If Super Admin can currently delete Goals, Super Admin must continue being able to delete Goals after introducing PDP/PEP.
+
+==================================================
+6. USER-SPECIFIC PERMISSIONS / ATTRIBUTES
+==================================================
+
+This is a critical part of John's requirement.
+
+Support explicit permissions for individual users.
+
+Conceptual model:
+
+user_permissions
+
+Fields could include:
+
+id
+user_id
+permission_key
+effect
+scope_type
+scope_id
+granted_by
+granted_at
+expires_at
+metadata
+
+Example:
+
+User:
+John Doe
+
+Role:
+Team Admin
+
+Default Team Admin permissions:
+    goal.read
+    goal.update
+    goal.archive
+
+Explicit additional permission:
+    goal.delete
+
+Effective result:
+
+goal.read      → ALLOW
+goal.update    → ALLOW
+goal.archive   → ALLOW
+goal.delete    → ALLOW
+
+The user does NOT need to become Super Admin.
+
+Do not hard-code individual users.
+
+==================================================
+7. FUTURE ABAC READINESS
+==================================================
+
+John specifically discussed introducing more attribute-based permissioning.
+
+Design the authorization API so future policy decisions can consider attributes such as:
+
+User attributes:
+- role
+- team memberships
+- ownership relationships
+- explicit permissions
+
+Resource attributes:
+- owner
+- team
+- status
+- visibility
+- resource type
+
+Context:
+- requested action
+- source team
+- target team
+- workflow state
+
+Example:
+
+canUser({
+    subject: user,
+    action: "goal.archive",
+    resource: goal
+})
+
+Could evaluate:
+
+user has explicit goal.archive
+
+OR
+
+user's role grants goal.archive
+
+OR
+
+user is appropriate team administrator and policy permits it.
+
+Do NOT build an unnecessarily complex generic policy language unless the repository already has one.
+
+Build extensible scaffolding.
+
+==================================================
+8. PDP — POLICY DECISION POINT
+==================================================
+
+Create or extend ONE centralized policy decision layer.
+
+Conceptually:
+
+authorize({
+    user,
+    action,
+    resource,
+    context
+})
+
+or:
+
+canUser(user, permission, resource?)
+
+The PDP should answer:
+
+ALLOW / DENY
+
+It should centrally evaluate applicable policy sources.
+
+Conceptual evaluation:
+
+1. Validate authenticated user
+2. Resolve identity
+3. Resolve role/default permissions
+4. Resolve explicit user permissions
+5. Resolve relevant resource/context attributes
+6. Apply policy rules
+7. Return decision
+
+Example:
+
+const decision = await authorize({
+    user: currentUser,
+    action: "goal.delete",
+    resource: goal
+});
+
+if (!decision.allowed) {
+    throw ForbiddenError();
+}
+
+Do not duplicate this decision logic independently in each feature.
+
+==================================================
+9. PEP — POLICY ENFORCEMENT POINTS
+==================================================
+
+PDP decides.
+
+PEP enforces.
+
+Identify appropriate enforcement points:
+
+SERVER/API
+- API routes
+- server actions
+- mutations
+- sensitive service methods
+
+UI
+- buttons
+- menu items
+- actions
+- navigation
+
+DATABASE/RLS
+- where currently applicable
+
+Critical rule:
+
+UI permission checks are UX only.
+
+SERVER-SIDE PEP IS MANDATORY.
+
+Example:
+
+Even if Delete Goal button is hidden:
+
+A user manually calling:
+
+DELETE /api/goals/{id}
+
+must still be denied if PDP returns DENY.
+
+Return:
+
+403 Forbidden
+
+using existing project conventions.
+
+==================================================
+10. EFFECTIVE PERMISSIONS
+==================================================
+
+Create a consistent way to calculate effective permissions.
+
+Conceptually:
+
+Effective Permissions
+=
+Role Default Permissions
 +
+Explicit User Permissions
++
+Contextual/Attribute-Based Decisions
 
-User-specific attributes/permissions
+Do NOT simply merge everything blindly if DENY semantics already exist.
+
+If explicit DENY overrides are supported, document precedence clearly.
+
+Possible conceptual precedence:
+
+explicit DENY
     ↓
-Additional capabilities
+explicit ALLOW
+    ↓
+role/default permissions
+    ↓
+contextual policies
+    ↓
+default DENY
 
-Do not implement an unnecessarily huge ABAC redesign in this task.
+But DO NOT invent this exact precedence if it conflicts with existing architecture.
 
-Just avoid introducing new hard-coded authorization technical debt.
+Audit first and define deterministic behavior.
 
 ==================================================
-11. UI ACCEPTANCE SCENARIOS
+11. APPLY TO CURRENT BUSINESS USE CASES
 ==================================================
 
-Test at minimum:
+Use the recently discussed features as initial PDP/PEP reference cases.
 
-Scenario A — Requester
+--------------------------------------------------
+A. DELETE VS ARCHIVE
+--------------------------------------------------
 
-User A submits Goal Transfer.
+John discussed that hard delete should remain highly restricted.
+
+Conceptually:
+
+goal.delete
+
+may initially belong only to Super Admin by default.
+
+Archive may be broader:
+
+goal.archive
+
+could potentially be available to:
+
+- Super Admin
+- Admin
+- Team Admin
+- Team Owner
+
+depending on scope/business policy.
+
+But do not hard-code this across components.
+
+Represent it through centralized permissions/policies.
+
+This allows future changes without rewriting business logic.
+
+--------------------------------------------------
+B. GOAL TRANSFER
+--------------------------------------------------
+
+Separate permissions:
+
+goal.transfer.request
+
+goal.transfer.approve
+
+goal.transfer.reject
+
+A user may be able to REQUEST a Goal Transfer without being able to APPROVE it.
+
+Also preserve the business rule:
+
+REQUESTER MUST NOT APPROVE THEIR OWN REQUEST.
+
+That contextual separation belongs in policy evaluation/enforcement.
+
+--------------------------------------------------
+C. INDIVIDUAL DELETE CAPABILITY
+--------------------------------------------------
+
+This directly represents John's example.
+
+Suppose:
+
+User X
+
+Role:
+Team Admin
+
+Normally Team Admin does NOT have:
+
+goal.delete
+
+But an administrator explicitly grants:
+
+goal.delete
+
+Then:
+
+PDP should return ALLOW for User X when appropriate.
+
+Do not require changing User X's role.
+
+Do not promote them to Super Admin.
+
+This proves the architecture supports:
+
+role defaults + individual capability.
+
+==================================================
+12. ENTRA ID RESPONSIBILITY
+==================================================
+
+Audit how Microsoft Entra identity/roles/groups currently enter the application.
+
+Preserve Entra as the source of identity and any existing external role/group information.
+
+But do not require every application-level granular permission to become a new Entra role/group.
+
+Conceptually:
+
+Entra
+    ↓
+Identity / groups / external role context
+    ↓
+Application user context
+    ↓
+Application authorization data
+    ↓
+PDP
+    ↓
+Decision
+
+Document clearly:
+
+What comes from Entra?
+
+What is stored locally?
+
+How are they combined?
+
+Do not redesign authentication unless required.
+
+==================================================
+13. ADMINISTRATION / FUTURE MANAGEMENT
+==================================================
+
+Design the data model so a future admin interface can manage:
+
+Roles
+
+→ default permissions
+
+Users
+
+→ additional explicit permissions
+
+Potential future UI:
+
+User:
+Jane Smith
+
+Role:
+Team Admin
+
+Role Permissions:
+✓ goal.read
+✓ goal.update
+✓ goal.archive
+
+Additional Permissions:
+✓ goal.delete
+✓ goal.transfer.approve
+
+Do NOT necessarily build the full UI now unless required by existing scope.
+
+But the backend/data architecture must support it cleanly.
+
+==================================================
+14. AUDITABILITY
+==================================================
+
+Permission changes are security-sensitive.
+
+Ensure permission assignments can be audited.
+
+Capture where appropriate:
+
+permission
+subject/user
+granted_by
+granted_at
+revoked_by
+revoked_at
+scope
+reason/metadata if supported
+
+For sensitive authorization actions, existing audit infrastructure should be reused.
+
+We should eventually be able to answer:
+
+Why could this user delete this Goal?
+
+Example explanation:
+
+ALLOW
+because:
+explicit user permission "goal.delete"
+granted by Super Admin
+on date X
+
+or:
+
+ALLOW
+because:
+role "super_admin"
+includes "goal.delete"
+
+==================================================
+15. CACHE / SESSION CONSIDERATIONS
+==================================================
+
+Audit whether roles/permissions are cached in:
+
+JWT/session
+React context
+server cache
+database cache
+middleware
+
+Permission changes must not remain stale indefinitely.
+
+Define safe invalidation/refresh behavior.
+
+Example:
+
+Admin grants:
+
+goal.delete
+
+User should receive the permission according to an intentional refresh strategy.
+
+Do not introduce security bugs caused by stale authorization data.
+
+==================================================
+16. DEFAULT DENY
+==================================================
+
+For sensitive actions, authorization should follow:
+
+No matching permission/policy
+        ↓
+DENY
+
+Do not accidentally allow actions because a permission record is missing.
+
+Sensitive mutations must fail closed.
+
+==================================================
+17. MIGRATION STRATEGY
+==================================================
+
+Do NOT replace the entire application's authorization in one change.
+
+Use phased migration.
+
+PHASE 1 — AUDIT
+
+Map all existing authorization.
+
+PHASE 2 — FOUNDATION
+
+Introduce:
+
+- permission catalog
+- role-permission model
+- user-specific permission model
+- centralized PDP
+- reusable PEP helpers
+
+PHASE 3 — REFERENCE FEATURES
+
+Migrate a small number of high-value features first:
+
+- Goal Delete
+- Goal Archive
+- Goal Transfer request/approval
+
+PHASE 4 — VALIDATION
+
+Ensure behavior matches existing authorization except intentional enhancements.
+
+PHASE 5 — GRADUAL MIGRATION
+
+Move remaining hard-coded checks to PDP/PEP incrementally.
+
+Do not attempt a risky big-bang migration.
+
+==================================================
+18. TESTING
+==================================================
+
+Add comprehensive authorization tests.
+
+TEST 1:
+
+Super Admin has default:
+
+goal.delete
 
 Expected:
 
-- request created as PENDING
-- Goal does NOT immediately move
-- User A cannot Approve
-- User A cannot Reject
-- direct API self-approval returns authorization failure
+ALLOW
 
-Scenario B — Authorized Approver
+TEST 2:
 
-User B is authorized for the target/request.
+Normal User without:
+
+goal.delete
 
 Expected:
 
-Pending Movements
-→ Goal Transfers
+DENY
 
-shows the request.
+TEST 3:
 
-Approve and Reject are available.
+Normal/non-Super-Admin user receives explicit:
 
-Scenario C — Approve
-
-User B approves.
+goal.delete
 
 Expected:
 
-- Goal moves to target team
-- owner/level updates correctly
-- request becomes APPROVED
-- audit information saved
-- request disappears from actionable Pending Movements
+ALLOW according to scope.
 
-Scenario D — Reject
+TEST 4:
 
-Create another transfer.
-
-User B rejects.
+Remove explicit permission.
 
 Expected:
 
-- Goal stays in original team
-- ownership/level remain unchanged
-- request becomes REJECTED
-- request disappears from actionable Pending Movements
+DENY again unless another policy grants it.
 
-Scenario E — Unauthorized User
+TEST 5:
 
-User C has no approval permission.
+Team Admin has archive but not hard delete.
 
 Expected:
 
-- no actionable request shown
-- no Approve/Reject actions
-- direct API call denied
+Archive → ALLOW
+Delete → DENY
 
-Scenario F — Super Admin
+according to configured policy.
 
-Verify behavior according to existing policy.
+TEST 6:
 
-Super Admin may have broad approval rights, but even if Super Admin initiated their own request, explicitly evaluate and enforce the no-self-approval policy unless an existing documented business rule says otherwise.
+Goal Transfer requester:
 
-Scenario G — Multiple Requests
+goal.transfer.request → ALLOW
 
-Verify each request is independently scoped and users only see requests they are authorized to action.
+but self approval:
 
-==================================================
-12. AUTOMATED TESTS
-==================================================
+goal.transfer.approve → DENY for own request.
 
-Add/update tests for:
+TEST 7:
 
-- requester cannot self-approve
-- requester cannot self-reject
-- authorized approver can see request
-- authorized approver can approve
-- authorized approver can reject
-- unauthorized user cannot see/action request
-- backend blocks unauthorized direct API calls
-- Goal does not move while PENDING
-- Goal moves only after APPROVED
-- Goal remains unchanged after REJECTED
-- processed request cannot be processed again
-- audit fields are correctly stored
-- Pending Movements query does not leak unrelated requests
+Authorized approver:
 
-Run:
+goal.transfer.approve → ALLOW.
 
-- relevant unit tests
-- integration tests
-- type checking
-- lint
-- build if practical
+TEST 8:
 
-Fix only issues caused by or directly related to this implementation.
+User manually calls protected API without permission.
+
+Expected:
+
+403.
+
+TEST 9:
+
+Frontend actions match effective permissions.
+
+TEST 10:
+
+Changing one user's explicit permission does not affect another user with the same role.
+
+This is critical.
 
 ==================================================
-13. IMPORTANT IMPLEMENTATION CONSTRAINTS
+19. SECURITY REQUIREMENTS
 ==================================================
 
-Do not:
+Never trust:
 
-- hard-code Sagar, Sachin, John, or any specific user
-- identify users by display name
-- trust requester IDs supplied by frontend
-- rely only on frontend button hiding
-- expose all pending transfers to all users
-- transfer the Goal before approval
-- break existing Item Movements
-- redesign unrelated authorization
-- modify unrelated modules
+- role supplied by frontend
+- permission supplied by frontend
+- user ID supplied as authorization evidence
 
-Use authenticated server-side user identity and stable user IDs.
+Use authenticated server-side identity.
 
-==================================================
-14. BEFORE CODING
-==================================================
+Never implement authorization only by hiding UI.
 
-First inspect and report:
+Never hard-code:
 
-1. Existing Goal Transfer implementation
-2. Existing Pending Movements implementation
-3. Current database tables/schema
-4. Current authorization/role model
-5. How current user identity is resolved
-6. How target team membership/ownership is represented
-7. Existing Item Movement approval pattern that can be reused
-8. Exact files that need modification
+specific user names
+emails
+Entra IDs
+database UUIDs
 
-Then implement the smallest production-safe change.
+Never grant a broad role simply because one individual capability is required.
 
 ==================================================
-15. FINAL OUTPUT
+20. IMPORTANT SCOPE CONTROL
+==================================================
+
+John's request is to establish SCAFFOLDING for more sophisticated permissioning.
+
+Do NOT over-engineer this into a complete IAM platform.
+
+Do NOT:
+
+- rewrite authentication
+- replace Entra
+- rewrite every authorization check immediately
+- build an unnecessary policy language
+- migrate unrelated functionality
+- introduce dozens of speculative permissions
+
+Build a clean, extensible foundation based on actual application requirements.
+
+==================================================
+21. REQUIRED OUTPUT BEFORE IMPLEMENTATION
+==================================================
+
+Before changing code, provide:
+
+A. CURRENT STATE
+
+Explain existing:
+
+Authentication
+Roles
+Authorization
+Entra integration
+Permission checks
+
+B. GAP ANALYSIS
+
+Identify:
+
+hard-coded role checks
+duplicated authorization
+frontend-only security
+missing user-specific permissions
+areas incompatible with PDP/PEP
+
+C. TARGET ARCHITECTURE
+
+Show:
+
+Entra / Identity
+        ↓
+Authenticated User Context
+        ↓
+PEP
+        ↓
+PDP
+        ↓
+Role Permissions + User Permissions + Attributes
+        ↓
+ALLOW / DENY
+
+D. DATABASE IMPACT
+
+List required tables/changes/migrations.
+
+E. MIGRATION PLAN
+
+Explain how existing behavior remains backward compatible.
+
+Only then implement the approved/minimal foundation.
+
+==================================================
+22. FINAL DELIVERABLE
 ==================================================
 
 After implementation provide:
 
-1. Root cause / previous behavior
-2. New end-to-end workflow
-3. How approver eligibility is determined
-4. How self-approval is prevented
-5. Files changed
-6. Database/migration changes, if any
-7. API changes
-8. Authorization changes
-9. Tests added and results
-10. Manual UAT steps for:
-    - requester
-    - approver
-    - unauthorized user
-11. Any assumptions or remaining risks
+1. Existing authorization architecture discovered
+2. Problems identified
+3. PDP architecture introduced
+4. PEP enforcement points introduced
+5. Permission catalog
+6. Role → permission mapping
+7. User-specific permission mechanism
+8. ABAC-ready/contextual design
+9. Entra integration impact
+10. Database migrations
+11. Files changed
+12. Existing hard-coded checks migrated
+13. Remaining hard-coded checks / technical debt
+14. Security validation
+15. Automated test results
+16. Manual UAT steps
+17. Rollback strategy
+18. Recommended next migration phase
 
-Final expected workflow:
+Most importantly, demonstrate this exact requirement:
 
-User A
-    ↓
-Requests Goal Transfer
-    ↓
-PENDING
-    ↓
-No Approve/Reject for User A
-    ↓
-Authorized receiving/permissioned User B
-    ↓
-Pending Movements → Goal Transfers
-    ↓
-Approve / Reject
-    ↓
-APPROVE → Goal actually transfers
-REJECT → Goal remains unchanged
+BEFORE:
 
-Implement this end-to-end, not just as a UI visibility change.
+Role = Super Admin
+→ Can delete Goals
+
+Role = Team Admin
+→ Cannot delete Goals
+
+AFTER:
+
+Super Admin
+→ goal.delete from ROLE DEFAULT
+→ ALLOW
+
+Team Admin
+→ no goal.delete
+→ DENY
+
+Team Admin + explicit user permission "goal.delete"
+→ ALLOW
+
+Another Team Admin without explicit permission
+→ DENY
+
+This demonstrates the architecture John requested:
+
+ROLE = baseline collection of capabilities
+
++
+
+USER-SPECIFIC PERMISSIONS / ATTRIBUTES = granular additional capabilities
+
+evaluated centrally through PDP
+
+and enforced consistently through PEP.
+
+Preserve all existing working functionality while establishing this foundation.
