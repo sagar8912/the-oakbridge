@@ -1,306 +1,588 @@
 
-Act as a Principal Full-Stack Engineer / Solution Architect with 15+ years of enterprise workflow experience.
+Act as a Principal Full-Stack Engineer / Solution Architect with strong experience in enterprise approval workflows, authorization, RBAC/ABAC, PDP/PEP, auditability, and secure multi-user applications.
 
-We need to implement the Goal Transfer Approval Process exactly as discussed with the client (John) in today’s meeting.
+We need to refine the existing Goal Transfer Approval Process / Pending Movements functionality according to the requirement discussed with John.
 
-Important Context
+IMPORTANT:
+First audit the complete existing implementation before changing anything.
 
-The current Goal Transfer functionality is already working and can be pushed to production.
+Do NOT blindly rewrite the existing Goal Transfer workflow.
+Do NOT break the existing Item Movements workflow.
+Do NOT change unrelated functionality.
+Reuse the existing architecture, database schema, authorization utilities, UI patterns, and APIs wherever possible.
 
-Current behavior:
+CURRENT FUNCTIONALITY:
 
-* Super Admin can transfer a goal directly from Team A → Team B.
-* The goal is immediately moved.
-* Owner and goal level can be changed during transfer.
-* Normal users do not have transfer access.
+We already have:
 
-John approved this for the immediate release, but requested a future-state movement approval workflow to avoid Super Admin becoming responsible for all data cleanliness decisions.
+My Items / Pending Movements
+    ├── Item Movements
+    └── Goal Transfers
 
-This work should be implemented as a new approval scaffolding, not by breaking the current transfer functionality.
+Under Goal Transfers, a transfer request displays information such as:
 
-⸻
+- Goal
+- Source Team
+- Target Team
+- Requested By
+- Owner
+- Goal Level
+- Requested Date
+- Status
+- Actions:
+    - Approve
+    - Reject
 
-John’s Exact Requirement
+Currently, a Goal Transfer request can appear in Pending Movements with Approve/Reject actions.
 
-A transfer should not always move the goal immediately.
+We need to make the visibility and authorization USER-SPECIFIC.
 
-Instead:
+==================================================
+CORE BUSINESS REQUIREMENT
+==================================================
 
-User requests transfer
-→ Transfer enters a Pending Movement queue
-→ Appropriate permissioned reviewer receives the request
-→ Reviewer can Approve or Reject
-→ Goal moves only after approval
+The user who INITIATES / REQUESTS a Goal Transfer must NOT be able to approve or reject their own transfer request.
 
 Example:
 
-* John Sweet transfers a goal to another team.
-* A Team Admin or designated reviewer checks the request.
-* Reviewer may reject it if the goal belongs to a different team.
+User A requests:
 
-John specifically wants this integrated into:
+Goal:
+Testing Goal Delete
 
-* My Items
-* Pending Movements
-* Approval queue / transfer workflow
+Source:
+CLAIMS
 
-⸻
+Target:
+Private Team Test
 
-Architecture Requirements
+Requested By:
+User A
 
-1. New Transfer Request Entity
+Target Owner / appropriate receiving user:
+User B
 
-Create a dedicated workflow entity instead of directly updating the goal.
+After User A submits the transfer:
 
-Suggested table: goal_transfer_requests
+User A must NOT receive Approve/Reject authority for their own request.
 
-Fields:
+The approval request should instead become actionable for the appropriate authorized user responsible for approving the movement/transfer.
 
-* id
-* goal_id
-* source_team_id
-* target_team_id
-* requested_owner_id
-* requested_goal_level
-* requested_by_user_id
-* status (PENDING | APPROVED | REJECTED | CANCELLED)
-* approval_notes
-* approved_by_user_id
-* approved_at
-* rejected_by_user_id
-* rejected_at
-* created_at
-* updated_at
+In simple terms:
 
-Add indexes and foreign keys.
+REQUESTER != APPROVER
 
-⸻
+A user must never be able to approve/reject their own Goal Transfer request.
 
-2. Permission Model
+==================================================
+1. REQUESTER EXPERIENCE
+==================================================
 
-Implement using the current RBAC model, but keep it compatible with future ABAC/PDP migration.
+When User A initiates a Goal Transfer:
 
-Can Request Transfer
+1. Create a transfer request with status PENDING.
+2. Do NOT immediately transfer the goal.
+3. Store the requester identity securely using the authenticated user's server-side identity.
+4. Determine the appropriate approver based on the existing team/permission model.
+5. The requester must not receive Approve/Reject actions.
 
-* Super Admin
-* Team Admin
-* Team Owner
-* Any role that currently has transfer capability
+If the product should allow requesters to track their own submitted requests, they may see them in a separate read-only context such as:
 
-Can Approve/Reject
+"My Requests"
 
-* Target Team Admin
-* Super Admin
-* Explicitly designated approver (future ABAC hook)
+or an equivalent existing UI pattern.
 
-Cannot Approve
+For their own request they may see:
 
-* Standard users
-* Editors
-* Viewers
+Goal
+Source
+Target
+Requested Owner
+Requested Date
+Status = Pending / Approved / Rejected
 
-Do NOT implement full ABAC yet, but create clean authorization hooks for future attribute-based policies.
-
-⸻
-
-3. UI Changes
-
-Goal Page
-
-Replace direct transfer with:
-
-Step 1 — Create Transfer Request
-
-* Select target team
-* Select owner
-* Select goal level
-* Submit Request
-
-Step 2 — Confirmation
-
-Show:
-
-* Request ID
-* Status = Pending
-* Awaiting approval by target team
-
-Do NOT move the goal yet.
-
-⸻
-
-4. Pending Movement Queue
-
-Add a new section in the existing workflow/navigation:
-
-My Items → Pending Movements
-
-Show:
-
-* Goal name
-* Source team
-* Target team
-* Requested by
-* Requested owner
-* Requested goal level
-* Request date
-* Status
-
-Approvers should see:
-
-* Approve button
-* Reject button
-* Comment box
-
-Requestors should see:
-
-* Pending
-* Approved
-* Rejected
-* Cancel Request (while pending)
-
-⸻
-
-5. Approval Behavior
+But they MUST NOT see:
 
 Approve
-
-When approved:
-
-* Goal.team_id = target_team_id
-* Goal.owner_id = requested_owner_id
-* Goal.goal_level = requested_goal_level
-* Create audit log entry
-* Mark request APPROVED
-* Send notification to requestor
-
 Reject
 
-When rejected:
+Do not create a new "My Requests" UI unnecessarily if an equivalent existing pattern already exists.
 
-* Goal remains unchanged
-* Request marked REJECTED
-* Store rejection reason
-* Notify requestor
+==================================================
+2. APPROVER EXPERIENCE
+==================================================
 
-⸻
+The transfer request should appear as actionable under:
 
-6. Audit & Compliance
+My Items
+    → Pending Movements
+        → Goal Transfers
 
-Create immutable audit events:
+ONLY for users who are authorized to act on that request.
 
-* goal.transfer.requested
-* goal.transfer.approved
-* goal.transfer.rejected
-* goal.transfer.cancelled
+For an authorized approver, display:
 
-Audit must include:
+Goal
+Source Team
+Target Team
+Requested By
+Proposed Owner
+Goal Level
+Requested Date
+Status
+Approve
+Reject
 
-* actor
-* timestamp
-* old values
-* requested values
-* final decision
+The Approve and Reject buttons must only appear when:
 
-This is important for future enterprise governance.
+1. Request status = PENDING
+2. Current user is authorized to approve the request
+3. Current user is NOT the requester
 
-⸻
+Example:
 
-7. Backward Compatibility
+User A creates request
+        ↓
+Request becomes PENDING
+        ↓
+User A cannot approve/reject
+        ↓
+Authorized User B logs in
+        ↓
+Pending Movements → Goal Transfers
+        ↓
+User B sees request + Approve/Reject
+        ↓
+User B Approves or Rejects
 
-Critical:
+==================================================
+3. WHO SHOULD RECEIVE THE APPROVAL?
+==================================================
 
-* Keep the existing direct-transfer endpoint operational for the current production release.
-* Add a feature flag or workflow mode if needed.
-* The new approval workflow should be introduced without breaking current staging functionality.
+Do NOT simply send approval actions to every user.
 
-Suggested:
-TRANSFER_APPROVAL_ENABLED=true
+Audit the existing application's:
 
-When false:
+- team membership model
+- team owner/admin roles
+- Super Admin permissions
+- existing Pending Movements authorization
+- goal ownership
+- target-team permissions
+- PDP/PEP or permission helpers if already implemented
 
-* Current direct transfer behavior.
+Determine the appropriate approver using the existing business rules.
 
-When true:
+Prefer the appropriate permissioned user associated with the TARGET team if that matches the current architecture/business rules.
 
-* Create transfer request workflow.
+Possible authorized approvers may include:
 
-⸻
+- target team owner
+- target team admin
+- appropriately permissioned user
+- Super Admin as fallback/override if existing policy permits it
 
-8. Notifications
+Do NOT hard-code a specific person's email/name/user ID.
 
-Implement lightweight notifications (reuse existing patterns if available):
+Use IDs and permission relationships.
 
-Request Created
+If the exact approver rule is ambiguous in the existing codebase, do not invent a silent business rule.
 
-Target team approvers are notified.
+Implement the safest architecture using an explicit:
 
-Request Approved
+approver_user_id
 
-Requestor is notified.
+or
 
-Request Rejected
+approval_scope / permission check
 
-Requestor is notified with reason.
+and clearly document the assumption.
 
-⸻
+==================================================
+4. CRITICAL SECURITY RULE — NO SELF APPROVAL
+==================================================
 
-9. Manual UAT Scenarios
+This must be enforced at BOTH UI and backend levels.
 
-Implement and verify:
+Frontend hiding is NOT sufficient.
 
-Scenario A — Team Admin requests transfer
+Backend rule:
+
+if current_user.id == transfer_request.requested_by_user_id:
+    reject authorization
+
+Even if the requester manually calls the API using Postman/dev tools/direct HTTP request, they must NOT be able to approve or reject their own request.
+
+Return an appropriate authorization response such as:
+
+403 Forbidden
+
+with a meaningful message:
+
+"You cannot approve or reject your own goal transfer request."
+
+Use the project's existing API/error conventions.
+
+==================================================
+5. PENDING MOVEMENTS VISIBILITY
+==================================================
+
+Fix the Pending Movements query so users only receive requests relevant to them.
+
+Do NOT fetch every pending Goal Transfer and rely only on frontend filtering.
+
+Server-side authorization/filtering is required.
+
+Conceptually:
+
+Actionable Pending Movements =
+    pending requests
+    where current user is an authorized approver
+    AND current user != requester
+
+If requester tracking is supported:
+
+Submitted Requests =
+    requests where requested_by_user_id = current_user.id
+
+These two concepts must not be confused.
+
+"Pending Movements requiring my action"
+
+is different from:
+
+"Requests submitted by me."
+
+==================================================
+6. APPROVE FLOW
+==================================================
+
+When an authorized approver clicks Approve:
+
+Validate again on the server:
+
+- request exists
+- request status is PENDING
+- current user is authorized
+- current user != requester
+- source/target teams still exist
+- goal still exists
+- transfer is still valid
+- request has not already been processed
+
+Then perform the transfer atomically.
+
+Update:
+
+status = APPROVED
+approved_by = current_user.id
+approved_at = timestamp
+
+Apply the approved changes:
+
+- target team
+- selected owner
+- goal level, if part of the transfer request
+- other approved transfer metadata
+
+The actual Goal must NOT move before approval.
+
+After success:
+
+- remove it from actionable Pending Movements
+- show success feedback
+- refresh relevant UI/cache
+- preserve audit history
+
+==================================================
+7. REJECT FLOW
+==================================================
+
+When an authorized approver clicks Reject:
+
+The Goal must remain unchanged.
+
+Update request:
+
+status = REJECTED
+rejected_by = current_user.id
+rejected_at = timestamp
+
+If the application already supports comments/reasons, capture:
+
+rejection_reason
+
+If not, structure the implementation so it can be added later without major redesign.
+
+Rejected requests must disappear from the actionable Pending list but remain available in audit/history where appropriate.
+
+==================================================
+8. CONCURRENCY / DUPLICATE ACTION PROTECTION
+==================================================
+
+Prevent:
+
+- double approval
+- approve after reject
+- reject after approve
+- duplicate button clicks
+- stale requests being processed twice
+
+Use transactional/atomic database behavior where supported.
+
+Only a PENDING request can transition to:
+
+PENDING → APPROVED
+
+or
+
+PENDING → REJECTED
+
+Never:
+
+APPROVED → REJECTED
+
+or
+
+REJECTED → APPROVED
+
+through normal approval endpoints.
+
+==================================================
+9. AUDIT TRAIL
+==================================================
+
+Every request should preserve enough information to answer:
+
+Who requested the transfer?
+When?
+From which team?
+To which team?
+Who was the proposed/new owner?
+What goal level was requested?
+Who approved/rejected?
+When?
+What was the final status?
+
+Reuse existing audit infrastructure if available.
+
+Do not introduce unnecessary duplicate audit systems.
+
+==================================================
+10. AUTHORIZATION / FUTURE PDP-PEP-ABAC READINESS
+==================================================
+
+John specifically wants the system to evolve away from hard-coded role-only permissions.
+
+Therefore, do not write logic everywhere like:
+
+if role === "super_admin"
+
+Centralize authorization behind a permission/policy abstraction where possible.
+
+Example conceptual permissions:
+
+goal.transfer.request
+goal.transfer.approve
+goal.transfer.reject
+
+The current role model may grant these permissions today, but the implementation should be compatible with future user-specific/attribute-based permissions.
+
+This should support the future model:
+
+Role
+    ↓
+Default permissions
+
++
+
+User-specific attributes/permissions
+    ↓
+Additional capabilities
+
+Do not implement an unnecessarily huge ABAC redesign in this task.
+
+Just avoid introducing new hard-coded authorization technical debt.
+
+==================================================
+11. UI ACCEPTANCE SCENARIOS
+==================================================
+
+Test at minimum:
+
+Scenario A — Requester
+
+User A submits Goal Transfer.
 
 Expected:
 
-* Request created.
-* Goal remains in original team.
-* Status = Pending.
+- request created as PENDING
+- Goal does NOT immediately move
+- User A cannot Approve
+- User A cannot Reject
+- direct API self-approval returns authorization failure
 
-Scenario B — Approver approves
+Scenario B — Authorized Approver
 
-Expected:
-
-* Goal moves to target team.
-* Owner updates.
-* Goal level updates.
-* Audit log created.
-
-Scenario C — Approver rejects
+User B is authorized for the target/request.
 
 Expected:
 
-* Goal stays in source team.
-* Status = Rejected.
-* Rejection reason visible.
+Pending Movements
+→ Goal Transfers
 
-Scenario D — Unauthorized user
+shows the request.
 
-Expected:
+Approve and Reject are available.
 
-* No transfer request UI.
-* API returns 403.
+Scenario C — Approve
 
-Scenario E — Pending queue
+User B approves.
 
 Expected:
 
-* Request visible in My Items → Pending Movements.
+- Goal moves to target team
+- owner/level updates correctly
+- request becomes APPROVED
+- audit information saved
+- request disappears from actionable Pending Movements
 
-⸻
+Scenario D — Reject
 
-10. Deliverables
+Create another transfer.
 
-Provide:
+User B rejects.
 
-1. Database migration.
-2. New API routes.
-3. UI components added.
-4. Authorization rules.
-5. Audit implementation.
-6. Feature flag behavior.
-7. Test results.
-8. Exact manual staging UAT steps.
+Expected:
 
-Important:
-Do NOT work on voting, KB, RAG, MCP, Azure migration, or unrelated permissions in this task.
-Focus only on the Goal Transfer Approval Process scaffolding requested by John.
+- Goal stays in original team
+- ownership/level remain unchanged
+- request becomes REJECTED
+- request disappears from actionable Pending Movements
+
+Scenario E — Unauthorized User
+
+User C has no approval permission.
+
+Expected:
+
+- no actionable request shown
+- no Approve/Reject actions
+- direct API call denied
+
+Scenario F — Super Admin
+
+Verify behavior according to existing policy.
+
+Super Admin may have broad approval rights, but even if Super Admin initiated their own request, explicitly evaluate and enforce the no-self-approval policy unless an existing documented business rule says otherwise.
+
+Scenario G — Multiple Requests
+
+Verify each request is independently scoped and users only see requests they are authorized to action.
+
+==================================================
+12. AUTOMATED TESTS
+==================================================
+
+Add/update tests for:
+
+- requester cannot self-approve
+- requester cannot self-reject
+- authorized approver can see request
+- authorized approver can approve
+- authorized approver can reject
+- unauthorized user cannot see/action request
+- backend blocks unauthorized direct API calls
+- Goal does not move while PENDING
+- Goal moves only after APPROVED
+- Goal remains unchanged after REJECTED
+- processed request cannot be processed again
+- audit fields are correctly stored
+- Pending Movements query does not leak unrelated requests
+
+Run:
+
+- relevant unit tests
+- integration tests
+- type checking
+- lint
+- build if practical
+
+Fix only issues caused by or directly related to this implementation.
+
+==================================================
+13. IMPORTANT IMPLEMENTATION CONSTRAINTS
+==================================================
+
+Do not:
+
+- hard-code Sagar, Sachin, John, or any specific user
+- identify users by display name
+- trust requester IDs supplied by frontend
+- rely only on frontend button hiding
+- expose all pending transfers to all users
+- transfer the Goal before approval
+- break existing Item Movements
+- redesign unrelated authorization
+- modify unrelated modules
+
+Use authenticated server-side user identity and stable user IDs.
+
+==================================================
+14. BEFORE CODING
+==================================================
+
+First inspect and report:
+
+1. Existing Goal Transfer implementation
+2. Existing Pending Movements implementation
+3. Current database tables/schema
+4. Current authorization/role model
+5. How current user identity is resolved
+6. How target team membership/ownership is represented
+7. Existing Item Movement approval pattern that can be reused
+8. Exact files that need modification
+
+Then implement the smallest production-safe change.
+
+==================================================
+15. FINAL OUTPUT
+==================================================
+
+After implementation provide:
+
+1. Root cause / previous behavior
+2. New end-to-end workflow
+3. How approver eligibility is determined
+4. How self-approval is prevented
+5. Files changed
+6. Database/migration changes, if any
+7. API changes
+8. Authorization changes
+9. Tests added and results
+10. Manual UAT steps for:
+    - requester
+    - approver
+    - unauthorized user
+11. Any assumptions or remaining risks
+
+Final expected workflow:
+
+User A
+    ↓
+Requests Goal Transfer
+    ↓
+PENDING
+    ↓
+No Approve/Reject for User A
+    ↓
+Authorized receiving/permissioned User B
+    ↓
+Pending Movements → Goal Transfers
+    ↓
+Approve / Reject
+    ↓
+APPROVE → Goal actually transfers
+REJECT → Goal remains unchanged
+
+Implement this end-to-end, not just as a UI visibility change.
