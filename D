@@ -1,268 +1,166 @@
-Act as a Principal Full-Stack Engineer / Solution Architect.
+Do NOT invent or implement a Step 4.
 
-We are continuing the approved Knowledge Base Phase 3 implementation.
+Your repository analysis concluded:
 
-IMPORTANT CURRENT STATE:
+STEP 4 BLOCKED — REQUIREMENTS NOT DEFINED
 
-Step 3 implementation/code work has been completed to the extent possible.
+I do not want to arbitrarily select A/B/C/D and create new scope.
 
-The remaining Step 3D blockers are ENVIRONMENT / LOCAL CONFIGURATION related:
-
-- OOO_API_KEY needs to be configured
-- OOO_APP_URL needs to be configured for MCP
-- KB-side MCP configuration (KB_API_KEY / KB_ADMIN_URL) needs to be configured
-- ooo_pillars_list live smoke validation remains pending until those values are configured
-- live E2E regression therefore remains pending
-- existing unit/build validation previously passed
-
-I will manually configure the required environment variables/secrets.
-
-DO NOT:
-- invent secrets
-- modify secrets
-- hardcode API keys
-- expose secret values
-- mark Step 3D live validation as PASS until it is actually tested
-
-Record Step 3D as:
-
-IMPLEMENTATION COMPLETE / LIVE VALIDATION PENDING ENV CONFIGURATION.
-
-Now proceed with STEP 4 ONLY.
-
-Before making ANY code changes:
-
-1. Re-read the existing Phase 3 architecture/audit documentation in this repository.
-2. Review all code implemented during Steps 3A, 3B, 3C and 3D.
-3. Identify exactly what the approved architecture defines as STEP 4.
-4. Do NOT infer Step 4 from generic assumptions.
-5. Use the repository documentation and approved architecture as the source of truth.
-
-PHASE 3 ARCHITECTURAL PRINCIPLES MUST REMAIN INTACT:
-
-Vision
-→ PEP
-→ PDP / centralized authorization
-→ KB integration/service boundary
-→ approved KB content
-→ controlled rendering/deep linking
-
-Preserve:
-
-- deny-by-default authorization
-- server-side enforcement
-- centralized PDP/PEP direction
-- existing RBAC compatibility
-- future ABAC/extensible permission architecture
-- existing Vision functionality
-- KB boundaries
-- existing authentication
-- existing routes unless explicitly required
-- backward compatibility
-
-Do not redesign unrelated functionality.
-
-==================================================
-STEP 4A — REPOSITORY & REQUIREMENT ANALYSIS
-==================================================
-
-First determine from the repository documentation:
-
-- exact Step 4 objective
-- required functionality
-- files/components involved
-- dependencies on Steps 3A–3D
-- acceptance criteria
-- security requirements
-- tests required
-
-Produce:
-
-STEP 4 REQUIREMENT MATRIX
-
-Requirement
-Current implementation
-Gap
-Required change
-File(s)
-Risk
+Instead, perform a FINAL PHASE 3 SCOPE RECONCILIATION.
 
 IMPORTANT:
+ANALYSIS ONLY FIRST.
+DO NOT MODIFY CODE.
+DO NOT MODIFY DATABASE.
+DO NOT CREATE MIGRATIONS.
+DO NOT CREATE NEW FEATURES.
+DO NOT COMMIT OR PUSH.
 
-Do not modify code during Step 4A.
+STEP 1 — Reconstruct the approved Phase 3 scope
 
-If Step 4 is not clearly defined in the documentation:
+Search all authoritative repository documentation, architecture documents,
+implementation plans, ADRs, Git-tracked requirements, TODO/backlog documents,
+and relevant code comments.
 
-STOP.
+Reconstruct exactly what Phase 3 was originally intended to deliver.
 
-Report:
+Create this table:
 
-STEP 4 BLOCKED — REQUIREMENTS NOT DEFINED
+Requirement / Capability
+Source document
+Originally required?
+Implementation status
+Validation status
+Remaining work
+In scope or deferred
 
-Do NOT invent requirements.
+Do not assume that something called "Step 4" must exist.
 
-==================================================
-STEP 4B — IMPLEMENT MINIMUM REQUIRED CHANGES
-==================================================
+STEP 2 — Reconcile Steps 3A–3D against the approved scope
 
-Only if Step 4 requirements are clearly supported by repository documentation:
+Inspect the actual implementation completed in:
 
-Implement the MINIMUM SAFE changes necessary.
+- Step 3A
+- Step 3B
+- Step 3C
+- Step 3D
 
-Rules:
+Map every implemented capability back to an approved requirement.
 
-1. Reuse existing architecture and utilities.
-2. Do not duplicate authorization logic.
-3. Do not bypass PEP/PDP.
-4. Do not introduce client-side-only security.
-5. Do not hardcode user-specific permissions.
-6. Do not hardcode secrets.
-7. Do not introduce unnecessary DB migrations.
-8. Do not change unrelated modules.
-9. Preserve existing behavior unless Step 4 explicitly requires otherwise.
-10. Keep changes production-oriented and minimal.
+Classify each requirement as:
 
-For every change report:
+IMPLEMENTED + VALIDATED
 
-FILE:
-CHANGE:
-WHY REQUIRED:
-REQUIREMENT SATISFIED:
+IMPLEMENTED + LIVE VALIDATION PENDING
 
-==================================================
-STEP 4C — SECURITY / AUTHORIZATION VALIDATION
-==================================================
+NOT IMPLEMENTED — REQUIRED
 
-Trace any new Step 4 request flow end-to-end.
+DEFERRED / OUT OF SCOPE
 
-Explicitly verify:
+UNSUPPORTED BY DOCUMENTATION
 
-User
-→ UI/action
-→ PEP
-→ PDP/authorization decision
-→ backend/API
-→ resource
-→ response/rendering
+Be evidence-based.
 
-Test at minimum where applicable:
+STEP 3 — Handle the existing Step 3D blocker correctly
 
-- authorized user
-- unauthorized user
-- anonymous user
-- user without required kb_role
-- malformed request
-- direct API access bypass attempt
-- cross-resource access
-- missing configuration
-- downstream KB unavailable
+Current known state:
 
-Expected principle:
+- Step 3 implementation/code work is believed complete.
+- Step 3D live proof is blocked by local ENV configuration.
+- OOO_API_KEY / OOO_APP_URL and corresponding KB/MCP configuration require manual setup.
+- I will configure secrets/environment values myself.
+- ooo_pillars_list live smoke remains pending.
 
-Unauthorized access must fail closed.
+Do NOT treat missing ENV configuration as missing feature implementation.
 
-No sensitive action should rely solely on UI visibility.
+Classify it separately as:
 
-==================================================
-STEP 4D — REGRESSION VALIDATION
-==================================================
+IMPLEMENTATION STATUS
 
-Run all tests that can safely run without the missing Step 3D environment secrets.
+versus
 
-Validate:
+VALIDATION/OPERATIONS STATUS.
 
-- TypeScript/type checks
-- lint where configured
-- unit tests
-- relevant integration tests
-- build
-- existing Vision behavior
-- existing KB behavior
-- PDP/PEP behavior
-- routes/imports
-- backward compatibility
+STEP 4 — Analyze the proposed A/B/C/D options
 
-Do NOT fake live integration results.
+The previous analysis suggested:
 
-Clearly separate:
+A. Finish Step 3D live smoke after ENV configuration.
+B. Expand remaining OOO/KB read-tool validation matrix.
+C. Platform-admin Phase 0 routes.
+D. Write tools + acting-user support.
 
-PASS
-FAIL
-BLOCKED BY ENVIRONMENT
+For EACH option determine:
 
-The existing Step 3D live tests may remain:
+- Is this explicitly part of the approved Phase 3 scope?
+- Is it required for Phase 3 acceptance?
+- Is it deferred backlog/future work?
+- Would implementing it create new scope?
+- What repository evidence supports the classification?
 
-BLOCKED — ENV CONFIGURATION PENDING
+Do NOT implement any of them.
 
-That must NOT automatically fail unrelated Step 4 code validation.
+STEP 5 — Determine whether a real Step 4 exists
 
-==================================================
-STEP 4E — FINAL AUDIT
-==================================================
+Search specifically for any authoritative requirement that represents work
+after 3A–3D.
 
-After implementation, inspect the git diff.
+If there is no explicit Step 4:
 
-Check for:
+DO NOT CREATE ONE.
 
-- accidental unrelated changes
-- hardcoded secrets
-- security regressions
-- duplicate authorization logic
-- unnecessary dependencies
-- unnecessary DB changes
-- debug code
-- TODOs introduced by this implementation
-- broken existing functionality
+Instead determine whether:
 
-Do NOT commit or push anything.
+Phase 3 implementation is complete with only Step 3D live validation pending.
 
-==================================================
-FINAL OUTPUT
-==================================================
+If there IS remaining approved implementation work, identify it using its
+actual requirement name from the documentation rather than inventing a
+"Step 4."
 
-Return:
+STEP 6 — Produce the final gap list
 
-1. STEP 4 OBJECTIVE
+Separate remaining work into exactly these categories:
 
-2. REQUIREMENTS IMPLEMENTED
+A. CODE WORK STILL REQUIRED FOR APPROVED PHASE 3
 
-3. FILES CHANGED
+B. MANUAL ENVIRONMENT / CONFIGURATION WORK
 
-4. AUTHORIZATION/SECURITY FLOW
+C. LIVE UAT / SMOKE / REGRESSION VALIDATION
 
-5. TEST RESULTS
+D. DEFERRED BACKLOG / FUTURE SCOPE
 
-PASS:
-...
+For category A:
 
-FAIL:
-...
+List exact missing requirement and affected files.
 
-BLOCKED:
-...
+If none, explicitly say:
 
-6. STEP 3D REMAINING MANUAL CONFIGURATION
+NO ADDITIONAL APPROVED PHASE 3 CODE WORK IDENTIFIED.
 
-Keep this clearly separate from Step 4.
+STEP 7 — FINAL VERDICT
 
-7. REMAINING RISKS / GAPS
+Return exactly one evidence-based verdict:
 
-8. ONE FINAL VERDICT:
-
-STEP 4 COMPLETE
+PHASE 3 CODE COMPLETE — STEP 3D LIVE VALIDATION PENDING
 
 or
 
-STEP 4 PARTIALLY COMPLETE — BLOCKED
+PHASE 3 PARTIALLY COMPLETE — APPROVED CODE WORK REMAINS
 
 or
 
-STEP 4 BLOCKED — REQUIREMENTS NOT DEFINED
+PHASE 3 SCOPE CANNOT BE DETERMINED FROM REPOSITORY DOCUMENTATION
 
-Do not claim COMPLETE unless every code-level Step 4 requirement supported by the repository has been implemented and validated.
+If code work remains, tell me exactly what requirement should be implemented next.
 
-STOP after Step 4.
+If only ENV/live validation remains, give me the exact manual checklist required
+to close Phase 3.
 
-Do NOT proceed to any next phase/step automatically.
-Do NOT commit.
-Do NOT push.
+Do not call deferred backlog items "Step 4."
+
+STOP after the report.
+
+NO CODE CHANGES.
+NO STEP 4 IMPLEMENTATION.
+NO COMMIT.
+NO PUSH.
