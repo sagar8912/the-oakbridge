@@ -1,0 +1,134 @@
+Using the verified notification audit findings, implement the minimum required
+TOW notification stability fixes.
+
+Do NOT add unrelated notification features.
+
+Do NOT touch KB Admin.
+
+==================================================
+OBJECTIVE
+==================================================
+
+Make existing intended TOW notifications deterministic and reliable.
+
+The complete lifecycle must work:
+
+EVENT
+→ CORRECT RECIPIENT
+→ NOTIFICATION CREATED
+→ PERSISTED
+→ UNREAD STATE
+→ UI INDICATOR
+→ USER OPENS NOTIFICATION
+→ CORRECT DESTINATION
+→ READ STATE UPDATED
+
+==================================================
+PRIORITY SCENARIOS FROM JOHN
+==================================================
+
+Ensure the existing business rules correctly support:
+
+1. A to-do is assigned to a user.
+
+2. A pending movement requires action from the appropriate person.
+
+IMPORTANT:
+A pending movement notification/action must go to the appropriate
+recipient/approver, not incorrectly to the requester if they should not
+approve their own request.
+
+3. Relevant comment/post activity on goals/items.
+
+Use existing business rules to determine recipients.
+
+Do not invent recipient behavior.
+
+==================================================
+UI REQUIREMENTS
+==================================================
+
+Where the current design supports it, notification state should appear
+consistently in:
+
+- top notification/bell icon
+- relevant main navigation/menu indicator
+
+Both should derive from a consistent notification state/source.
+
+==================================================
+RELIABILITY
+==================================================
+
+Prevent:
+
+- lost notifications
+- duplicate notifications
+- stale unread counts
+- notification visible only after manual hard refresh where avoidable
+- wrong recipients
+- broken notification links
+- unauthorized information leakage
+
+==================================================
+TESTING
+==================================================
+
+Test with at least two distinct users where applicable.
+
+TEST 1:
+User A assigns To-do to User B.
+
+Verify User B receives the intended notification.
+
+TEST 2:
+User A creates a movement request requiring User B/actionable approver.
+
+Verify appropriate recipient receives notification.
+
+TEST 3:
+Relevant comment/post event.
+
+Verify intended recipient(s).
+
+TEST 4:
+Click notification.
+
+Verify correct item opens.
+
+TEST 5:
+Mark/read lifecycle.
+
+Verify unread counts update.
+
+TEST 6:
+Refresh/re-login.
+
+Verify state persists correctly.
+
+TEST 7:
+Duplicate prevention.
+
+TEST 8:
+Unauthorized user cannot access protected item through notification deep link.
+
+Run relevant automated tests, type checks and build.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Return:
+
+NOTIFICATION ISSUES FIXED
+FILES CHANGED
+EVENT MATRIX AFTER FIX
+TEST RESULTS
+MANUAL MULTI-USER UAT STEPS
+REMAINING LIMITATIONS
+
+Do NOT commit.
+Do NOT push.
+Do NOT touch KB Admin.
+
+STOP.
