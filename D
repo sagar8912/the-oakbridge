@@ -1,166 +1,41 @@
-Do NOT invent or implement a Step 4.
+We have confirmed:
 
-Your repository analysis concluded:
+PHASE 3 CODE COMPLETE — STEP 3D LIVE VALIDATION PENDING.
 
-STEP 4 BLOCKED — REQUIREMENTS NOT DEFINED
+Now help me complete the manual validation checklist ONE STEP AT A TIME.
 
-I do not want to arbitrarily select A/B/C/D and create new scope.
+Start with STEP 1 ONLY:
 
-Instead, perform a FINAL PHASE 3 SCOPE RECONCILIATION.
+Configure OOO_API_KEY correctly for:
+1. the OOO application local environment
+2. the MCP configuration
+
+Requirements:
+
+- First inspect the repository/configuration and confirm the exact OOO app path and exact environment file that should be used.
+- Confirm the exact MCP configuration file/location expected by this project.
+- Do NOT invent or generate a secret for me.
+- Do NOT print any existing secret values.
+- Do NOT hardcode secrets into source code.
+- Do NOT commit any secrets.
+- Do NOT modify application/business logic.
+- Use placeholders such as <YOUR_LOCAL_OOO_API_KEY> when showing examples.
+
+Explain exactly:
+
+A. Which file I need to open/create for the OOO app.
+B. The exact variable line/format I need to add using a placeholder.
+C. Which MCP configuration file I need to open/create.
+D. Exactly where OOO_API_KEY must be configured there using the same placeholder.
+E. Whether the two values must be identical.
+F. How I can safely generate/use a local development secret if no existing local secret is available.
+G. How to verify that both configurations are present WITHOUT displaying the secret.
 
 IMPORTANT:
-ANALYSIS ONLY FIRST.
-DO NOT MODIFY CODE.
-DO NOT MODIFY DATABASE.
-DO NOT CREATE MIGRATIONS.
-DO NOT CREATE NEW FEATURES.
-DO NOT COMMIT OR PUSH.
 
-STEP 1 — Reconstruct the approved Phase 3 scope
+Do not proceed to OOO_APP_URL.
+Do not start applications.
+Do not run smoke tests.
+Do not make unrelated changes.
 
-Search all authoritative repository documentation, architecture documents,
-implementation plans, ADRs, Git-tracked requirements, TODO/backlog documents,
-and relevant code comments.
-
-Reconstruct exactly what Phase 3 was originally intended to deliver.
-
-Create this table:
-
-Requirement / Capability
-Source document
-Originally required?
-Implementation status
-Validation status
-Remaining work
-In scope or deferred
-
-Do not assume that something called "Step 4" must exist.
-
-STEP 2 — Reconcile Steps 3A–3D against the approved scope
-
-Inspect the actual implementation completed in:
-
-- Step 3A
-- Step 3B
-- Step 3C
-- Step 3D
-
-Map every implemented capability back to an approved requirement.
-
-Classify each requirement as:
-
-IMPLEMENTED + VALIDATED
-
-IMPLEMENTED + LIVE VALIDATION PENDING
-
-NOT IMPLEMENTED — REQUIRED
-
-DEFERRED / OUT OF SCOPE
-
-UNSUPPORTED BY DOCUMENTATION
-
-Be evidence-based.
-
-STEP 3 — Handle the existing Step 3D blocker correctly
-
-Current known state:
-
-- Step 3 implementation/code work is believed complete.
-- Step 3D live proof is blocked by local ENV configuration.
-- OOO_API_KEY / OOO_APP_URL and corresponding KB/MCP configuration require manual setup.
-- I will configure secrets/environment values myself.
-- ooo_pillars_list live smoke remains pending.
-
-Do NOT treat missing ENV configuration as missing feature implementation.
-
-Classify it separately as:
-
-IMPLEMENTATION STATUS
-
-versus
-
-VALIDATION/OPERATIONS STATUS.
-
-STEP 4 — Analyze the proposed A/B/C/D options
-
-The previous analysis suggested:
-
-A. Finish Step 3D live smoke after ENV configuration.
-B. Expand remaining OOO/KB read-tool validation matrix.
-C. Platform-admin Phase 0 routes.
-D. Write tools + acting-user support.
-
-For EACH option determine:
-
-- Is this explicitly part of the approved Phase 3 scope?
-- Is it required for Phase 3 acceptance?
-- Is it deferred backlog/future work?
-- Would implementing it create new scope?
-- What repository evidence supports the classification?
-
-Do NOT implement any of them.
-
-STEP 5 — Determine whether a real Step 4 exists
-
-Search specifically for any authoritative requirement that represents work
-after 3A–3D.
-
-If there is no explicit Step 4:
-
-DO NOT CREATE ONE.
-
-Instead determine whether:
-
-Phase 3 implementation is complete with only Step 3D live validation pending.
-
-If there IS remaining approved implementation work, identify it using its
-actual requirement name from the documentation rather than inventing a
-"Step 4."
-
-STEP 6 — Produce the final gap list
-
-Separate remaining work into exactly these categories:
-
-A. CODE WORK STILL REQUIRED FOR APPROVED PHASE 3
-
-B. MANUAL ENVIRONMENT / CONFIGURATION WORK
-
-C. LIVE UAT / SMOKE / REGRESSION VALIDATION
-
-D. DEFERRED BACKLOG / FUTURE SCOPE
-
-For category A:
-
-List exact missing requirement and affected files.
-
-If none, explicitly say:
-
-NO ADDITIONAL APPROVED PHASE 3 CODE WORK IDENTIFIED.
-
-STEP 7 — FINAL VERDICT
-
-Return exactly one evidence-based verdict:
-
-PHASE 3 CODE COMPLETE — STEP 3D LIVE VALIDATION PENDING
-
-or
-
-PHASE 3 PARTIALLY COMPLETE — APPROVED CODE WORK REMAINS
-
-or
-
-PHASE 3 SCOPE CANNOT BE DETERMINED FROM REPOSITORY DOCUMENTATION
-
-If code work remains, tell me exactly what requirement should be implemented next.
-
-If only ENV/live validation remains, give me the exact manual checklist required
-to close Phase 3.
-
-Do not call deferred backlog items "Step 4."
-
-STOP after the report.
-
-NO CODE CHANGES.
-NO STEP 4 IMPLEMENTATION.
-NO COMMIT.
-NO PUSH.
+STOP after giving me the exact Step 1 instructions and wait for me to complete them.
