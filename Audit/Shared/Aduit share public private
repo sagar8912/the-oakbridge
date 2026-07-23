@@ -1,0 +1,150 @@
+Now proceed with TOW CHANGE 2:
+
+SHARED / PUBLIC / PRIVATE LISTS AND SETTINGS STABILITY.
+
+IMPORTANT:
+
+John did NOT identify one isolated bug.
+
+He reported historical inconsistency across this functionality and asked us
+to revisit it comprehensively for stability.
+
+Focus ONLY on TOW.
+
+Do NOT touch KB Admin.
+
+FIRST perform a deep audit before modifying code.
+
+==================================================
+JOHN'S REPORTED PROBLEM
+==================================================
+
+John described scenarios involving:
+
+- Shared lists
+- Public lists
+- Private lists
+- Public/private teams
+- Who can create lists
+- Who can see lists
+- Who can add items
+- Whether expected users can find shared lists/items
+
+Example:
+
+Someone is told:
+
+"Add this to the shared bugs and requests list."
+
+The item is added.
+
+Another expected user expands their lists but cannot see the expected
+list/item.
+
+John wants this feedback loop to be reliable.
+
+==================================================
+STEP 1 — MAP THE COMPLETE DATA MODEL
+==================================================
+
+Identify:
+
+- list entities/tables
+- list ownership
+- list type/status
+- public/private/shared fields
+- team relationships
+- user relationships
+- membership rules
+- item/list relationships
+- visibility fields
+- permission checks
+
+Do not modify anything.
+
+==================================================
+STEP 2 — TRACE ALL VISIBILITY LOGIC
+==================================================
+
+Trace:
+
+Database
+→ repository/query
+→ API
+→ authorization
+→ frontend filtering
+→ displayed lists/items
+
+Find every place where visibility is calculated.
+
+Identify duplicate or contradictory filtering.
+
+==================================================
+STEP 3 — BUILD A SCENARIO MATRIX
+==================================================
+
+Create scenarios covering:
+
+PUBLIC LIST
+PRIVATE LIST
+SHARED LIST
+
+against:
+
+- creator
+- owner
+- team member
+- non-team member
+- Super Admin
+- Admin
+- Team Admin
+- Team Owner
+- normal user
+
+Also account for public/private team relationships where applicable.
+
+For each scenario state:
+
+EXPECTED VISIBILITY
+ACTUAL CODE BEHAVIOR
+PASS / FAIL / AMBIGUOUS
+
+==================================================
+STEP 4 — CREATION PERMISSIONS
+==================================================
+
+Audit:
+
+Who can create each list type?
+
+Who can edit?
+
+Who can delete/archive?
+
+Who can add/remove items?
+
+Who can change visibility/settings?
+
+Verify frontend and backend rules agree.
+
+==================================================
+STEP 5 — ROOT CAUSE REPORT
+==================================================
+
+Identify actual inconsistencies.
+
+For every issue provide:
+
+SCENARIO
+EXPECTED
+ACTUAL
+ROOT CAUSE
+FILES
+MINIMUM FIX
+REGRESSION RISK
+
+Do NOT implement yet.
+
+STOP after producing the complete scenario matrix and proposed fix plan.
+
+Do NOT touch KB Admin.
