@@ -1,0 +1,136 @@
+1. TOW → Knowledge Base Integration
+
+* John liked the integration/scaffolding already created and said it is the right starting point.
+* However, do not broadly roll out/push the TOW–KB crossover yet because the Knowledge Base is not stable/mature enough.
+* First stabilize the KB: permissions, controls, bugs, architecture, and dead code.
+* Existing previously agreed TOW changes can continue through Staging → UAT → Production.
+
+2. Knowledge Base Navigation
+
+* Add Knowledge as its own section in the TOW navigation.
+* It should sit between the core TOW functionality and Admin, separated visually.
+* “Knowledge” should represent the entire organizational Knowledge Base, not only TOW application documentation.
+
+3. Knowledge Can Be Linked to TOW Items
+
+John likes the ability to associate relevant KB knowledge with TOW work.
+
+For example, if there is a TOW issue involving EXL, users could reference/link a KB article describing the EXL vendor relationship, agreements, expectations, or related policies.
+
+So KB is not just application training; it should eventually represent broader organizational knowledge.
+
+4. GitHub / CI-CD → Automatic Knowledge Articles
+
+This is an important future workflow John wants.
+
+When a feature is developed:
+
+PRD/Markdown docs → PR/GitHub workflow → deployment/release → generate/update an end-user Knowledge Base article → approval/publishing
+
+The goal is to avoid relying on tribal knowledge when application changes reach production.
+
+John’s long-term vision is that developers/users should be able to use tools such as Cursor/Claude with standardized templates to help create KB articles rather than manually authoring everything.
+
+5. Knowledge Base Permissions – High Priority
+
+KB currently needs stronger permissioning/governance.
+
+The team needs to establish clearly:
+
+* Who can view knowledge.
+* Who can author/create articles.
+* Who can edit articles.
+* Who can delete/manage articles.
+* How user/team permissions work across the KB hierarchy.
+
+Because TOW and KB share the monorepo/user ecosystem, John suggested leveraging the existing TOW user model to help determine KB permissions on a per-user basis.
+
+6. PDP/PEP – User Permission UI
+
+For the recently implemented additional/user-specific permissions, John requested a UI change:
+
+Current: searchable multi-select permissions.
+
+Wanted: clear True/False checkbox list on the User Edit/Profile page.
+
+For example:
+
+☑ Delete Goal
+☑ Archive Goal
+☐ Approve Transfer
+
+The existing role/system permissions remain the baseline, with additional individual permissions layered on top.
+
+John also emphasized that KB permissions have not yet been incorporated into the current PDP/PEP work and will require additional design because KB permissions can have a hierarchy/waterfall involving both users and teams.
+
+7. Clean Up Knowledge Base / Dead Code
+
+John believes the KB contains significant old/dead or unfinished functionality.
+
+He specifically mentioned reviewing/removing things such as:
+
+* Nonfunctional/old Chatbot functionality.
+* Unused/incomplete File Upload functionality.
+* Other dead code and unfinished scaffolding.
+
+The objective is to remove misleading functionality before broader users start testing, otherwise users will report bugs against features that were never truly operational.
+
+8. Use Existing GitHub Research & Plans
+
+John has already done significant architecture research and planning.
+
+The team should carefully review the repository’s:
+
+* docs
+* research documents
+* implementation plans
+
+These already contain thinking around areas such as schema foundation, pipelines/retrieval, MCP integrations, dead-code cleanup, and broader KB architecture.
+
+John’s direction is to use those documents as the basis for implementation rather than designing everything again from scratch.
+
+9. Knowledge Base as the Source for AI Agents
+
+Longer term, John wants agents such as the existing IT-ticketing / HR LangSmith use cases to retrieve knowledge from the Knowledge Base rather than directly depending on scattered:
+
+Word documents / PDFs / shared drives
+
+Desired direction:
+
+Existing documents → structured KB articles → governed/approved KB → agents query relevant KB sections
+
+The team can create POCs around these use cases to help determine the correct KB retrieval/MCP architecture.
+
+10. Two TOW Functionalities to Stabilize Before New TOW Features
+
+Before doing additional new TOW features, John specifically asked the team to investigate two historically inconsistent areas.
+
+Shared/Public/Private Lists & Settings: Review public/private/shared list visibility, team relationships, who can create/access lists, and why users sometimes cannot see expected shared lists/items. John wants end-to-end stability, not just one isolated bug fix.
+
+Notifications: Review the full notification lifecycle. Notifications should reliably trigger for scenarios such as to-do assignment, pending movements, comments/posts on goals/items, and other actionable events. Indicators should appear consistently in both the relevant navigation/menu areas and top notification icon/bell.
+
+11. New Staging/UAT Process
+
+John plans to establish a standard UAT group led by Cole Phelps, with approximately six volunteer users.
+
+Expected release process:
+
+Development → Staging → Send clear change/test summary to Cole + UAT users → UAT → Approval/green light → Production
+
+Cole will become an important power UAT contact for staging, and John indicated he will largely rely on this group’s validation before production pushes.
+
+Final Priority Order from John
+
+1. Move already-completed TOW changes through Staging → UAT → Production.
+
+2. Before adding more TOW features, stabilize Lists/Settings and Notifications.
+
+3. Keep the existing TOW–KB integration scaffolding, but do not broadly expose/deepen the integration until KB is stable.
+
+4. Make the Knowledge Base the primary engineering focus: clean dead code, establish permissions/governance, follow the existing repo research/implementation plans, strengthen schema/infrastructure/retrieval/MCP foundations, and explore GitHub/CI-CD-driven article generation.
+
+5. Later, use the stable KB as the governed knowledge source for TOW workflows and LangSmith/AI agents.
+
+One-line summary for the team
+
+John is happy with the TOW–KB integration foundation, but wants us to stop expanding the crossover for now, stabilize and properly build the Knowledge Base first, fix TOW Lists/Notifications, establish stronger KB permissions and governance, clean dead code, follow the existing GitHub architecture plans, and use Cole’s UAT group before production releases.
