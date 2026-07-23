@@ -1,0 +1,145 @@
+Now proceed with TOW CHANGE 3:
+
+NOTIFICATION RELIABILITY AND STABILITY.
+
+John described TOW notifications as historically "flaky" and unreliable.
+
+He specifically explained that he sometimes comments/posts on a goal or item
+and then manually sends the person a Teams message because he cannot trust
+the application notification to reach them.
+
+Focus ONLY on TOW.
+
+Do NOT touch KB Admin.
+
+FIRST perform an analysis-only notification audit.
+
+==================================================
+STEP 1 — MAP NOTIFICATION ARCHITECTURE
+==================================================
+
+Trace:
+
+Business event
+→ notification trigger
+→ recipient resolution
+→ notification creation
+→ database persistence
+→ unread/read state
+→ notification API
+→ frontend retrieval
+→ navigation/menu indicator
+→ top notification/bell indicator
+→ click/deep-link destination
+
+Identify all notification-related files/services/components.
+
+==================================================
+STEP 2 — BUILD EVENT MATRIX
+==================================================
+
+Audit at minimum the events John explicitly mentioned:
+
+A. To-do assigned to another user
+
+B. Pending movement requiring action
+
+C. Comment/post added to a goal where another relevant user should be notified
+
+D. Comment/post added to another applicable TOW item
+
+Also discover existing supported notification events from the codebase.
+
+Do NOT invent new business events.
+
+For every existing/intended event determine:
+
+TRIGGER
+RECIPIENT
+DATABASE RECORD CREATED?
+UNREAD COUNT UPDATED?
+TOP BELL UPDATED?
+NAVIGATION INDICATOR UPDATED?
+CLICK DESTINATION
+ACTUAL STATUS
+
+Classify:
+
+PASS
+FAIL
+PARTIAL
+NOT IMPLEMENTED
+
+==================================================
+STEP 3 — RECIPIENT LOGIC
+==================================================
+
+Audit recipient determination carefully.
+
+Check:
+
+- assignee
+- owner
+- requester
+- approver
+- relevant team/user
+- comment target participants
+
+Prevent:
+
+- missing recipients
+- duplicate notifications
+- notifying the actor unnecessarily unless explicitly intended
+- unauthorized information disclosure
+
+==================================================
+STEP 4 — UI INDICATORS
+==================================================
+
+John expects actionable notifications to be visible consistently in:
+
+1. Relevant navigation/main-menu indicators where applicable.
+
+2. Top notification icon/bell.
+
+Audit whether both use the same source of truth/unread state.
+
+Check refresh/revalidation behavior.
+
+==================================================
+STEP 5 — READ/UNREAD LIFECYCLE
+==================================================
+
+Audit:
+
+new
+→ unread
+→ displayed
+→ clicked/read
+→ unread count updated
+
+Check persistence after refresh/login.
+
+==================================================
+OUTPUT
+==================================================
+
+Produce:
+
+NOTIFICATION EVENT MATRIX
+
+BROKEN/FLAKY SCENARIOS
+
+ROOT CAUSES
+
+FILES INVOLVED
+
+MINIMUM FIX PLAN
+
+TEST PLAN
+
+Do NOT modify code yet.
+
+Do NOT touch KB Admin.
+
+STOP after the audit.
