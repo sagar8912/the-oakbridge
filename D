@@ -1,185 +1,268 @@
-Continue ONLY with resolving the blockers for Step 3D.
+Act as a Principal Full-Stack Engineer / Solution Architect.
 
-Current final verdict:
+We are continuing the approved Knowledge Base Phase 3 implementation.
 
-STEP 3 PARTIALLY COMPLETE — BLOCKED
+IMPORTANT CURRENT STATE:
 
-Reported blocker:
-- OOO_API_KEY
-- OOO_APP_URL
-- corresponding KB-side configuration required for the integration/smoke test
-- successful ooo_pillars_list smoke validation is still required
+Step 3 implementation/code work has been completed to the extent possible.
 
-DO NOT START STEP 4.
+The remaining Step 3D blockers are ENVIRONMENT / LOCAL CONFIGURATION related:
 
-Your task is to safely resolve or guide me through resolving the Step 3D environment/configuration blockers.
+- OOO_API_KEY needs to be configured
+- OOO_APP_URL needs to be configured for MCP
+- KB-side MCP configuration (KB_API_KEY / KB_ADMIN_URL) needs to be configured
+- ooo_pillars_list live smoke validation remains pending until those values are configured
+- live E2E regression therefore remains pending
+- existing unit/build validation previously passed
 
-IMPORTANT SAFETY RULES:
+I will manually configure the required environment variables/secrets.
 
-1. Do NOT invent, generate, or guess API keys.
-2. Do NOT replace real configuration with fake values just to make tests pass.
-3. Do NOT expose or print existing secret values.
-4. Do NOT commit secrets to Git.
-5. Do NOT make production configuration changes.
-6. Do NOT modify application architecture.
-7. Do NOT bypass authentication or authorization.
-8. Do NOT weaken security checks to make the smoke test pass.
+DO NOT:
+- invent secrets
+- modify secrets
+- hardcode API keys
+- expose secret values
+- mark Step 3D live validation as PASS until it is actually tested
 
-STEP 1 — INSPECT EXISTING CONFIGURATION
+Record Step 3D as:
 
-Search the entire repository/workspace for references to:
+IMPLEMENTATION COMPLETE / LIVE VALIDATION PENDING ENV CONFIGURATION.
 
-OOO_API_KEY
-OOO_APP_URL
-KB_REVALIDATE_API_KEY
-and any related KB/OOO integration environment variables.
+Now proceed with STEP 4 ONLY.
 
-Inspect:
+Before making ANY code changes:
 
-- .env.example files
-- local environment templates
-- README/documentation
-- package configuration
-- API routes
-- revalidation endpoints
-- OOO → KB integration code
-- KB → OOO integration code
-- existing local development configuration
+1. Re-read the existing Phase 3 architecture/audit documentation in this repository.
+2. Review all code implemented during Steps 3A, 3B, 3C and 3D.
+3. Identify exactly what the approved architecture defines as STEP 4.
+4. Do NOT infer Step 4 from generic assumptions.
+5. Use the repository documentation and approved architecture as the source of truth.
 
-DO NOT display secret values.
+PHASE 3 ARCHITECTURAL PRINCIPLES MUST REMAIN INTACT:
 
-Report only:
+Vision
+→ PEP
+→ PDP / centralized authorization
+→ KB integration/service boundary
+→ approved KB content
+→ controlled rendering/deep linking
 
-VARIABLE NAME
-WHICH APP USES IT
-PURPOSE
-WHERE IT IS READ IN CODE
-WHERE IT SHOULD BE CONFIGURED LOCALLY
-WHETHER IT CURRENTLY EXISTS: YES/NO/UNKNOWN
+Preserve:
 
-STEP 2 — DETERMINE THE REQUIRED KEY PAIRING
+- deny-by-default authorization
+- server-side enforcement
+- centralized PDP/PEP direction
+- existing RBAC compatibility
+- future ABAC/extensible permission architecture
+- existing Vision functionality
+- KB boundaries
+- existing authentication
+- existing routes unless explicitly required
+- backward compatibility
 
-Trace the authentication flow between OOO and KB.
+Do not redesign unrelated functionality.
 
-Determine exactly which keys must match between the two applications.
+==================================================
+STEP 4A — REPOSITORY & REQUIREMENT ANALYSIS
+==================================================
 
-For example, determine whether:
+First determine from the repository documentation:
 
-OOO_API_KEY in one application
+- exact Step 4 objective
+- required functionality
+- files/components involved
+- dependencies on Steps 3A–3D
+- acceptance criteria
+- security requirements
+- tests required
 
-must correspond to a server-side expected API key in the other application,
+Produce:
 
-and similarly determine how:
+STEP 4 REQUIREMENT MATRIX
 
-KB_REVALIDATE_API_KEY
+Requirement
+Current implementation
+Gap
+Required change
+File(s)
+Risk
 
-is validated.
+IMPORTANT:
 
-Do not assume variable relationships based only on their names.
+Do not modify code during Step 4A.
 
-Verify them directly from code.
+If Step 4 is not clearly defined in the documentation:
 
-Show me a simple mapping:
+STOP.
 
-SOURCE APP
-ENV VARIABLE
-→
-TARGET APP
-VALIDATED AGAINST
+Report:
 
-Do NOT reveal actual values.
+STEP 4 BLOCKED — REQUIREMENTS NOT DEFINED
 
-STEP 3 — CHECK WHETHER LOCAL DEVELOPMENT KEYS ALREADY EXIST
+Do NOT invent requirements.
 
-Determine whether valid local-development configuration already exists somewhere safe in the workspace/environment.
+==================================================
+STEP 4B — IMPLEMENT MINIMUM REQUIRED CHANGES
+==================================================
 
-If it exists:
+Only if Step 4 requirements are clearly supported by repository documentation:
 
-Do NOT print the value.
+Implement the MINIMUM SAFE changes necessary.
 
-Tell me only where/how the application already loads it and whether any configuration wiring is missing.
+Rules:
 
-If it does NOT exist:
+1. Reuse existing architecture and utilities.
+2. Do not duplicate authorization logic.
+3. Do not bypass PEP/PDP.
+4. Do not introduce client-side-only security.
+5. Do not hardcode user-specific permissions.
+6. Do not hardcode secrets.
+7. Do not introduce unnecessary DB migrations.
+8. Do not change unrelated modules.
+9. Preserve existing behavior unless Step 4 explicitly requires otherwise.
+10. Keep changes production-oriented and minimal.
 
-Tell me exactly which local-development variables I need to create.
+For every change report:
 
-For locally generated development-only shared secrets, explain the safe method for creating them, but DO NOT automatically modify files until you establish that this is the intended repository pattern.
+FILE:
+CHANGE:
+WHY REQUIRED:
+REQUIREMENT SATISFIED:
 
-STEP 4 — DETERMINE CORRECT LOCAL URLs
+==================================================
+STEP 4C — SECURITY / AUTHORIZATION VALIDATION
+==================================================
 
-Inspect the actual application configuration and determine the correct local URLs/ports for:
+Trace any new Step 4 request flow end-to-end.
 
-OOO_APP_URL
-KB application URL
+Explicitly verify:
 
-Do not guess ports.
+User
+→ UI/action
+→ PEP
+→ PDP/authorization decision
+→ backend/API
+→ resource
+→ response/rendering
 
-Use the repository's actual dev-server configuration.
+Test at minimum where applicable:
 
-Report the exact expected local URLs.
+- authorized user
+- unauthorized user
+- anonymous user
+- user without required kb_role
+- malformed request
+- direct API access bypass attempt
+- cross-resource access
+- missing configuration
+- downstream KB unavailable
 
-STEP 5 — GIVE ME THE MINIMUM MANUAL SETUP
+Expected principle:
 
-Before changing anything, provide:
+Unauthorized access must fail closed.
 
-A. Exact file(s) where environment variables need to be configured.
+No sensitive action should rely solely on UI visibility.
 
-B. Variable names only.
+==================================================
+STEP 4D — REGRESSION VALIDATION
+==================================================
 
-C. Which variables must share/match values across apps.
+Run all tests that can safely run without the missing Step 3D environment secrets.
 
-D. Which variables are URLs.
+Validate:
 
-E. Which apps must be restarted after configuration.
+- TypeScript/type checks
+- lint where configured
+- unit tests
+- relevant integration tests
+- build
+- existing Vision behavior
+- existing KB behavior
+- PDP/PEP behavior
+- routes/imports
+- backward compatibility
 
-F. Exact commands to start both applications.
+Do NOT fake live integration results.
 
-G. Exact smoke-test command/process for ooo_pillars_list.
+Clearly separate:
 
-If PowerShell ExecutionPolicy blocks a command, prefer a safe process-scoped or direct executable alternative rather than changing machine-wide policy.
+PASS
+FAIL
+BLOCKED BY ENVIRONMENT
 
-STEP 6 — ONLY IF CONFIGURATION IS ALREADY CORRECT
+The existing Step 3D live tests may remain:
 
-If all required configuration already exists and can be safely used:
+BLOCKED — ENV CONFIGURATION PENDING
 
-Start/verify both local applications where possible.
+That must NOT automatically fail unrelated Step 4 code validation.
 
-Then execute the Step 3D smoke validation.
+==================================================
+STEP 4E — FINAL AUDIT
+==================================================
 
-Verify:
+After implementation, inspect the git diff.
 
-OOO
-→ authenticated integration request
-→ KB/API
-→ PDP/PEP enforcement where applicable
-→ expected response
+Check for:
 
-Also verify ooo_pillars_list.
+- accidental unrelated changes
+- hardcoded secrets
+- security regressions
+- duplicate authorization logic
+- unnecessary dependencies
+- unnecessary DB changes
+- debug code
+- TODOs introduced by this implementation
+- broken existing functionality
 
-Do not claim success unless the actual request succeeds.
+Do NOT commit or push anything.
 
-STEP 7 — FINAL VERDICT
+==================================================
+FINAL OUTPUT
+==================================================
 
 Return:
 
-STEP 3D CONFIGURATION
-- OOO_API_KEY: CONFIGURED / MISSING / UNKNOWN
-- OOO_APP_URL: CONFIGURED / MISSING / UNKNOWN
-- KB-side key/config: CONFIGURED / MISSING / UNKNOWN
-- Applications running: YES/NO
-- ooo_pillars_list smoke: PASS/FAIL/BLOCKED
-- Regression validation: PASS/FAIL/BLOCKED
+1. STEP 4 OBJECTIVE
 
-Then give exactly one verdict:
+2. REQUIREMENTS IMPLEMENTED
 
-STEP 3 COMPLETE — READY FOR STEP 4
+3. FILES CHANGED
+
+4. AUTHORIZATION/SECURITY FLOW
+
+5. TEST RESULTS
+
+PASS:
+...
+
+FAIL:
+...
+
+BLOCKED:
+...
+
+6. STEP 3D REMAINING MANUAL CONFIGURATION
+
+Keep this clearly separate from Step 4.
+
+7. REMAINING RISKS / GAPS
+
+8. ONE FINAL VERDICT:
+
+STEP 4 COMPLETE
 
 or
 
-STEP 3 PARTIALLY COMPLETE — BLOCKED
+STEP 4 PARTIALLY COMPLETE — BLOCKED
 
-If BLOCKED, give me the exact next manual action I need to perform.
+or
 
-STOP after this.
+STEP 4 BLOCKED — REQUIREMENTS NOT DEFINED
 
-DO NOT START STEP 4 without my explicit approval.
+Do not claim COMPLETE unless every code-level Step 4 requirement supported by the repository has been implemented and validated.
+
+STOP after Step 4.
+
+Do NOT proceed to any next phase/step automatically.
+Do NOT commit.
+Do NOT push.
