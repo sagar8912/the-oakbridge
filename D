@@ -1,115 +1,451 @@
-I need to implement the following Phase 3 requirement for the existing TOW App / KB-Admin App:
-
-PHASE 3: MCP Wrappers / Context-Callable APIs
-Goal: Create an MCP Wrapper for Agentic Development.
-
-Requirements:
-1. Harden APIs and security so TOW + Knowledge Base capabilities can be safely wrapped and exposed as callable services/tools (MCP-style) for future agentic orchestration.
-2. Ensure the architecture remains model-agnostic and aligned with Azure guardrails. Avoid vendor/model lock-in and avoid introducing a premature "AI-in-a-box" architecture.
-3. Use a centralized MCP tool-server approach for integrating TOW and Knowledge Base capabilities, with LangSmith integration/tracing where applicable.
+Based on the Phase 3 repository analysis you just completed, proceed with STEP 2: TARGET ARCHITECTURE AND IMPLEMENTATION PLAN ONLY.
 
 IMPORTANT:
-DO NOT modify, create, delete, rename, or refactor any files in this step.
-This is ANALYSIS ONLY.
+DO NOT modify, create, delete, rename, or refactor any code in this step.
+DO NOT install dependencies.
+DO NOT change configuration.
+DO NOT implement MCP tools yet.
 
-First, deeply analyze the complete repository and existing architecture before recommending anything.
+We now know from the repository analysis that:
 
-Analyze:
+1. We are NOT starting from zero.
+   Existing MCP packages/patterns already exist.
 
-1. TOW App architecture
-   - Frontend
-   - Backend
-   - API routes/endpoints
-   - Service/business logic
-   - Database/data-access layer
-   - Authentication
-   - Authorization
-   - Existing PDP/PEP/RACI implementation
-   - Logging/auditing
-   - Error handling
-   - Environment/configuration structure
+2. We should NOT duplicate existing business logic.
+   Existing HTTP proxy/API/service patterns should be reused.
 
-2. KB-Admin / Knowledge Base architecture
-   - Existing APIs
-   - Search/retrieval functionality
-   - Document/content operations
-   - Authentication/authorization
-   - How TOW currently communicates with KB-Admin, if applicable
+3. The current implementation is NOT yet ready for production agentic use because of identified issues including:
+   - dual-auth/authentication gaps
+   - environment/configuration/key issues
+   - existing tool drift/inconsistency
+   - limited/unclear write behavior
+   - authorization/identity questions
 
-3. Existing AI/agent/LangSmith-related implementation
-   - Search for LangSmith, LangChain, agents, tools, MCP, LLM providers, Azure AI/OpenAI, or similar integrations.
-   - Determine what already exists and what can safely be reused.
+4. LangSmith should NOT automatically be treated as the MCP hosting/runtime platform.
+   Clearly separate:
+   - MCP server/tool runtime
+   - agent/orchestration layer
+   - LangSmith tracing/observability/evaluation
 
-4. Existing Azure-related architecture/configuration.
+5. The Phase 3 requirements remain:
 
-5. Identify all existing APIs/capabilities that could potentially become MCP tools.
+   A. Harden APIs and security so TOW + Knowledge Base can safely be wrapped/exposed as callable MCP-style services for future orchestration.
 
-For each candidate capability, classify it as:
+   B. Keep the architecture model-agnostic and aligned with the Azure guardrails direction, avoiding model/provider lock-in and premature "AI-in-a-box."
 
-- Read-only / low risk
-- Write / medium risk
-- Delete/admin/security-sensitive / high risk
+   C. Use a centralized MCP tool-server approach for integrating MCP-based TOW/KB capabilities, with LangSmith integration where appropriate.
 
-Do NOT assume MCP is required everywhere.
+Your task is to create the MINIMUM-CHANGE target architecture based on the ACTUAL repository.
 
-Then provide:
+==================================================
+1. MAP THE EXISTING MCP IMPLEMENTATION
+==================================================
 
-A. CURRENT ARCHITECTURE
-Explain the current relevant architecture and data/request flow.
+Identify the exact existing MCP-related:
 
-B. EXISTING REUSABLE COMPONENTS
-Show what already exists that Phase 3 can reuse.
+- packages
+- servers
+- entry points
+- transports
+- tools
+- API/proxy clients
+- authentication mechanisms
+- environment/configuration
+- shared utilities
+- tests
 
-C. GAP ANALYSIS
-Map each Phase 3 requirement to:
-- Already implemented
-- Partially implemented
-- Missing
+Show the exact file paths.
 
-D. MCP CANDIDATE CAPABILITIES
-List possible MCP tools, but DO NOT implement them.
+For each component classify:
 
-E. SECURITY ANALYSIS
-Explain how existing authentication + PDP/PEP/RACI authorization works and where MCP must integrate without bypassing security.
+KEEP AS-IS
+HARDEN
+REFACTOR/CONSOLIDATE
+DEPRECATE
+NEEDS REQUIREMENT CLARIFICATION
 
-F. RECOMMENDED ARCHITECTURE
-Propose the minimum-change architecture for:
-AI/Agent
-→ Central MCP Tool Server
-→ Existing TOW/KB APIs or service layer
-→ PEP/PDP authorization
-→ Business logic
-→ Data
+Do not propose replacing working components without evidence.
 
-Do not duplicate existing business logic inside MCP wrappers.
+==================================================
+2. RESOLVE "CENTRALIZED MCP TOOL SERVER"
+==================================================
 
-G. LANGSMITH CLARIFICATION
-Analyze the requirement "centralized MCP tool server within LangSmith."
+The analysis found a possible conflict:
 
-Clearly distinguish:
-- MCP server/tool hosting
-- Agent orchestration
-- LangSmith tracing/observability/evaluation
+- existing framework/repository may contain three MCP packages/servers
+- requirement says "centralized MCP tool server"
 
-Do not incorrectly assume LangSmith itself must host the MCP server unless the existing architecture/documentation proves that.
+Determine the safest architecture that satisfies both the existing repository and Phase 3.
 
-H. IMPLEMENTATION PLAN
-Give a safe step-by-step implementation plan with exact files likely to be:
-- created
-- modified
-- reused
+Compare at least:
 
-I. RISKS / OPEN QUESTIONS
-Identify anything that must be clarified before implementation.
+OPTION A:
+One physical centralized MCP gateway/server containing all TOW + KB tool registrations.
 
-Do not write any implementation code yet.
+OPTION B:
+Existing domain-specific MCP packages remain internally separated, but are exposed through one centralized MCP entry point/gateway.
 
-Primary principles:
-- Minimum necessary changes
-- No breaking existing functionality
-- No duplicated business logic
-- No bypassing PDP/PEP/RACI
-- Model-agnostic
-- Azure-compatible
-- Secure by default
-- Backward compatible
+OPTION C:
+Keep multiple independent MCP servers.
+
+For each explain:
+
+- code impact
+- security impact
+- deployment impact
+- maintainability
+- compatibility with current code
+- compatibility with Azure
+- compatibility with Phase 3 wording
+
+Recommend ONE option.
+
+Prefer the minimum-change solution unless there is a strong technical reason otherwise.
+
+DO NOT IMPLEMENT IT YET.
+
+==================================================
+3. DESIGN AUTHENTICATION + AUTHORIZATION
+==================================================
+
+The analysis identified a dual-auth gap.
+
+Document the CURRENT authentication flow first.
+
+Then design the TARGET flow for MCP.
+
+Explicitly distinguish:
+
+A. Machine/service authentication
+   Who/what is allowed to call the MCP service?
+
+B. End-user authorization
+   On whose behalf is the agent acting?
+
+C. Application authorization
+   How do existing PDP/PEP/RACI rules determine whether the requested operation is allowed?
+
+Target principle:
+
+Agent / MCP Client
+        ↓
+Machine/Service Authentication
+        ↓
+Trusted End-User Context (when acting for a user)
+        ↓
+MCP Tool
+        ↓
+Existing PEP
+        ↓
+Existing PDP / RACI authorization
+        ↓
+Existing API / Service / Business Logic
+        ↓
+Data
+
+CRITICAL:
+
+MCP tool arguments must NEVER be trusted to self-declare:
+
+- user identity
+- role
+- permissions
+- tenant
+- team
+- authorization level
+
+Explain exactly how trusted identity should propagate based on the existing repository.
+
+If the repository does not currently support safe end-user impersonation/delegation, mark it as an OPEN DECISION instead of inventing a solution.
+
+==================================================
+4. EXISTING TOOL AUDIT
+==================================================
+
+Create a complete table of existing MCP tools.
+
+For each tool show:
+
+- Tool name
+- Package/file
+- TOW or KB domain
+- Read / Write / Delete / Admin
+- Underlying API/service
+- Authentication used
+- Authorization used
+- Input validation
+- Error handling
+- Audit/logging
+- Current status
+- Security risk
+- Recommended action
+
+Recommended action must be one of:
+
+KEEP
+FIX
+DISABLE UNTIL SECURED
+NEEDS CLARIFICATION
+
+Identify "tool drift":
+- duplicate tools
+- stale tools
+- tools pointing to outdated APIs
+- inconsistent schemas
+- inconsistent auth
+- direct database/business-logic duplication
+
+==================================================
+5. API HARDENING PLAN
+==================================================
+
+Identify the exact security/configuration issues that must be fixed BEFORE adding new MCP capabilities.
+
+Prioritize:
+
+P0 = blocks safe MCP usage
+P1 = required for Phase 3 production readiness
+P2 = improvement but not blocking
+
+Include:
+
+- authentication
+- authorization
+- PDP/PEP/RACI
+- object-level authorization
+- service-role usage
+- environment variables
+- missing/optional keys
+- secrets handling
+- input validation
+- errors
+- logging/auditing
+- timeouts
+- correlation IDs
+- rate limiting if applicable
+- sensitive-data exposure
+
+For every issue provide:
+
+Severity
+Evidence/file path
+Current behavior
+Risk
+Minimum required fix
+Tests required
+
+==================================================
+6. MODEL-AGNOSTIC DESIGN
+==================================================
+
+Review any existing:
+
+- OpenAI
+- Azure OpenAI
+- embeddings
+- LangChain
+- LangSmith
+- model-provider-specific code
+
+Classify each dependency as:
+
+BUSINESS-LOGIC DEPENDENCY
+AGENT/ORCHESTRATION DEPENDENCY
+OBSERVABILITY DEPENDENCY
+EMBEDDING/SEARCH DEPENDENCY
+
+Explain which dependencies are acceptable and which create unnecessary lock-in.
+
+Do NOT recommend replacing OpenAI/Azure/OpenAI embeddings simply for theoretical purity.
+
+Only recommend abstraction where required to satisfy Phase 3.
+
+Target separation:
+
+Business Logic
+        ↑
+Application Services/APIs
+        ↑
+MCP Adapter Layer
+        ↑
+Agent/Orchestration
+        ↑
+Model Provider
+
+Changing the model provider should not require rewriting TOW/KB business logic or MCP tool contracts.
+
+==================================================
+7. LANGSMITH ARCHITECTURE
+==================================================
+
+Clarify exactly how LangSmith should fit.
+
+Show separately:
+
+MCP SERVER
+- hosts/exposes tools
+
+AGENT/ORCHESTRATOR
+- discovers/selects/calls tools
+
+LANGSMITH
+- tracing
+- observability
+- debugging
+- evaluation where applicable
+
+Determine what LangSmith integration already exists.
+
+Explain what should be traced.
+
+Identify sensitive fields that must NOT be traced.
+
+Do not claim LangSmith hosts MCP unless repository evidence proves it.
+
+==================================================
+8. AZURE TARGET ARCHITECTURE
+==================================================
+
+Based on the existing Azure migration direction, explain how the MCP layer should eventually fit into Azure.
+
+Do NOT deploy anything.
+
+Cover only architecture-relevant concerns:
+
+- authentication
+- secrets
+- environment configuration
+- networking
+- service hosting
+- logging/observability
+- staging vs production
+- health/readiness
+
+Do not introduce unnecessary Azure services.
+
+Mark assumptions clearly.
+
+==================================================
+9. RESOLVE OR CLASSIFY THE 10 OPEN QUESTIONS
+==================================================
+
+Review every open question from your Step 1 analysis.
+
+For each classify it as:
+
+CAN RESOLVE FROM CODE
+CAN RESOLVE FROM EXISTING REQUIREMENTS
+REQUIRES PRODUCT/ARCHITECT DECISION
+NOT BLOCKING YET
+
+For questions that can be resolved from code, answer them with evidence.
+
+For questions requiring John/product/architect input, write the exact concise question we should ask.
+
+Do not block the entire implementation for questions that only affect later write capabilities.
+
+==================================================
+10. DEFINE THE FIRST IMPLEMENTATION SLICE
+==================================================
+
+Based on all evidence, define the smallest safe first implementation slice.
+
+The Step 1 verdict suggested:
+
+"Harden dual-auth + env + fix existing tools before new tool sprawl."
+
+Turn that into an exact implementation plan.
+
+Specify:
+
+STEP 3A
+What security/auth issue to fix first.
+
+STEP 3B
+What environment/config issue to fix.
+
+STEP 3C
+Which existing MCP tool should be repaired/validated first.
+
+STEP 3D
+What tests prove the foundation works.
+
+Prefer an EXISTING low-risk READ-ONLY MCP tool as the first validated end-to-end path.
+
+Do not create a new tool if an existing suitable tool can be fixed/reused.
+
+==================================================
+11. FILE-BY-FILE CHANGE PLAN
+==================================================
+
+Provide a table:
+
+File
+Current purpose
+Planned change
+Why required
+Phase 3 requirement
+Risk
+Tests
+
+Separate:
+
+FILES TO MODIFY
+
+FILES TO CREATE
+
+FILES TO LEAVE UNCHANGED
+
+If no new file is required, explicitly say so.
+
+==================================================
+12. REQUIREMENT TRACEABILITY
+==================================================
+
+Map the proposed architecture directly to:
+
+PHASE 3 REQUIREMENT 1:
+Harden APIs/security for MCP-callable TOW + KB services.
+
+PHASE 3 REQUIREMENT 2:
+Model-agnostic + Azure guardrails + avoid lock-in.
+
+PHASE 3 REQUIREMENT 3:
+Centralized MCP tool-server approach + LangSmith integration.
+
+For each show:
+
+Current state
+Gap
+Planned solution
+Files/components
+How it will be tested
+
+==================================================
+FINAL OUTPUT
+==================================================
+
+End with:
+
+1. Recommended target architecture diagram
+
+2. Existing components we will REUSE
+
+3. Components we need to HARDEN
+
+4. Components we need to CREATE, if any
+
+5. P0 blockers
+
+6. Open decisions requiring John/product/architect
+
+7. Exact recommended Step 3 implementation scope
+
+8. Explicit statement:
+
+"NO CODE CHANGES WERE MADE IN THIS STEP."
+
+Do not implement anything.
+Do not expand scope beyond Phase 3.
+Do not rewrite working architecture unnecessarily.
+Base every recommendation on repository evidence.
