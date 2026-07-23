@@ -1,752 +1,207 @@
-Act as a Principal Full-Stack Engineer / Solution Architect performing a strict production-readiness CODE AUDIT.
+Continue from the Vision → KB Full Integration code audit you just completed.
 
-IMPORTANT: THIS IS AN ANALYSIS-ONLY TASK.
+IMPORTANT:
+Do not start implementing all recommended changes yet.
 
-DO NOT modify any code.
-DO NOT create files.
-DO NOT delete files.
-DO NOT run migrations.
-DO NOT refactor anything.
-DO NOT fix any issue yet.
-DO NOT change configuration or environment variables.
-DO NOT implement missing functionality.
+We now need to perform STEP 2: VALIDATE THE AUDIT FINDINGS AND PREPARE THE INTEGRATION FOR UAT.
 
-I have already completed the integration:
+Work strictly from the findings in your previous audit.
 
-"TOW Vision to KB Article → Full Integration"
+Your previous recommended next steps included:
 
-I now want you to deeply inspect the CURRENT CODEBASE and verify whether the implementation actually satisfies the intended requirements.
+1. Confirm staging/prod knowledge_base.code and article slugs for:
+   - mission
+   - vision
+   - purpose
+   - core-values
 
-Your job in this step is ONLY:
+2. If the actual KB code is not "tow", identify the exact mapping/configuration change required before UAT.
 
-READ → TRACE → ANALYZE → VERIFY → REPORT.
+3. Verify:
+   - KB_REVALIDATE_API_KEY
+   - OOO_APP_URL
+   across the relevant applications/configuration.
 
-Do not make code changes until I explicitly approve them.
+4. Validate the complete flow:
+   KB Admin
+      → edit content
+      → approve/publish
+      → revalidation
+      → Vision card refresh
+      → latest approved content displayed
 
-==================================================
-1. FIRST UNDERSTAND THE REQUIREMENT
-==================================================
+5. Validate an authenticated user without kb_role:
+   - Reader access
+   - Vision card access
+   - ?towContext=vision deep-link behavior
 
-Locate and read all repository documentation related to:
+6. Determine whether live Vision prose/content is:
+   A. actually required by the current documented scope, or
+   B. intentionally still static/out of scope.
 
-- TOW Vision to KB Article → Full Integration
-- Vision → Knowledge Base
-- Vision bundle / Vision sections
-- Knowledge Base article/content integration
-- Reader rendering
-- Article content APIs
-- KB architecture documentation
-- any related Git/docs/technical requirements
-
-Use the repository documentation as the source of truth.
-
-Do not invent requirements.
-
-Create a requirement checklist before evaluating the implementation.
-
-From the documented design, verify requirements including, where applicable:
-
-1. Vision sections map into the appropriate Knowledge Base / KB articles.
-
-2. The integration uses the existing Knowledge Base architecture correctly rather than creating unnecessary duplicate infrastructure.
-
-3. Existing KB data structures such as:
-   - articles
-   - article_content
-   - article_versions
-   or their actual equivalents are used correctly.
-
-4. Vision content is stored/retrieved using the intended model.
-
-5. Approved/published content behavior is respected.
-
-6. Reader-side rendering correctly retrieves the intended KB/Vision content.
-
-7. Existing article body/content APIs are reused where intended.
-
-8. Cache/revalidation behavior works according to the documented architecture.
-
-9. Permission/authorization boundaries remain correct.
-
-10. Existing KB Admin and OOO/end-user functionality is not broken.
-
-Do not assume these exact implementation details if the repository differs.
-Verify everything against actual code and documentation.
+Do NOT expand scope if repository documentation says it is out of scope.
 
 ==================================================
-2. IDENTIFY ALL CODE CHANGES FOR THIS INTEGRATION
+PHASE A — VALIDATE EACH FINDING
 ==================================================
 
-I want to see ONLY the code changes relevant to this integration.
+For each previous audit finding, verify it again against the actual current code/configuration.
 
-Inspect Git history/diff/current branch as available.
+Return:
 
-Determine:
+Finding:
+Evidence:
+File/config involved:
+Current behavior:
+Expected behavior:
+Status:
+- VERIFIED ISSUE
+- CONFIGURATION DEPENDENT
+- ALREADY CORRECT
+- CANNOT VERIFY LOCALLY
 
-- current branch
-- comparison/base branch if identifiable
-- modified files
-- added files
-- deleted files
-- migrations
-- APIs
-- server actions
-- components
-- types
-- utilities
-- tests
-- documentation
-
-Separate files into:
-
-A. Directly related to Vision → KB integration
-
-B. Indirect/supporting changes required by the integration
-
-C. Unrelated changes
-
-Do not mix unrelated changes into the audit.
-
-For every relevant changed file provide:
-
-FILE PATH
-
-CHANGE TYPE:
-Added / Modified / Deleted
-
-PURPOSE
-
-REQUIREMENT SUPPORTED
-
-KEY LOGIC CHANGED
-
-RISK LEVEL:
-LOW / MEDIUM / HIGH
-
-Do not dump entire source files.
-
-Show only important code snippets/diffs needed to explain the implementation.
+Do not modify code during this phase.
 
 ==================================================
-3. TRACE THE COMPLETE DATA FLOW
+PHASE B — SEPARATE CODE ISSUES FROM ENV/UAT ISSUES
 ==================================================
 
-Trace the integration end-to-end from actual code.
+Create four categories:
 
-I want a concrete flow such as:
+A. CODE FIX REQUIRED BEFORE UAT
 
-Vision
-    ↓
-Vision section/content
-    ↓
-Mapping / identifier resolution
-    ↓
-KB / Article lookup
-    ↓
-Article content API/service
-    ↓
-Approved/published content resolution
-    ↓
-Reader
-    ↓
-Rendered content
+B. CONFIGURATION/ENVIRONMENT FIX REQUIRED BEFORE UAT
 
-But use the ACTUAL architecture found in the repository.
+C. MANUAL UAT VALIDATION REQUIRED
 
-For every step provide:
+D. OUT OF SCOPE / FUTURE WORK
 
-- source file
-- function/component
-- input
-- transformation
-- database/API interaction
-- output
-- next caller
+This distinction is critical.
 
-Identify any broken or incomplete link.
-
-Do not infer that something works simply because a function exists.
-
-Verify that callers actually reach it.
+Do not modify code to solve something that is only an environment/configuration issue.
 
 ==================================================
-4. VERIFY VISION → KB MAPPING
+PHASE C — VERIFY VISION → KB MAPPING
 ==================================================
 
-Deeply inspect how Vision content maps to Knowledge Base content.
+Inspect the actual mapping implementation.
 
-Determine:
+Confirm the expected:
 
-- What uniquely identifies a Vision section?
-- What uniquely identifies the target KB/article?
-- Is mapping by slug, ID, code, foreign key, metadata, or another mechanism?
-- Where is the mapping stored?
-- How is it created?
-- How is it retrieved?
-- What happens when mapping is missing?
-- What happens when the KB/article is missing?
-- What happens when content is draft?
-- What happens when content is approved?
-- What happens when content changes?
+knowledge_base.code
 
-Look for possible:
+and exact slugs for:
 
-- fragile slug matching
-- hard-coded IDs
-- hard-coded KB codes
-- environment-specific assumptions
-- duplicate mappings
-- orphaned mappings
-- null handling problems
-- stale references
+mission
+vision
+purpose
+core-values
 
-Give a verdict:
+Trace where these values are referenced in code.
 
-PASS
-PARTIAL
-FAIL
+Report:
 
-with exact evidence.
+Expected value
+Actual code assumption
+Database/config dependency
+Risk if mismatched
+
+If a code/config fix is required, show me the exact proposed change as a diff preview ONLY.
+
+Do not apply it yet.
 
 ==================================================
-5. VERIFY DATABASE / DATA MODEL
+PHASE D — VERIFY REVALIDATION
 ==================================================
 
-Inspect all database changes related to this integration.
+Trace:
 
-Check:
+Approve KB content
+→ revalidation trigger
+→ KB_REVALIDATE_API_KEY
+→ OOO_APP_URL
+→ cache invalidation
+→ Vision card refresh
 
-- migrations
-- tables
-- columns
-- foreign keys
-- indexes
-- unique constraints
-- RLS/policies if applicable
-- timestamps
-- nullable fields
-- delete behavior
+Determine whether this flow is code-complete.
 
-Determine whether the implementation correctly reuses the existing KB infrastructure.
+Separate:
 
-Specifically look for unnecessary duplication.
+CODE COMPLETE
 
-For example, if the existing system already has:
+from
 
-articles
-article_content
-article_versions
+ENVIRONMENT NOT VERIFIED.
 
-verify whether the Vision integration correctly uses those structures instead of creating another parallel content model without justification.
+Do not expose secret values.
 
-Check migration safety:
-
-- idempotency where appropriate
-- staging/prod compatibility
-- backward compatibility
-- rollback implications
-
-Do NOT apply migrations.
-
-Analysis only.
+Only report whether required variables exist/references are correct.
 
 ==================================================
-6. VERIFY API / SERVER-SIDE INTEGRATION
+PHASE E — CREATE MANUAL UAT PLAN
 ==================================================
 
-Inspect all APIs/server actions/services involved.
+Give me exact browser/UI steps I can perform manually.
 
-For each endpoint/function verify:
+Create numbered tests:
 
-- authentication
-- authorization
-- input validation
-- ID/code/slug validation
-- correct DB query
-- correct content status filtering
-- error handling
-- null handling
-- cache behavior
-- response contract
+TEST 1 — Vision card reads approved KB content
 
-Pay special attention to any endpoint conceptually similar to:
+TEST 2 — Draft changes are NOT visible
 
-GET /api/kb/[code]/content
+TEST 3 — Approve/publish updates Vision card
 
-or article-body/content APIs.
+TEST 4 — Cache/revalidation works
 
-Verify whether existing APIs were reused as intended.
+TEST 5 — Authenticated user without kb_role can access expected reader content
 
-Check for:
+TEST 6 — ?towContext=vision deep link works
 
-- duplicated APIs
-- bypassing established services
-- service-role misuse
-- frontend-only security
-- incorrect status filtering
-- N+1 queries
-- unnecessary DB calls
+TEST 7 — Missing/unavailable article behavior is graceful
 
-==================================================
-7. VERIFY PUBLISHING / CONTENT STATUS
-==================================================
+For every test provide:
 
-Trace the content lifecycle.
+STARTING PAGE/URL PATTERN
 
-Check behavior for:
+USER ROLE REQUIRED
 
-DRAFT
-    ↓
-REVIEW if applicable
-    ↓
-APPROVED / PUBLISHED
-    ↓
-READER
+EXACT CLICKS/ACTIONS
 
-Verify:
+EXPECTED RESULT
 
-- Draft content does not incorrectly appear to end users.
-- Approved/published content becomes available correctly.
-- Versioning remains intact.
-- Updating draft content does not accidentally overwrite the published experience.
-- Publishing/revalidation is correctly triggered.
+PASS CRITERIA
 
-Give PASS/PARTIAL/FAIL for each.
+FAIL SYMPTOM
+
+Do not invent UI controls that do not exist in the code.
 
 ==================================================
-8. VERIFY READER INTEGRATION
+PHASE F — FINAL GO/NO-GO
 ==================================================
 
-Inspect the actual Reader implementation.
+Return:
 
-Verify:
+CODE STATUS:
+READY / NOT READY
 
-Vision / KB mapping
-        ↓
-content fetch
-        ↓
-approved content
-        ↓
-renderer
-        ↓
-end-user UI
+CONFIG STATUS:
+READY / NEEDS VERIFICATION
 
-Check:
+READY FOR LOCAL UAT:
+YES / NO
 
-- correct article resolution
-- correct content resolution
-- loading state
-- empty state
-- error state
-- missing mapping behavior
-- missing article behavior
-- draft-only behavior
-- approved content rendering
-- Markdown/HTML rendering
-- sanitization/security
-- responsive behavior where relevant
+READY FOR STAGING UAT:
+YES / NO
 
-Most importantly:
+BLOCKERS:
+List only genuine blockers.
 
-Determine whether the Reader is using REAL integrated data or still using:
+Then give me:
 
-- placeholder content
-- static markdown
-- mock data
-- hard-coded text
-- fallback content masking failures
+"NEXT SINGLE ACTION"
 
-Clearly report this.
+Tell me exactly the ONE thing I should do next.
 
-==================================================
-9. VERIFY CACHE + REVALIDATION
-==================================================
+Do not implement anything.
 
-Trace caching end-to-end.
-
-Check:
-
-Admin edits content
-        ↓
-Save
-        ↓
-Publish/Approve
-        ↓
-Revalidation triggered
-        ↓
-Reader cache invalidated
-        ↓
-Latest approved content visible
-
-Inspect:
-
-- cache keys/tags
-- article-specific tags
-- KB-specific tags
-- Vision-specific tags if implemented
-- revalidation API
-- environment variables
-- failure handling
-
-Check whether stale content can remain after publishing.
-
-Also check whether cache invalidation is too broad and unnecessarily clears the entire KB.
-
-Report exact behavior from code.
-
-==================================================
-10. VERIFY AUTHORIZATION
-==================================================
-
-Audit authorization specifically for the integration.
-
-Check:
-
-- who can create/edit Vision-linked KB content
-- who can publish/approve
-- who can read
-- whether service-role credentials bypass intended authorization
-- whether authorization exists only in UI
-- whether backend APIs enforce permissions
-
-Also verify compatibility with existing:
-
-RBAC
-PDP/PEP
-ABAC scaffolding
-
-if present in the current branch.
-
-Do not redesign authorization.
-
-Just report whether this integration follows the existing model.
-
-==================================================
-11. VERIFY NO DUPLICATE IMPLEMENTATION
-==================================================
-
-Search for duplicate functionality introduced during development.
-
-Look for:
-
-- duplicate article fetchers
-- duplicate content APIs
-- duplicate markdown renderers
-- duplicate mapping logic
-- duplicate cache logic
-- duplicate permission checks
-- old unused integration code
-- dead code
-- temporary implementations
-- TODO hacks
-
-Classify each:
-
-SAFE
-
-TECHNICAL DEBT
-
-SHOULD REMOVE LATER
-
-BLOCKER
-
-Do not remove anything yet.
-
-==================================================
-12. VERIFY REGRESSION RISK
-==================================================
-
-Check whether these changes could break existing:
-
-KB Admin
-
-KB Reader
-
-Article editing
-
-Article publishing
-
-Version history
-
-Search
-
-Cache revalidation
-
-Vision
-
-Goals
-
-Items
-
-Relationships
-
-Authentication/authorization
-
-For each affected area provide:
-
-IMPACT:
-NONE / LOW / MEDIUM / HIGH
-
-WHY
-
-Do not claim "no regression" without tracing the affected dependencies.
-
-==================================================
-13. ANALYZE TEST COVERAGE
-==================================================
-
-Find all tests related to the integration.
-
-Map:
-
-Requirement
-→ Test file
-→ Test case
-→ Coverage status
-
-Check coverage for:
-
-Vision → KB mapping
-
-article content retrieval
-
-draft visibility
-
-approved visibility
-
-reader rendering
-
-missing content
-
-missing mapping
-
-cache revalidation
-
-authorization
-
-version behavior
-
-error handling
-
-Do NOT write tests yet.
-
-Identify missing tests only.
-
-==================================================
-14. STATIC QUALITY REVIEW
-==================================================
-
-Inspect relevant changed code for:
-
-TypeScript errors
-
-unsafe any
-
-null/undefined risks
-
-race conditions
-
-incorrect async behavior
-
-duplicate queries
-
-hard-coded values
-
-security issues
-
-performance problems
-
-bad error handling
-
-environment assumptions
-
-stale cache risk
-
-incorrect imports
-
-dead code
-
-unreachable code
-
-incorrect server/client boundaries
-
-Do not fix anything.
-
-Report findings.
-
-==================================================
-15. REQUIREMENT TRACEABILITY MATRIX
-==================================================
-
-Create a final matrix:
-
-| # | Requirement | Implementation | Files | Evidence | Status |
-|---|-------------|----------------|-------|----------|--------|
-
-Status must be:
-
-PASS
-
-PARTIAL
-
-FAIL
-
-NOT IMPLEMENTED
-
-CANNOT VERIFY
-
-Do not mark PASS merely because code exists.
-
-PASS means you traced the complete implementation and found evidence that the requirement is satisfied.
-
-==================================================
-16. CODE CHANGES SUMMARY
-==================================================
-
-Give me a concise list of ONLY integration-related code changes:
-
-### Added
-
-File
-→ what was added
-→ why
-
-### Modified
-
-File
-→ exact relevant behavior changed
-→ why
-
-### Deleted
-
-File
-→ what was removed
-→ why
-
-### Database
-
-Migration/schema changes.
-
-### API
-
-Endpoints/server actions changed.
-
-### UI
-
-Components/pages changed.
-
-### Tests
-
-Tests changed/added.
-
-Ignore unrelated branch changes.
-
-==================================================
-17. FINDINGS BY SEVERITY
-==================================================
-
-Classify every finding:
-
-P0 — Critical
-Security/data-loss/major production blocker
-
-P1 — High
-Core requirement broken or incomplete
-
-P2 — Medium
-Important edge case/technical problem
-
-P3 — Low
-Cleanup/improvement
-
-For every issue provide:
-
-ISSUE
-
-REQUIREMENT AFFECTED
-
-FILE(S)
-
-EXACT CODE PATH / FUNCTION
-
-WHY IT IS A PROBLEM
-
-EXPECTED BEHAVIOR
-
-CURRENT BEHAVIOR
-
-RECOMMENDED FIX
-
-But DO NOT implement the fix.
-
-==================================================
-18. FINAL VERDICT
-==================================================
-
-Give exactly one overall verdict:
-
-READY
-
-READY WITH MINOR GAPS
-
-PARTIALLY COMPLETE
-
-NOT READY
-
-Then answer:
-
-1. Is Vision → KB integration truly end-to-end?
-
-2. Is real KB content being used?
-
-3. Is mapping reliable?
-
-4. Is approved/published-only visibility correct?
-
-5. Is Reader integration complete?
-
-6. Is caching/revalidation correct?
-
-7. Are permissions correctly enforced?
-
-8. Are database changes production-safe?
-
-9. Are there any hard-coded/mock/placeholder paths remaining?
-
-10. Is anything required before staging UAT?
-
-11. Is anything required before production?
-
-==================================================
-19. VERY IMPORTANT — STOP AFTER ANALYSIS
-==================================================
-
-DO NOT FIX ANYTHING.
-
-Even if you find obvious bugs:
-
-DO NOT edit them.
-
-At the end provide:
-
-A. Requirements discovered
-
-B. Relevant code changes discovered
-
-C. End-to-end architecture/data flow
-
-D. PASS/PARTIAL/FAIL matrix
-
-E. Missing or incorrect implementation
-
-F. P0/P1/P2/P3 issues
-
-G. Regression risks
-
-H. Test coverage gaps
-
-I. Final readiness verdict
-
-J. Exact recommended next steps in priority order
-
-Then STOP and wait for my approval before making any code changes.
+STOP after the validation report and wait for my approval.
