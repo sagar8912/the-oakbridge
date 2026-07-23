@@ -1,41 +1,174 @@
-We have confirmed:
+Act as a Principal Full-Stack Engineer / Solution Architect.
 
-PHASE 3 CODE COMPLETE — STEP 3D LIVE VALIDATION PENDING.
+PHASE 3 IS NOW COMPLETE AND VALIDATION-COMPLETE.
 
-Now help me complete the manual validation checklist ONE STEP AT A TIME.
+Confirmed status:
+- Step 3A Dual-auth: COMPLETE
+- Step 3B Env/API-key contract: COMPLETE
+- Step 3C KB contract adapters: COMPLETE
+- Step 3D Live E2E `ooo_pillars_list`: PASS
+- OOO MCP is connected and validated.
+- Phase 3 foundation is closed.
 
-Start with STEP 1 ONLY:
-
-Configure OOO_API_KEY correctly for:
-1. the OOO application local environment
-2. the MCP configuration
-
-Requirements:
-
-- First inspect the repository/configuration and confirm the exact OOO app path and exact environment file that should be used.
-- Confirm the exact MCP configuration file/location expected by this project.
-- Do NOT invent or generate a secret for me.
-- Do NOT print any existing secret values.
-- Do NOT hardcode secrets into source code.
-- Do NOT commit any secrets.
-- Do NOT modify application/business logic.
-- Use placeholders such as <YOUR_LOCAL_OOO_API_KEY> when showing examples.
-
-Explain exactly:
-
-A. Which file I need to open/create for the OOO app.
-B. The exact variable line/format I need to add using a placeholder.
-C. Which MCP configuration file I need to open/create.
-D. Exactly where OOO_API_KEY must be configured there using the same placeholder.
-E. Whether the two values must be identical.
-F. How I can safely generate/use a local development secret if no existing local secret is available.
-G. How to verify that both configurations are present WITHOUT displaying the secret.
+NOW PROCEED DIRECTLY TO PHASE 4.
 
 IMPORTANT:
+Do NOT invent Phase 4 scope.
 
-Do not proceed to OOO_APP_URL.
-Do not start applications.
-Do not run smoke tests.
-Do not make unrelated changes.
+Before making changes, inspect the existing repository documentation, architecture documents, implementation plans, backlog/roadmap, and all Phase 1–3 decisions to determine the exact intended Phase 4 requirements.
 
-STOP after giving me the exact Step 1 instructions and wait for me to complete them.
+STEP 1 — DISCOVER PHASE 4 REQUIREMENTS
+
+Search the complete repository for references to:
+
+- Phase 4
+- Phase 3 → Phase 4 transition
+- deferred Phase 3 scope
+- centralized gateway
+- MCP architecture
+- KB ↔ OOO integration
+- PDP / PEP
+- ABAC / permission architecture
+- platform-admin
+- write tools
+- acting-user / user context
+- LangSmith / observability
+- production architecture
+
+Identify the authoritative documents.
+
+Report:
+
+1. Exact Phase 4 objective.
+2. Functional requirements.
+3. Architecture requirements.
+4. Security/permission requirements.
+5. Dependencies on completed Phase 3.
+6. Acceptance criteria.
+7. Explicitly deferred/out-of-scope functionality.
+
+Clearly distinguish:
+
+REQUIRED BY EXISTING DOCUMENTATION
+
+vs.
+
+ASSUMPTION / NOT DEFINED
+
+Do not silently convert assumptions into requirements.
+
+STEP 2 — CURRENT CODE GAP ANALYSIS
+
+Compare the discovered Phase 4 requirements against the CURRENT repository.
+
+For every requirement classify it:
+
+- ALREADY IMPLEMENTED
+- PARTIALLY IMPLEMENTED
+- NOT IMPLEMENTED
+- BLOCKED / REQUIRES DECISION
+
+Trace the actual implementation paths and reuse the existing architecture.
+
+Do NOT duplicate functionality already implemented in Phase 3.
+
+STEP 3 — CREATE IMPLEMENTATION PLAN
+
+Create the minimum safe implementation plan required to complete Phase 4.
+
+For every proposed change provide:
+
+- requirement being satisfied
+- files/components affected
+- why the change is necessary
+- existing functionality being reused
+- database/schema impact
+- API impact
+- authentication/authorization impact
+- backward compatibility risk
+- tests required
+
+Do not perform unnecessary refactoring.
+
+STEP 4 — IMPLEMENT PHASE 4
+
+After the requirements and implementation path are confirmed from repository evidence, implement the required Phase 4 functionality.
+
+Rules:
+
+- Preserve all working Phase 1–3 functionality.
+- Do not break the validated OOO MCP integration.
+- Do not break KB ↔ OOO integration.
+- Do not weaken authentication or authorization.
+- Never hardcode secrets/API keys.
+- Never commit .env.local or local MCP configuration.
+- Reuse existing patterns and abstractions.
+- Do not create duplicate APIs/services.
+- Do not make unrelated UI changes.
+- Do not perform unrelated refactoring.
+- Do not modify production data manually.
+
+If Phase 4 includes PDP/PEP/ABAC, centralized gateway, write tools, acting-user context, platform-admin, or LangSmith, implement ONLY what is explicitly supported by the authoritative Phase 4 requirements.
+
+STEP 5 — VALIDATION
+
+Run all available:
+
+- unit tests
+- integration tests
+- build/type checks
+- authentication tests
+- authorization tests
+- MCP/API contract tests
+- regression tests
+
+Also verify that the previously validated:
+
+`ooo_pillars_list`
+
+still passes after Phase 4 changes.
+
+Test negative/security scenarios where applicable.
+
+STEP 6 — FINAL REPORT
+
+Return:
+
+PHASE 4 REQUIREMENTS FOUND:
+[exact repository-derived requirements]
+
+IMPLEMENTED:
+[completed functionality]
+
+FILES CHANGED:
+[file + reason]
+
+DATABASE CHANGES:
+[if any]
+
+SECURITY/PERMISSION CHANGES:
+[if any]
+
+TEST RESULTS:
+[PASS/FAIL for each validation]
+
+REGRESSION CHECK:
+[confirm Phase 3 functionality remains working]
+
+REMAINING BLOCKERS:
+[exact blockers, if any]
+
+FINAL VERDICT:
+
+PHASE 4 COMPLETE
+or
+PHASE 4 PARTIALLY COMPLETE
+or
+PHASE 4 BLOCKED
+
+IMPORTANT:
+Do not declare Phase 4 complete unless every repository-defined acceptance criterion has been implemented and validated.
+
+If an essential Phase 4 requirement is ambiguous or requires a business/security decision, STOP only at that specific decision point, explain exactly what decision is required, and do not guess.
+
+Start now with STEP 1, then continue sequentially through implementation where the repository provides sufficient authoritative requirements.
