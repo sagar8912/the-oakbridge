@@ -1,203 +1,176 @@
-Act as a Principal Full-Stack Engineer / Solution Architect.
+Continue ONLY with resolving the blockers for Step 3D.
 
-We are continuing the existing Phase 3 implementation.
+Current final verdict:
 
-Current verified state from your previous execution:
+STEP 3 PARTIALLY COMPLETE — BLOCKED
 
-STEP 3 = PARTIALLY COMPLETE
+Reported blocker:
+- OOO_API_KEY
+- OOO_APP_URL
+- corresponding KB-side configuration required for the integration/smoke test
+- successful ooo_pillars_list smoke validation is still required
 
-You reported:
-- Step 3A implementation is in place
-- Step 3B implementation is in place
-- Step 3C implementation is in place
-- Step 3D and full regression validation remain blocked by ExecutionPolicy and/or unset environment secrets/configuration
-- The blocker is environmental/configuration-related, not a missing implementation design
-- Step 4 has NOT started
+DO NOT START STEP 4.
 
-Your task now is to CLOSE OUT STEP 3 SAFELY.
+Your task is to safely resolve or guide me through resolving the Step 3D environment/configuration blockers.
 
-IMPORTANT:
-Do NOT start Step 4.
-Do NOT expand scope.
-Do NOT redesign the approved architecture.
-Do NOT introduce unrelated refactoring.
-Do NOT invent secret values.
-Do NOT expose secrets.
-Do NOT make destructive database changes.
+IMPORTANT SAFETY RULES:
 
-STEP 1 — RE-ANALYZE CURRENT STATE
+1. Do NOT invent, generate, or guess API keys.
+2. Do NOT replace real configuration with fake values just to make tests pass.
+3. Do NOT expose or print existing secret values.
+4. Do NOT commit secrets to Git.
+5. Do NOT make production configuration changes.
+6. Do NOT modify application architecture.
+7. Do NOT bypass authentication or authorization.
+8. Do NOT weaken security checks to make the smoke test pass.
 
-First inspect all code changes currently made for Phase 3.
+STEP 1 — INSPECT EXISTING CONFIGURATION
 
-Verify exactly what was implemented in:
-- 3A
-- 3B
-- 3C
+Search the entire repository/workspace for references to:
 
-For every implementation, trace the complete code path:
-UI/client
-→ request
-→ PEP/enforcement
-→ PDP/policy decision
-→ permission/attribute source
-→ database/data access
-→ response/error handling.
+OOO_API_KEY
+OOO_APP_URL
+KB_REVALIDATE_API_KEY
+and any related KB/OOO integration environment variables.
 
-Confirm that implementation still follows the approved Phase 3 architecture.
+Inspect:
 
-Identify:
-- incomplete code
-- TODOs
-- placeholders
-- hard-coded temporary logic
-- fail-open authorization behavior
-- duplicated authorization logic
-- missing error handling
-- missing auditability
-- type inconsistencies
+- .env.example files
+- local environment templates
+- README/documentation
+- package configuration
+- API routes
+- revalidation endpoints
+- OOO → KB integration code
+- KB → OOO integration code
+- existing local development configuration
 
-Do not modify anything during this analysis.
+DO NOT display secret values.
 
-STEP 2 — IDENTIFY EXACT 3D BLOCKERS
+Report only:
 
-Determine exactly what is preventing Step 3D from executing.
+VARIABLE NAME
+WHICH APP USES IT
+PURPOSE
+WHERE IT IS READ IN CODE
+WHERE IT SHOULD BE CONFIGURED LOCALLY
+WHETHER IT CURRENTLY EXISTS: YES/NO/UNKNOWN
 
-For each blocker report:
+STEP 2 — DETERMINE THE REQUIRED KEY PAIRING
 
-- blocker name
-- exact command/test being blocked
-- whether caused by PowerShell ExecutionPolicy, missing environment variable, missing secret, unavailable service, or another reason
-- whether it can be resolved safely without changing application architecture
+Trace the authentication flow between OOO and KB.
 
-For environment variables/secrets:
+Determine exactly which keys must match between the two applications.
 
-Only report the VARIABLE NAMES required.
+For example, determine whether:
 
-Never print secret values.
+OOO_API_KEY in one application
 
-Clearly separate:
+must correspond to a server-side expected API key in the other application,
 
-REQUIRED FOR LOCAL TESTING
-REQUIRED FOR STAGING
-REQUIRED FOR PRODUCTION
+and similarly determine how:
 
-If there is a safe way to run tests without changing machine-wide ExecutionPolicy, provide the exact command.
+KB_REVALIDATE_API_KEY
 
-Prefer temporary/process-scoped solutions over permanent machine configuration changes.
+is validated.
 
-STEP 3 — EXECUTE ALL SAFE VALIDATION POSSIBLE
+Do not assume variable relationships based only on their names.
 
-Run every validation that can safely execute in the current environment.
+Verify them directly from code.
 
-Where applicable run:
+Show me a simple mapping:
 
-- targeted unit tests for Phase 3
-- PDP tests
-- PEP tests
-- authorization/permission tests
-- TypeScript type checking
-- lint
-- relevant integration tests
-- regression tests around existing role-based behavior
+SOURCE APP
+ENV VARIABLE
+→
+TARGET APP
+VALIDATED AGAINST
 
-Do not claim PASS for anything that was not actually executed.
+Do NOT reveal actual values.
 
-Report each validation as:
+STEP 3 — CHECK WHETHER LOCAL DEVELOPMENT KEYS ALREADY EXIST
 
-PASS
-FAIL
-BLOCKED
-NOT APPLICABLE
+Determine whether valid local-development configuration already exists somewhere safe in the workspace/environment.
 
-For failures provide:
-- exact failing test
-- root cause
-- whether failure was introduced by Phase 3
+If it exists:
 
-Only fix a failure if it is clearly inside the already-approved Step 3 scope.
+Do NOT print the value.
 
-Do not make speculative fixes.
+Tell me only where/how the application already loads it and whether any configuration wiring is missing.
 
-STEP 4 — SECURITY / PERMISSION VALIDATION
+If it does NOT exist:
 
-Specifically verify the architecture John requested:
+Tell me exactly which local-development variables I need to create.
 
-Roles remain the BASE permission set.
+For locally generated development-only shared secrets, explain the safe method for creating them, but DO NOT automatically modify files until you establish that this is the intended repository pattern.
 
-Example:
-Super Admin may receive a collection of default capabilities through its role.
+STEP 4 — DETERMINE CORRECT LOCAL URLs
 
-But individual users must be capable, through the Phase 3 foundation, of receiving additional granular permissions/attributes independently of their role.
+Inspect the actual application configuration and determine the correct local URLs/ports for:
 
-Validate that the architecture supports the future model:
+OOO_APP_URL
+KB application URL
 
-ROLE BASE PERMISSIONS
-+
-INDIVIDUAL USER ATTRIBUTES/PERMISSIONS
-=
-EFFECTIVE PERMISSIONS
+Do not guess ports.
 
-Example future use case:
+Use the repository's actual dev-server configuration.
 
-A user who is NOT Super Admin may eventually receive a specific permission such as:
+Report the exact expected local URLs.
 
-goal.delete
+STEP 5 — GIVE ME THE MINIMUM MANUAL SETUP
 
-without being promoted to Super Admin.
+Before changing anything, provide:
 
-Verify that PDP is the centralized decision point and PEP correctly enforces the resulting decision.
+A. Exact file(s) where environment variables need to be configured.
 
-Check that sensitive authorization is not based only on hidden UI buttons.
+B. Variable names only.
 
-Backend/server-side enforcement must exist.
+C. Which variables must share/match values across apps.
 
-Check fail-safe behavior:
+D. Which variables are URLs.
 
-If PDP/permission resolution fails, sensitive operations must not silently become allowed.
+E. Which apps must be restarted after configuration.
 
-STEP 5 — BACKWARD COMPATIBILITY
+F. Exact commands to start both applications.
 
-Verify existing users who only have role-based permissions continue to behave exactly as expected.
+G. Exact smoke-test command/process for ooo_pillars_list.
 
-Phase 3 foundation must not unintentionally break:
+If PowerShell ExecutionPolicy blocks a command, prefer a safe process-scoped or direct executable alternative rather than changing machine-wide policy.
 
-- Super Admin
-- Admin
-- Team Admin
-- Team Owner
-- normal users
+STEP 6 — ONLY IF CONFIGURATION IS ALREADY CORRECT
 
-Do not change existing business permissions unless explicitly required by the approved architecture.
+If all required configuration already exists and can be safely used:
 
-STEP 6 — STEP 3D CLOSEOUT
+Start/verify both local applications where possible.
 
-Attempt Step 3D only when prerequisites available in the current environment allow it.
+Then execute the Step 3D smoke validation.
 
-If configuration is missing, do NOT fake a successful result.
+Verify:
 
-Instead give me exact manual setup instructions.
+OOO
+→ authenticated integration request
+→ KB/API
+→ PDP/PEP enforcement where applicable
+→ expected response
 
-After configuration is available, validate the full request path and regression behavior.
+Also verify ooo_pillars_list.
 
-STEP 7 — FINAL REPORT
+Do not claim success unless the actual request succeeds.
 
-At the end provide:
+STEP 7 — FINAL VERDICT
 
-1. Files changed for Phase 3
-2. What 3A implemented
-3. What 3B implemented
-4. What 3C implemented
-5. Status of 3D
-6. Tests actually executed
-7. PASS/FAIL/BLOCKED table
-8. Remaining environment/config blockers
-9. Security findings
-10. Backward compatibility findings
-11. Any technical debt created
-12. Exact manual actions I need to perform
-13. Production-readiness risks
+Return:
 
-Then provide ONE final verdict:
+STEP 3D CONFIGURATION
+- OOO_API_KEY: CONFIGURED / MISSING / UNKNOWN
+- OOO_APP_URL: CONFIGURED / MISSING / UNKNOWN
+- KB-side key/config: CONFIGURED / MISSING / UNKNOWN
+- Applications running: YES/NO
+- ooo_pillars_list smoke: PASS/FAIL/BLOCKED
+- Regression validation: PASS/FAIL/BLOCKED
+
+Then give exactly one verdict:
 
 STEP 3 COMPLETE — READY FOR STEP 4
 
@@ -205,14 +178,8 @@ or
 
 STEP 3 PARTIALLY COMPLETE — BLOCKED
 
-or
+If BLOCKED, give me the exact next manual action I need to perform.
 
-STEP 3 FAILED — FIX REQUIRED
+STOP after this.
 
-If blocked, explicitly tell me the minimum actions needed to unblock it.
-
-CRITICAL STOP CONDITION:
-
-DO NOT PROCEED TO STEP 4.
-
-Even if Step 3 becomes fully green, STOP after the Step 3 closeout report and wait for my explicit approval before starting Step 4.
+DO NOT START STEP 4 without my explicit approval.
