@@ -1,435 +1,218 @@
-Proceed with STEP 3: IMPLEMENT THE MINIMUM SAFE PHASE 3 FOUNDATION based strictly on the Step 1 repository analysis and Step 2 approved target architecture.
+Act as a Principal Full-Stack Engineer / Solution Architect.
 
-This is now an IMPLEMENTATION step, but scope must remain tightly controlled.
+We are continuing the existing Phase 3 implementation.
 
-DO NOT implement all of Phase 3.
+Current verified state from your previous execution:
 
-The approved Step 3 scope from the architecture analysis is:
+STEP 3 = PARTIALLY COMPLETE
 
-3A. Harden OOO dual-auth on the identified 8 MVP routes
-3B. Fix/document environment and API-key configuration required for MCP
-3C. Fix existing KB MCP tool contract drift, starting with kb_hierarchy and then kb_search
-3D. Validate one existing OOO read tool end-to-end and run automated + manual smoke validation
+You reported:
+- Step 3A implementation is in place
+- Step 3B implementation is in place
+- Step 3C implementation is in place
+- Step 3D and full regression validation remain blocked by ExecutionPolicy and/or unset environment secrets/configuration
+- The blocker is environmental/configuration-related, not a missing implementation design
+- Step 4 has NOT started
 
-IMPORTANT ARCHITECTURAL CONSTRAINTS:
-
-- REUSE the existing MCP packages and patterns.
-- REUSE mcp-shared.
-- REUSE validateApiKey and existing security mechanisms.
-- REUSE existing APIs and business logic.
-- REUSE existing PEP/PDP/RLS authorization.
-- DO NOT create a new mega-gateway.
-- DO NOT create a new MCP server unless absolutely required by existing architecture.
-- DO NOT add new MCP tools in this step.
-- DO NOT implement write-capable agent tools.
-- DO NOT implement LangSmith hosting.
-- DO NOT migrate models/providers.
-- DO NOT perform Azure deployment.
-- DO NOT refactor unrelated code.
-- DO NOT weaken any existing security to make tests pass.
-
-Before editing each area, inspect the exact implementation and confirm the minimum required change.
-
-==================================================
-STEP 3A — HARDEN OOO DUAL-AUTH
-==================================================
-
-The previous analysis identified missing/incomplete dual-auth on 8 OOO MVP routes.
-
-First, identify and list the exact 8 routes and their file paths.
-
-For each route document BEFORE changing:
-
-- current authentication
-- current authorization
-- whether validateApiKey is present
-- whether user/session authentication is present
-- whether PEP/PDP/RLS is involved
-- current security gap
-
-Then implement the existing repository's intended DUAL-AUTH pattern.
+Your task now is to CLOSE OUT STEP 3 SAFELY.
 
 IMPORTANT:
+Do NOT start Step 4.
+Do NOT expand scope.
+Do NOT redesign the approved architecture.
+Do NOT introduce unrelated refactoring.
+Do NOT invent secret values.
+Do NOT expose secrets.
+Do NOT make destructive database changes.
 
-Do NOT invent a new authentication system.
+STEP 1 — RE-ANALYZE CURRENT STATE
 
-Follow the repository's existing approved dual-auth pattern.
+First inspect all code changes currently made for Phase 3.
 
-The intended principle is that routes used through MCP must not become less secure than normal application access.
+Verify exactly what was implemented in:
+- 3A
+- 3B
+- 3C
 
-Where supported by the existing architecture, distinguish:
+For every implementation, trace the complete code path:
+UI/client
+→ request
+→ PEP/enforcement
+→ PDP/policy decision
+→ permission/attribute source
+→ database/data access
+→ response/error handling.
 
-1. Service/API authentication
-   Validates the trusted calling service using the existing API-key/service mechanism.
-
-2. User/application authorization
-   Preserves existing user/session/context and PEP/PDP/RLS authorization where required.
-
-Do not trust MCP/tool input parameters to self-declare:
-
-- user identity
-- role
-- team
-- tenant
-- permissions
-- authorization level
-
-Do not bypass existing RLS/PDP/PEP.
-
-Do not globally convert all application routes to service-role access.
-
-Use the minimum change required on the identified 8 routes.
-
-SECURITY TESTS REQUIRED:
-
-For each affected route or representative route groups, test:
-
-- valid normal application/user authentication still works
-- valid intended MCP/service authentication works only as designed
-- missing authentication fails
-- invalid API key fails
-- unauthorized user/context fails where applicable
-- authorization/RLS is not bypassed
-- existing frontend behavior is not broken
-
-Fail closed.
-
-==================================================
-STEP 3B — ENVIRONMENT / API KEY HARDENING
-==================================================
-
-The analysis found unset/mismatched environment keys.
-
-Audit the exact environment variables used by:
-
-- mcp-ooo
-- mcp-kb-admin
-- mcp-shared
-- apps/ooo
-- apps/kb-admin
+Confirm that implementation still follows the approved Phase 3 architecture.
 
 Identify:
+- incomplete code
+- TODOs
+- placeholders
+- hard-coded temporary logic
+- fail-open authorization behavior
+- duplicated authorization logic
+- missing error handling
+- missing auditability
+- type inconsistencies
 
-- variable name
-- where it is read
-- where it is documented
-- whether it is required/optional
-- naming mismatches
-- unsafe fallback behavior
-- missing validation
+Do not modify anything during this analysis.
 
-DO NOT print or expose actual secret values.
+STEP 2 — IDENTIFY EXACT 3D BLOCKERS
 
-DO NOT hardcode secrets.
+Determine exactly what is preventing Step 3D from executing.
 
-Fix only configuration CONTRACT problems in code/docs/examples.
+For each blocker report:
 
-Examples:
+- blocker name
+- exact command/test being blocked
+- whether caused by PowerShell ExecutionPolicy, missing environment variable, missing secret, unavailable service, or another reason
+- whether it can be resolved safely without changing application architecture
 
-- inconsistent variable names
-- missing startup validation
-- misleading .env.example entries
-- unsafe fallback behavior
-- mismatched API-key header expectations
+For environment variables/secrets:
 
-If actual secret values must be manually configured by a developer or deployment environment:
+Only report the VARIABLE NAMES required.
 
-DO NOT invent values.
-
-Clearly tell me:
-
-MANUAL CONFIGURATION REQUIRED
-
-and provide:
-
-VARIABLE NAME
-WHERE IT MUST BE SET
-WHAT COMPONENT USES IT
-HOW TO VERIFY IT WITHOUT REVEALING THE SECRET
-
-Ensure production-sensitive keys fail safely when required.
-
-Do not break local development unnecessarily.
-
-==================================================
-STEP 3C — FIX EXISTING KB TOOL CONTRACT DRIFT
-==================================================
-
-Do NOT create new KB tools.
-
-Audit the existing:
-
-1. kb_hierarchy
-2. kb_search
-
-For each trace:
-
-MCP tool schema
-→ MCP implementation
-→ HTTP/API request
-→ backend route
-→ request schema
-→ response schema
-→ MCP response
-
-Identify the exact contract drift.
-
-Examples to check:
-
-- wrong endpoint
-- stale parameter names
-- missing required parameters
-- response-shape mismatch
-- outdated tool description
-- authentication mismatch
-- inconsistent error handling
-
-Fix kb_hierarchy first.
-
-Run tests.
-
-Only after kb_hierarchy is validated, fix kb_search.
-
-Maintain backward compatibility where reasonably possible.
-
-Do not duplicate search/hierarchy business logic inside MCP.
-
-The MCP tool must remain a thin adapter over the existing KB application capability.
-
-==================================================
-STEP 3D — END-TO-END MCP FOUNDATION VALIDATION
-==================================================
-
-After 3A, 3B and 3C are complete, validate ONE EXISTING LOW-RISK READ-ONLY OOO MCP TOOL end-to-end.
-
-Do not create a new tool.
-
-Choose the safest existing read-only tool based on repository evidence.
-
-Show the exact execution path:
-
-MCP Client / stdio
-        ↓
-Existing mcp-ooo tool
-        ↓
-Shared MCP/API client
-        ↓
-x-api-key / intended service authentication
-        ↓
-OOO API
-        ↓
-Existing authentication/authorization
-        ↓
-PEP/PDP/RLS where applicable
-        ↓
-Existing business/data layer
-        ↓
-Response back through MCP
-
-Validate:
-
-1. MCP server starts successfully.
-
-2. Existing tool discovery works.
-
-3. Selected read-only tool can be invoked successfully with valid configuration/authentication.
-
-4. Missing/invalid credentials fail safely.
-
-5. Unauthorized data cannot be retrieved.
-
-6. Existing application functionality still works.
-
-7. No direct database access was introduced into MCP.
-
-8. No business logic was duplicated.
-
-9. No new tools were created.
-
-10. No secrets appear in logs/errors/output.
-
-Also validate:
-
-kb_hierarchy
-and
-kb_search
-
-through their existing MCP paths after contract fixes.
-
-==================================================
-REGRESSION TESTING
-==================================================
-
-Run all relevant existing:
-
-- unit tests
-- integration tests
-- MCP tests
-- authentication tests
-- authorization tests
-- type checks
-- lint
-- build checks
-
-Do not hide pre-existing failures.
-
-Clearly distinguish:
-
-NEW FAILURE CAUSED BY STEP 3
-
-vs
-
-PRE-EXISTING FAILURE
-
-Any security-sensitive failure introduced by Step 3 must be fixed before completion.
-
-==================================================
-CHANGE CONTROL
-==================================================
-
-Before making changes:
-
-Record the current git status.
-
-Do not modify unrelated existing user changes.
-
-After implementation provide the exact changed-file list.
-
-For EVERY changed file explain:
-
-- what changed
-- why
-- which Step 3 requirement required it
-
-Do not perform broad formatting/refactoring.
-
-Do not delete working code unless clearly necessary.
-
-==================================================
-STOP CONDITIONS
-==================================================
-
-STOP and ask for clarification instead of guessing if:
-
-1. Implementing dual-auth requires choosing between materially different security models not established by repository evidence.
-
-2. Safe end-user impersonation/delegation is required.
-
-3. Actual production/staging secret values are required.
-
-4. A change would weaken existing PDP/PEP/RLS.
-
-5. A change would require creating a new centralized gateway.
-
-6. A change would require Azure infrastructure/deployment.
-
-7. A change would require introducing new write capabilities.
-
-For configuration values, code as far as safely possible and mark manual configuration instead of inventing secrets.
-
-==================================================
-FINAL REPORT
-==================================================
-
-Return:
-
-1. STEP 3A — DUAL-AUTH
-
-Routes identified:
-[table]
-
-Changes:
-[details]
-
-Tests:
-[PASS/FAIL]
-
-2. STEP 3B — ENVIRONMENT/API KEYS
-
-Problems found:
-[table]
-
-Fixed:
-[details]
-
-Manual configuration required:
-[details without secrets]
-
-3. STEP 3C — KB TOOL DRIFT
-
-kb_hierarchy:
-- root cause
-- fix
-- tests
-
-kb_search:
-- root cause
-- fix
-- tests
-
-4. STEP 3D — E2E VALIDATION
-
-Selected existing OOO read tool:
-[name]
-
-Execution path:
-[diagram]
-
-Results:
-[PASS/FAIL]
-
-5. FILES CHANGED
-
-Exact list with reason.
-
-6. REGRESSION RESULTS
-
-Tests/build/lint/type-check.
-
-7. SECURITY VALIDATION
-
-Confirm PASS/FAIL:
-
-- API/service auth enforced
-- existing user authorization preserved
-- PDP/PEP/RLS not bypassed
-- invalid credentials rejected
-- unauthorized access rejected
-- no secrets exposed
-- no hardcoded secrets
-- no direct DB access added to MCP
-- no duplicate business logic
-- no new MCP tools
-- no mega-gateway
-- no LangSmith hosting changes
-
-8. REQUIREMENT PROGRESS
-
-Phase 3 Requirement 1:
-Current status and evidence.
-
-Phase 3 Requirement 2:
-Current status and evidence.
-
-Phase 3 Requirement 3:
-Current status and evidence.
-
-Do NOT declare all of Phase 3 complete yet.
-
-9. REMAINING BLOCKERS / OPEN DECISIONS
+Never print secret values.
 
 Clearly separate:
 
-BLOCKS NEXT STEP
+REQUIRED FOR LOCAL TESTING
+REQUIRED FOR STAGING
+REQUIRED FOR PRODUCTION
 
-DOES NOT BLOCK READ-ONLY MCP FOUNDATION
+If there is a safe way to run tests without changing machine-wide ExecutionPolicy, provide the exact command.
 
-10. FINAL VERDICT
+Prefer temporary/process-scoped solutions over permanent machine configuration changes.
 
-STEP 3:
-COMPLETE / PARTIALLY COMPLETE / BLOCKED
+STEP 3 — EXECUTE ALL SAFE VALIDATION POSSIBLE
 
-Explain based only on code and test evidence.
+Run every validation that can safely execute in the current environment.
 
-Do not automatically proceed to Step 4.
-STOP after the Step 3 report.
+Where applicable run:
+
+- targeted unit tests for Phase 3
+- PDP tests
+- PEP tests
+- authorization/permission tests
+- TypeScript type checking
+- lint
+- relevant integration tests
+- regression tests around existing role-based behavior
+
+Do not claim PASS for anything that was not actually executed.
+
+Report each validation as:
+
+PASS
+FAIL
+BLOCKED
+NOT APPLICABLE
+
+For failures provide:
+- exact failing test
+- root cause
+- whether failure was introduced by Phase 3
+
+Only fix a failure if it is clearly inside the already-approved Step 3 scope.
+
+Do not make speculative fixes.
+
+STEP 4 — SECURITY / PERMISSION VALIDATION
+
+Specifically verify the architecture John requested:
+
+Roles remain the BASE permission set.
+
+Example:
+Super Admin may receive a collection of default capabilities through its role.
+
+But individual users must be capable, through the Phase 3 foundation, of receiving additional granular permissions/attributes independently of their role.
+
+Validate that the architecture supports the future model:
+
+ROLE BASE PERMISSIONS
++
+INDIVIDUAL USER ATTRIBUTES/PERMISSIONS
+=
+EFFECTIVE PERMISSIONS
+
+Example future use case:
+
+A user who is NOT Super Admin may eventually receive a specific permission such as:
+
+goal.delete
+
+without being promoted to Super Admin.
+
+Verify that PDP is the centralized decision point and PEP correctly enforces the resulting decision.
+
+Check that sensitive authorization is not based only on hidden UI buttons.
+
+Backend/server-side enforcement must exist.
+
+Check fail-safe behavior:
+
+If PDP/permission resolution fails, sensitive operations must not silently become allowed.
+
+STEP 5 — BACKWARD COMPATIBILITY
+
+Verify existing users who only have role-based permissions continue to behave exactly as expected.
+
+Phase 3 foundation must not unintentionally break:
+
+- Super Admin
+- Admin
+- Team Admin
+- Team Owner
+- normal users
+
+Do not change existing business permissions unless explicitly required by the approved architecture.
+
+STEP 6 — STEP 3D CLOSEOUT
+
+Attempt Step 3D only when prerequisites available in the current environment allow it.
+
+If configuration is missing, do NOT fake a successful result.
+
+Instead give me exact manual setup instructions.
+
+After configuration is available, validate the full request path and regression behavior.
+
+STEP 7 — FINAL REPORT
+
+At the end provide:
+
+1. Files changed for Phase 3
+2. What 3A implemented
+3. What 3B implemented
+4. What 3C implemented
+5. Status of 3D
+6. Tests actually executed
+7. PASS/FAIL/BLOCKED table
+8. Remaining environment/config blockers
+9. Security findings
+10. Backward compatibility findings
+11. Any technical debt created
+12. Exact manual actions I need to perform
+13. Production-readiness risks
+
+Then provide ONE final verdict:
+
+STEP 3 COMPLETE — READY FOR STEP 4
+
+or
+
+STEP 3 PARTIALLY COMPLETE — BLOCKED
+
+or
+
+STEP 3 FAILED — FIX REQUIRED
+
+If blocked, explicitly tell me the minimum actions needed to unblock it.
+
+CRITICAL STOP CONDITION:
+
+DO NOT PROCEED TO STEP 4.
+
+Even if Step 3 becomes fully green, STOP after the Step 3 closeout report and wait for my explicit approval before starting Step 4.
