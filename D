@@ -1,37 +1,115 @@
-I am now doing the manual UAT setup.
+I need to implement the following Phase 3 requirement for the existing TOW App / KB-Admin App:
 
-Your analysis confirmed that Vision → KB expects these four approved workflow targets under TOWApp:
+PHASE 3: MCP Wrappers / Context-Callable APIs
+Goal: Create an MCP Wrapper for Agentic Development.
 
-mission
-vision
-purpose
-core-values
+Requirements:
+1. Harden APIs and security so TOW + Knowledge Base capabilities can be safely wrapped and exposed as callable services/tools (MCP-style) for future agentic orchestration.
+2. Ensure the architecture remains model-agnostic and aligned with Azure guardrails. Avoid vendor/model lock-in and avoid introducing a premature "AI-in-a-box" architecture.
+3. Use a centralized MCP tool-server approach for integrating TOW and Knowledge Base capabilities, with LangSmith integration/tracing where applicable.
 
-I want to test ONE mapping at a time, starting ONLY with "mission".
+IMPORTANT:
+DO NOT modify, create, delete, rename, or refactor any files in this step.
+This is ANALYSIS ONLY.
 
-Do NOT modify code or DB.
+First, deeply analyze the complete repository and existing architecture before recommending anything.
 
-Give me the exact UI click path in the current KB Admin application to manually create the "mission" workflow.
+Analyze:
 
-Tell me:
+1. TOW App architecture
+   - Frontend
+   - Backend
+   - API routes/endpoints
+   - Service/business logic
+   - Database/data-access layer
+   - Authentication
+   - Authorization
+   - Existing PDP/PEP/RACI implementation
+   - Logging/auditing
+   - Error handling
+   - Environment/configuration structure
 
-1. Which page I should open first.
-2. Which button/menu I should click.
-3. Exact values for every required field.
-4. Name = ?
-5. Code/slug = ?
-6. Parent/hierarchy = ?
-7. Knowledge Base = ?
-8. Whether categories or any other fields are required.
-9. How to add article/content to this workflow.
-10. Exact content status transitions required to make it approved.
-11. How to confirm the final admin URL resolves to:
-   /admin/knowledge/TOWApp/workflows/mission
-12. After approval, exactly how to verify the Mission card on /vision.
+2. KB-Admin / Knowledge Base architecture
+   - Existing APIs
+   - Search/retrieval functionality
+   - Document/content operations
+   - Authentication/authorization
+   - How TOW currently communicates with KB-Admin, if applicable
 
-Do not make any changes yourself.
-Do not create anything automatically.
-Guide me through UI actions only.
+3. Existing AI/agent/LangSmith-related implementation
+   - Search for LangSmith, LangChain, agents, tools, MCP, LLM providers, Azure AI/OpenAI, or similar integrations.
+   - Determine what already exists and what can safely be reused.
 
-Focus ONLY on Mission.
-STOP before Vision, Purpose, or Core Values.
+4. Existing Azure-related architecture/configuration.
+
+5. Identify all existing APIs/capabilities that could potentially become MCP tools.
+
+For each candidate capability, classify it as:
+
+- Read-only / low risk
+- Write / medium risk
+- Delete/admin/security-sensitive / high risk
+
+Do NOT assume MCP is required everywhere.
+
+Then provide:
+
+A. CURRENT ARCHITECTURE
+Explain the current relevant architecture and data/request flow.
+
+B. EXISTING REUSABLE COMPONENTS
+Show what already exists that Phase 3 can reuse.
+
+C. GAP ANALYSIS
+Map each Phase 3 requirement to:
+- Already implemented
+- Partially implemented
+- Missing
+
+D. MCP CANDIDATE CAPABILITIES
+List possible MCP tools, but DO NOT implement them.
+
+E. SECURITY ANALYSIS
+Explain how existing authentication + PDP/PEP/RACI authorization works and where MCP must integrate without bypassing security.
+
+F. RECOMMENDED ARCHITECTURE
+Propose the minimum-change architecture for:
+AI/Agent
+→ Central MCP Tool Server
+→ Existing TOW/KB APIs or service layer
+→ PEP/PDP authorization
+→ Business logic
+→ Data
+
+Do not duplicate existing business logic inside MCP wrappers.
+
+G. LANGSMITH CLARIFICATION
+Analyze the requirement "centralized MCP tool server within LangSmith."
+
+Clearly distinguish:
+- MCP server/tool hosting
+- Agent orchestration
+- LangSmith tracing/observability/evaluation
+
+Do not incorrectly assume LangSmith itself must host the MCP server unless the existing architecture/documentation proves that.
+
+H. IMPLEMENTATION PLAN
+Give a safe step-by-step implementation plan with exact files likely to be:
+- created
+- modified
+- reused
+
+I. RISKS / OPEN QUESTIONS
+Identify anything that must be clarified before implementation.
+
+Do not write any implementation code yet.
+
+Primary principles:
+- Minimum necessary changes
+- No breaking existing functionality
+- No duplicated business logic
+- No bypassing PDP/PEP/RACI
+- Model-agnostic
+- Azure-compatible
+- Secure by default
+- Backward compatible
