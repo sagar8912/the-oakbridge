@@ -1,207 +1,49 @@
-Continue from the Vision → KB Full Integration code audit you just completed.
+Do NOT modify any code or database yet.
+
+I am performing manual UAT for the completed Vision → Knowledge Base integration.
+
+In KB Admin, the existing TOW App knowledge base currently shows hierarchy entries such as:
+- OOO Items
+- Goals
+- Technical Documents
+- Getting Started
+
+However, I cannot currently see the four Vision-related Knowledge Base entries expected by the integration:
+- Mission
+- Vision
+- Purpose
+- Core Values
+
+The OOO / Vision page is loading successfully, but Mission, Vision, and Purpose show:
+"Authoritative article unavailable"
+
+Before making ANY changes, inspect the current codebase, Vision→KB mapping configuration, seed/migration data, and existing KB architecture.
+
+Tell me exactly:
+
+1. Which Knowledge Base should contain each of these four entries?
+2. Expected knowledge_base.code for each mapping.
+3. Exact expected slug for:
+   - Mission
+   - Vision
+   - Purpose
+   - Core Values
+4. Whether these should be:
+   - hierarchy/category nodes with article content,
+   - standalone articles,
+   - or existing records that should already be present in staging DB.
+5. Whether any seed/migration is supposed to create them.
+6. Whether I should create them manually through KB Admin for UAT or whether missing records indicate incomplete setup/migration.
+7. Exact UI steps to create/configure them if manual setup is expected.
+8. What status they need to have for Vision to resolve them (Draft/Review/Approved/Published).
+9. How the Vision page fetches each article and what exact condition causes "Authoritative article unavailable".
 
 IMPORTANT:
-Do not start implementing all recommended changes yet.
-
-We now need to perform STEP 2: VALIDATE THE AUDIT FINDINGS AND PREPARE THE INTEGRATION FOR UAT.
-
-Work strictly from the findings in your previous audit.
-
-Your previous recommended next steps included:
-
-1. Confirm staging/prod knowledge_base.code and article slugs for:
-   - mission
-   - vision
-   - purpose
-   - core-values
-
-2. If the actual KB code is not "tow", identify the exact mapping/configuration change required before UAT.
-
-3. Verify:
-   - KB_REVALIDATE_API_KEY
-   - OOO_APP_URL
-   across the relevant applications/configuration.
-
-4. Validate the complete flow:
-   KB Admin
-      → edit content
-      → approve/publish
-      → revalidation
-      → Vision card refresh
-      → latest approved content displayed
-
-5. Validate an authenticated user without kb_role:
-   - Reader access
-   - Vision card access
-   - ?towContext=vision deep-link behavior
-
-6. Determine whether live Vision prose/content is:
-   A. actually required by the current documented scope, or
-   B. intentionally still static/out of scope.
-
-Do NOT expand scope if repository documentation says it is out of scope.
-
-==================================================
-PHASE A — VALIDATE EACH FINDING
-==================================================
-
-For each previous audit finding, verify it again against the actual current code/configuration.
-
-Return:
-
-Finding:
-Evidence:
-File/config involved:
-Current behavior:
-Expected behavior:
-Status:
-- VERIFIED ISSUE
-- CONFIGURATION DEPENDENT
-- ALREADY CORRECT
-- CANNOT VERIFY LOCALLY
-
-Do not modify code during this phase.
-
-==================================================
-PHASE B — SEPARATE CODE ISSUES FROM ENV/UAT ISSUES
-==================================================
-
-Create four categories:
-
-A. CODE FIX REQUIRED BEFORE UAT
-
-B. CONFIGURATION/ENVIRONMENT FIX REQUIRED BEFORE UAT
-
-C. MANUAL UAT VALIDATION REQUIRED
-
-D. OUT OF SCOPE / FUTURE WORK
-
-This distinction is critical.
-
-Do not modify code to solve something that is only an environment/configuration issue.
-
-==================================================
-PHASE C — VERIFY VISION → KB MAPPING
-==================================================
-
-Inspect the actual mapping implementation.
-
-Confirm the expected:
-
-knowledge_base.code
-
-and exact slugs for:
-
-mission
-vision
-purpose
-core-values
-
-Trace where these values are referenced in code.
-
-Report:
-
-Expected value
-Actual code assumption
-Database/config dependency
-Risk if mismatched
-
-If a code/config fix is required, show me the exact proposed change as a diff preview ONLY.
-
-Do not apply it yet.
-
-==================================================
-PHASE D — VERIFY REVALIDATION
-==================================================
-
-Trace:
-
-Approve KB content
-→ revalidation trigger
-→ KB_REVALIDATE_API_KEY
-→ OOO_APP_URL
-→ cache invalidation
-→ Vision card refresh
-
-Determine whether this flow is code-complete.
-
-Separate:
-
-CODE COMPLETE
-
-from
-
-ENVIRONMENT NOT VERIFIED.
-
-Do not expose secret values.
-
-Only report whether required variables exist/references are correct.
-
-==================================================
-PHASE E — CREATE MANUAL UAT PLAN
-==================================================
-
-Give me exact browser/UI steps I can perform manually.
-
-Create numbered tests:
-
-TEST 1 — Vision card reads approved KB content
-
-TEST 2 — Draft changes are NOT visible
-
-TEST 3 — Approve/publish updates Vision card
-
-TEST 4 — Cache/revalidation works
-
-TEST 5 — Authenticated user without kb_role can access expected reader content
-
-TEST 6 — ?towContext=vision deep link works
-
-TEST 7 — Missing/unavailable article behavior is graceful
-
-For every test provide:
-
-STARTING PAGE/URL PATTERN
-
-USER ROLE REQUIRED
-
-EXACT CLICKS/ACTIONS
-
-EXPECTED RESULT
-
-PASS CRITERIA
-
-FAIL SYMPTOM
-
-Do not invent UI controls that do not exist in the code.
-
-==================================================
-PHASE F — FINAL GO/NO-GO
-==================================================
-
-Return:
-
-CODE STATUS:
-READY / NOT READY
-
-CONFIG STATUS:
-READY / NEEDS VERIFICATION
-
-READY FOR LOCAL UAT:
-YES / NO
-
-READY FOR STAGING UAT:
-YES / NO
-
-BLOCKERS:
-List only genuine blockers.
-
-Then give me:
-
-"NEXT SINGLE ACTION"
-
-Tell me exactly the ONE thing I should do next.
-
-Do not implement anything.
-
-STOP after the validation report and wait for my approval.
+READ-ONLY ANALYSIS ONLY.
+Do not edit code.
+Do not create migrations.
+Do not modify seed data.
+Do not change mappings.
+Do not commit anything.
+
+Give me the exact expected DB/KB mapping versus what currently exists, then STOP so I can perform the manual UAT safely.
