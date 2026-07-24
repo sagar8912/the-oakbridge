@@ -4,13 +4,14 @@ We are continuing the Knowledge Base (KB Admin) implementation discussed with Jo
 
 CURRENT STATUS:
 
-- Phase A: Stabilization / confirmed dead-code cleanup — COMPLETE
-- Phase B: Schema / Content Foundation — implementation completed locally; staging migration and final validation DEFERRED
-- Phase C: Permissioning / USER + TEAM access-control foundation — completed sufficiently to continue local development; final migration/security validation DEFERRED
+- Phase A — KB Stabilization / Dead-Code Cleanup: COMPLETE
+- Phase B — Schema / Content Foundation: LOCAL IMPLEMENTATION COMPLETE; staging validation deferred
+- Phase C — Permissions / USER + TEAM Access-Control Foundation: LOCAL IMPLEMENTATION COMPLETE; final staging/security validation deferred
+- Phase D — Content Lifecycle / Authoring / Approval / Publishing Foundation: COMPLETE ENOUGH TO CONTINUE LOCALLY
 
-IMPORTANT:
+IMPORTANT WORKFLOW RULE:
 
-We intentionally do NOT want to:
+Do NOT:
 
 - commit
 - push
@@ -19,357 +20,368 @@ We intentionally do NOT want to:
 - deploy
 - apply staging/production migrations
 
-at this stage.
-
-All integration/deployment/staging validation will be performed later after the planned local implementation phases are complete.
+We are completing local implementation phases first.
 
 Proceed with:
 
-PHASE D ONLY — KNOWLEDGE BASE CONTENT LIFECYCLE, AUTHORING, APPROVAL AND PUBLISHING FOUNDATION.
+PHASE E ONLY — GITHUB / CI-CD → KNOWLEDGE ARTICLE GENERATION PIPELINE
 
 ==================================================
-JOHN'S BUSINESS OBJECTIVE
+JOHN'S REQUIREMENT
 ==================================================
 
-John wants the Knowledge Base to become a reliable, governed source of organizational knowledge.
+John explained that development work already produces useful structured information through:
 
-He specifically does NOT want an uncontrolled KB where anyone can freely create/delete/publish content.
+- GitHub PRs
+- Markdown files
+- PRDs
+- implementation plans
+- research documents
+- feature documentation
 
-The KB must eventually support:
+His goal is that when a feature is developed and eventually released, we should not rely on tribal knowledge to explain the change to users.
 
-- controlled article creation
-- editing
-- review/approval
-- publishing
-- hierarchy organization
-- permissions
-- reliable authoritative content
+The development/deployment workflow should be capable of producing a Knowledge Base article from the available development documentation.
 
-It should support many types of knowledge, not only TOW application documentation.
+Conceptually:
 
-Examples include:
+Feature / Requirement
+        ↓
+PRD / Markdown / Implementation Documentation
+        ↓
+Pull Request / Development Lifecycle
+        ↓
+Structured Knowledge Article Draft
+        ↓
+Review / Approval
+        ↓
+Published Knowledge Article
 
-- application training
-- company/process knowledge
-- vendor knowledge
-- policies/procedures
-- operational knowledge
-- future agent-consumable knowledge
+IMPORTANT:
 
-Do NOT narrow the architecture to TOW documentation only.
+Do NOT automatically publish generated content.
 
-==================================================
-STEP D1 — AUDIT CURRENT CONTENT LIFECYCLE
-==================================================
-
-First inspect the existing repository.
-
-Determine exactly how KB content currently works:
-
-- article creation
-- article editing
-- drafts
-- approval
-- publishing
-- rejection
-- archival
-- deletion
-- versioning/revisions
-- authoritative article designation
-- hierarchy placement
-- ownership
-- author information
-- approval metadata
-
-Identify:
-
-- implemented functionality
-- partial/scaffolded functionality
-- dead functionality
-- duplicated lifecycle logic
-- missing enforcement
-- database state/status fields
-- UI/API inconsistencies
-
-Also inspect any existing docs/research/plans in the repository related to KB lifecycle.
-
-Do NOT modify code until this audit is complete.
+Generated knowledge must enter the controlled KB lifecycle created in Phase D.
 
 ==================================================
-STEP D2 — DEFINE CANONICAL ARTICLE LIFECYCLE
+STEP E1 — AUDIT EXISTING GITHUB / CI-CD ARCHITECTURE
 ==================================================
 
-Reuse existing approved architecture wherever possible.
+Before modifying code, inspect:
 
-Establish or normalize a clear lifecycle such as:
+- .github/workflows
+- GitHub Actions
+- PR templates
+- markdown documentation
+- docs/research
+- docs/plans
+- PRD locations
+- deployment workflows
+- staging/prod promotion workflows
+- existing automation scripts
+- GitHub API integrations
+- webhooks if any
+- KB APIs/MCP tools capable of creating content
 
+Determine:
+
+1. What information is available during a PR.
+
+2. Where PRDs/implementation docs live.
+
+3. How a PR relates to a feature.
+
+4. What event currently represents release/deployment.
+
+5. Whether any existing documentation automation exists.
+
+6. Whether repository research/plans already define this pipeline.
+
+Do not modify code until the audit is complete.
+
+==================================================
+STEP E2 — DEFINE CANONICAL KNOWLEDGE GENERATION CONTRACT
+==================================================
+
+Define a structured contract for converting development information into a KB article draft.
+
+At minimum consider:
+
+- title
+- summary
+- what changed
+- why it changed
+- who is affected
+- how to use the feature
+- user-visible behavior
+- permissions/access considerations
+- known limitations
+- related feature/module
+- source PR
+- source documentation
+- release/deployment reference
+- generated timestamp
+
+Do not blindly copy engineering documentation into the KB.
+
+The output should be useful from an END-USER / BUSINESS USER perspective.
+
+Preserve traceability back to source development artifacts.
+
+==================================================
+STEP E3 — SOURCE DISCOVERY
+==================================================
+
+Implement a deterministic way to discover relevant documentation associated with a PR/feature.
+
+Potential sources include existing repository conventions such as:
+
+- PR description
+- linked PRD
+- docs/research
+- docs/plans
+- implementation markdown
+- changed documentation files
+
+Do NOT invent fragile assumptions if the repository already defines conventions.
+
+Prefer explicit references/metadata where available.
+
+If no reliable association exists, report the gap instead of guessing unrelated documents.
+
+==================================================
+STEP E4 — ARTICLE DRAFT GENERATION
+==================================================
+
+Implement the minimum safe pipeline that can transform the discovered feature information into a structured:
+
+KNOWLEDGE ARTICLE DRAFT
+
+Important:
+
+The generated result MUST NOT bypass Phase D.
+
+It should enter the lifecycle as:
+
+GENERATED CONTENT
+        ↓
 DRAFT
-   ↓
-SUBMITTED / IN REVIEW
-   ↓
-APPROVED
-   ↓
-PUBLISHED
+        ↓
+HUMAN REVIEW
+        ↓
+APPROVAL
+        ↓
+PUBLISH
 
-with appropriate handling for:
+Never:
 
-REJECTED / CHANGES REQUESTED
+Generated
+        ↓
+Automatically Published
 
-and
+unless an existing explicitly approved business rule says otherwise.
 
-ARCHIVED
+==================================================
+STEP E5 — IDEMPOTENCY / DUPLICATE PROTECTION
+==================================================
 
-Do NOT invent unnecessary statuses if equivalent repository-defined states already exist.
+Prevent the same PR/release from creating uncontrolled duplicate articles.
 
-Document the allowed transitions.
+Use an appropriate stable source reference such as:
 
-Prevent invalid transitions.
+- repository
+- PR number
+- source identifier
+- deployment/release identifier
+
+consistent with existing architecture.
+
+The pipeline should be capable of determining:
+
+NEW SOURCE
+→ create draft
+
+EXISTING SOURCE
+→ update/revise appropriate draft or safely no-op
+
+Do not overwrite published authoritative content unsafely.
+
+Respect Phase D revision/version behavior.
+
+==================================================
+STEP E6 — TRACEABILITY
+==================================================
+
+Every generated article should retain machine-readable traceability where architecture supports it.
 
 Examples:
 
-A draft should not accidentally become published through a direct client request.
+- source repository
+- PR number
+- source commit/SHA
+- source document(s)
+- generation method
+- generation timestamp
 
-Archived content should not behave as active published content.
+This is important so we can answer:
 
-==================================================
-STEP D3 — ARTICLE AUTHORING
-==================================================
+“Why does this KB article exist?”
 
-Ensure authorized users can:
+and:
 
-- create an article
-- save a draft
-- edit permitted drafts/content
-- assign/select appropriate hierarchy location where allowed
-- provide required metadata
-- submit content for review
+“Which code/change generated it?”
 
-Reuse Phase C permission capabilities.
-
-Do not create a second authorization model.
-
-Unauthorized users must not be able to bypass restrictions through direct API calls.
+Do not expose unnecessary internal engineering metadata to normal end users if it belongs only in audit metadata.
 
 ==================================================
-STEP D4 — REVIEW AND APPROVAL WORKFLOW
+STEP E7 — SECURITY / PERMISSIONS
 ==================================================
 
-Implement or harden the existing review workflow.
+Integrate with Phase C and Phase D.
 
-Support, where consistent with repository architecture:
-
-Author
-    ↓
-Draft
-    ↓
-Submit for Review
-    ↓
-Authorized Reviewer/Approver
-    ↓
-Approve OR Request Changes/Reject
-    ↓
-Publish
-
-Record appropriate audit metadata such as:
-
-- created_by
-- updated_by
-- submitted_by
-- approved_by
-- timestamps
-
-Only where consistent with existing schema/architecture.
-
-Do not duplicate fields that already exist.
-
-==================================================
-STEP D5 — PUBLISHING CONTROL
-==================================================
-
-Publishing must be controlled.
+The automation identity/process must not become an unrestricted security bypass.
 
 Ensure:
 
-- only authorized users/processes can publish
-- publication state is enforced server-side
-- unauthorized direct API publication fails
-- unpublished content does not accidentally appear as authoritative public knowledge
+- article creation uses an explicitly authorized service/system path
+- generated content is DRAFT
+- publication still requires authorized lifecycle action
+- generated articles respect hierarchy/access architecture
+- direct unauthorized API calls remain rejected
 
-Reuse Phase C APPROVE/PUBLISH permissions.
-
-==================================================
-STEP D6 — AUTHORITATIVE CONTENT
-==================================================
-
-Inspect the existing concept of:
-
-- authoritative article
-- approved knowledge
-- published article
-
-Normalize behavior so consumers can reliably distinguish:
-
-AUTHORITATIVE/PUBLISHED KNOWLEDGE
-
-from:
-
-DRAFT / UNAPPROVED / ARCHIVED KNOWLEDGE.
-
-This is important because future:
-
-- TOW integration
-- MCP tools
-- LangSmith agents
-- search/retrieval
-
-must be able to consume trusted knowledge.
-
-Do NOT implement the agent integration yet.
-
-Only ensure the lifecycle/data model supports it.
+Do not weaken existing RLS/PDP/PEP protections to make automation easier.
 
 ==================================================
-STEP D7 — VERSIONING / REVISION SAFETY
+STEP E8 — GITHUB ACTION / PIPELINE INTEGRATION
 ==================================================
 
-Inspect whether article versioning/revisions already exist.
+Design and implement the safest integration point supported by the repository.
 
-If supported by existing architecture, ensure editing a published article does not silently destroy the authoritative published version.
+Possible trigger points may include:
 
-Prefer a safe model such as:
+- PR event
+- merge event
+- staging deployment
+- release/deployment completion
 
-Published Version
-      ↓
-New Revision/Draft
-      ↓
-Review
-      ↓
-Approval
-      ↓
-New Published Version
+Choose based on existing architecture and John's requirement.
 
-But DO NOT introduce a large new versioning architecture if repository plans specify another approach.
+IMPORTANT:
 
-Follow approved repository research/plans first.
+Do not introduce automatic production deployment.
 
-==================================================
-STEP D8 — ARCHIVE / DELETE SAFETY
-==================================================
+Do not require real GitHub secrets for local implementation/testing.
 
-Review delete behavior carefully.
+If actual GitHub integration requires credentials/secrets:
 
-Avoid destructive deletion of important published organizational knowledge unless explicitly required.
+Implement the code/configuration contract safely and mark live execution:
 
-Prefer existing archive/soft-delete architecture where available.
+DEFERRED — REQUIRES INTEGRATION ENVIRONMENT
 
-Ensure unauthorized users cannot:
-
-- delete
-- archive
-- restore
-
-content through direct API calls.
-
-Do not invent new retention policy.
-
-If business clarification is required, report it.
+Never print or hardcode secrets.
 
 ==================================================
-STEP D9 — HIERARCHY INTEGRATION
+STEP E9 — FAILURE SAFETY
 ==================================================
 
-Ensure articles integrate correctly with the existing KB hierarchy.
+Knowledge generation must NOT break application deployment.
 
-Validate:
-
-- article → hierarchy relationship
-- movement between hierarchy nodes
-- hierarchy deletion impact
-- permission interaction from Phase C
-
-Do NOT invent unresolved USER/TEAM inheritance semantics.
-
-If Phase D behavior depends on unresolved inheritance rules, mark:
-
-BLOCKED — JOHN CONFIRMATION REQUIRED
-
-and implement only the safe foundation.
-
-==================================================
-STEP D10 — UI WORKFLOW
-==================================================
-
-Ensure the UI clearly reflects lifecycle state.
-
-Where supported by permissions, users should be able to understand whether content is:
-
-- Draft
-- In Review
-- Approved
-- Published
-- Changes Requested/Rejected
-- Archived
-
-Only show actionable controls when appropriate.
+Design failure behavior explicitly.
 
 Examples:
 
-Submit for Review
-Approve
-Request Changes
-Publish
-Archive
+If KB generation fails:
 
-must appear only when:
+- record/report failure
+- preserve diagnostic information
+- avoid creating corrupt/partial published content
 
-1. the lifecycle state allows the action
-AND
-2. the user has permission.
+Determine whether it should block deployment only if existing approved requirements say so.
 
-Do not perform unrelated visual redesign.
+Do not invent a deployment-blocking policy.
 
 ==================================================
-STEP D11 — SERVER-SIDE ENFORCEMENT
+STEP E10 — LOCAL TESTING
 ==================================================
 
-Every lifecycle transition must be validated server-side.
+Create local fixtures/tests representing:
 
-Do not trust:
+Scenario 1:
+PR with valid linked PRD/docs
+→ structured KB draft generated.
 
-- hidden buttons
-- disabled controls
-- client-supplied status
-- client-supplied permission claims
+Scenario 2:
+PR with insufficient documentation
+→ safe failure / actionable result.
 
-Test direct API attempts for invalid/unauthorized transitions.
+Scenario 3:
+Same PR processed twice
+→ no uncontrolled duplicate.
+
+Scenario 4:
+Existing draft from same source
+→ safe update/no-op according to architecture.
+
+Scenario 5:
+Existing published article
+→ not silently overwritten.
+
+Scenario 6:
+Generated article
+→ remains draft/unpublished.
+
+Scenario 7:
+Unauthorized caller
+→ cannot abuse generation endpoint/process.
+
+Scenario 8:
+Traceability metadata
+→ correctly retained.
 
 ==================================================
-STEP D12 — TEST MATRIX
+STEP E11 — PRESERVE FUTURE MODEL-AGNOSTIC DESIGN
 ==================================================
 
-Create/update tests covering at minimum:
+John wants the architecture to remain model-agnostic.
 
-1. Authorized user creates draft.
-2. Unauthorized user cannot create.
-3. Draft can be edited by authorized user.
-4. Draft can be submitted for review.
-5. Unauthorized user cannot approve.
-6. Authorized approver can approve.
-7. Unauthorized user cannot publish.
-8. Authorized publisher can publish.
-9. Invalid lifecycle transitions fail.
-10. Published/authoritative content is distinguishable from drafts.
-11. Archive/delete permissions are enforced.
-12. Hierarchy relationships remain valid.
-13. Existing Phase C permission enforcement is not bypassed.
+Do not tightly couple the pipeline to one AI provider unless the repository explicitly requires it.
 
-If versioning exists:
+Separate:
 
-14. Editing published content preserves appropriate revision/history behavior.
+SOURCE COLLECTION
+
+from
+
+CONTENT TRANSFORMATION
+
+from
+
+KB PERSISTENCE
+
+from
+
+APPROVAL/PUBLISHING.
+
+If AI generation is used or planned, keep the provider boundary replaceable.
+
+Do not implement unnecessary “AI-in-a-box” architecture.
 
 ==================================================
-STEP D13 — REGRESSION VALIDATION
+STEP E12 — REGRESSION
 ==================================================
+
+Verify no regressions to:
+
+- TOW app
+- KB navigation
+- authentication
+- Phase C permissions
+- Phase D lifecycle
+- hierarchy
+- article reading
+- article creation/editing
+- approval/publishing
+- existing CI/CD
 
 Run locally available:
 
@@ -379,36 +391,23 @@ Run locally available:
 - integration tests
 - build
 
-Verify no regression to:
-
-- TOW app
-- authentication
-- PDP/PEP
-- Phase A stabilization
-- Phase B schema/content foundation
-- Phase C permission foundation
-- KB navigation
-- hierarchy
-- article reading
-- existing TOW → KB deep links
-
-Fix only issues caused by Phase D.
+Fix only regressions caused by Phase E.
 
 ==================================================
-STRICT SCOPE CONTROL
+STRICT SCOPE
 ==================================================
 
-DO NOT implement yet:
+DO NOT implement Phase F yet.
 
-- GitHub PR → automatic KB article generation
-- CI/CD knowledge generation
-- LangSmith agent integration
-- document/PDF bulk migration
-- TOW notification fixes
-- TOW shared-list fixes
-- unrelated TOW features
+Specifically do NOT implement:
 
-These belong to separate workstreams/phases.
+- LangSmith agent migration
+- IT/HR agent retrieval changes
+- bulk Word/PDF ingestion
+- full MCP retrieval redesign
+- TOW notification work
+- TOW shared-list work
+- unrelated features
 
 DO NOT:
 
@@ -417,7 +416,7 @@ DO NOT:
 - merge
 - create PR
 - deploy
-- run staging/production migrations
+- apply staging/prod migrations
 
 ==================================================
 FINAL REPORT
@@ -425,41 +424,46 @@ FINAL REPORT
 
 Return:
 
-PHASE D STATUS:
+PHASE E STATUS:
 COMPLETE / PARTIALLY COMPLETE / BLOCKED
 
-Then provide:
+Report:
 
-1. Existing lifecycle discovered
-2. Canonical lifecycle after Phase D
-3. Files/schema/components changed
-4. Authoring functionality completed
-5. Review functionality completed
-6. Approval functionality completed
-7. Publishing controls completed
-8. Authoritative-content handling
-9. Version/revision handling
-10. Archive/delete handling
-11. Permission integration with Phase C
-12. Tests and exact results
-13. Regression results
-14. Deferred staging/migration work
+1. Existing GitHub/CI-CD architecture discovered
+2. Documentation sources discovered
+3. Generation architecture implemented
+4. Article draft contract
+5. Trigger/integration design
+6. Duplicate/idempotency handling
+7. Traceability implementation
+8. Phase C permission integration
+9. Phase D lifecycle integration
+10. Security behavior
+11. Tests and exact results
+12. CI/CD regression status
+13. Items requiring real GitHub/staging integration later
 
-Create:
+Clearly separate:
+
+LOCAL IMPLEMENTATION COMPLETE
+
+from:
+
+DEFERRED INTEGRATION VALIDATION
+
+List any:
 
 QUESTIONS FOR JOHN
 
-Only include genuine unresolved business decisions.
-
-Do not invent answers.
+Only if a genuine business decision is unresolved.
 
 Finally state:
 
-READY FOR PHASE E LOCAL IMPLEMENTATION: YES/NO
+READY FOR PHASE F LOCAL IMPLEMENTATION: YES/NO
 
-STOP after Phase D.
+STOP.
 
-Do not start Phase E.
+Do not start Phase F.
 Do not commit.
 Do not push.
 Do not merge.
