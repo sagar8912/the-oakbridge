@@ -1,22 +1,283 @@
-I have created the staging list:
+Proceed with PHASE A ONLY — Knowledge Base Stabilization and Confirmed Dead-Code Cleanup.
 
-Team: Oakes Award - Nominations
-List: Oakes Award Recommendations
+The previous repository analysis concluded:
 
-The list URL shows this UUID:
-45a32244-0ca0-4f83-9224-7f3d7da62d3a
+READY TO START IMPLEMENTATION
 
-Please verify this UUID against the staging database before using it.
+Recommended first phase:
+Phase A — Stabilization / dead-code cleanup
+aligned with the existing repository Track 1, dead-navigation fixes,
+and Phase 1.B UAT.
 
-Also verify the list configuration:
-- Create = Everyone
-- A valid Default Owner is configured
-- Viewer/non-team users can submit safely
-- Viewers cannot read or modify other users' nominations
-- Delete remains restricted to Team Admin
-- No private team/list data is exposed
+This is now an IMPLEMENTATION step.
 
-Once verified, configure this as the staging OAKES_AWARD_LIST_ID and complete the smallest safe implementation.
+IMPORTANT:
+Use the repository analysis and existing research/plans you just completed as the source of truth.
 
-Do not use this staging UUID for production.
-Do not weaken global Viewer permissions.
+Do NOT invent a new architecture.
+Do NOT expand into later phases.
+Do NOT implement new KB permissions yet.
+Do NOT redesign the schema.
+Do NOT implement GitHub/CI-CD article generation yet.
+Do NOT implement new MCP/agent functionality yet.
+Do NOT modify unrelated TOW functionality.
+Do NOT commit or push.
+
+==================================================
+OBJECTIVE
+==================================================
+
+Make the current Knowledge Base application smaller, safer, and more stable before we build additional functionality.
+
+This directly follows John's direction that the KB currently contains scaffolding/dead functionality and should be stabilized before broader TOW integration or user adoption.
+
+==================================================
+STEP 1 — CONFIRM DEAD CODE BEFORE DELETION
+==================================================
+
+Use the dead-code findings from the previous analysis.
+
+For every candidate, verify:
+
+1. Is it reachable from the current UI?
+2. Is it imported by active production code?
+3. Is an API route actively consuming it?
+4. Is it referenced by tests?
+5. Is it required by an existing documented architecture plan?
+6. Could deleting it break an active KB workflow?
+
+Classify:
+
+SAFE TO REMOVE
+KEEP
+DEFER / UNCERTAIN
+
+Only remove code classified SAFE TO REMOVE with concrete evidence.
+
+==================================================
+STEP 2 — CHATBOT DEAD/SCAFFOLDED FUNCTIONALITY
+==================================================
+
+John specifically identified the old/non-working chatbot as functionality that should not remain exposed if it is not actually supported.
+
+Trace the entire chatbot implementation:
+
+UI
+→ components
+→ routes
+→ APIs
+→ services
+→ database dependencies
+→ imports/references.
+
+If the previous analysis and current code prove it is dead/scaffolded:
+
+- remove user-facing navigation/access
+- remove confirmed unused components
+- remove confirmed unused routes/APIs/services
+- remove orphaned imports/references
+
+Do NOT remove shared infrastructure used elsewhere.
+
+If any chatbot component is actively required, preserve it and explain why.
+
+==================================================
+STEP 3 — FILE-UPLOAD DEAD/SCAFFOLDED FUNCTIONALITY
+==================================================
+
+Perform the same dependency trace for old KB file-upload functionality.
+
+Determine whether it is:
+
+- genuinely active
+- partially implemented
+- dead/scaffolded
+
+If confirmed dead:
+
+remove only the dead implementation safely.
+
+IMPORTANT:
+
+Do not remove generic/shared storage or upload infrastructure if another active feature depends on it.
+
+Do not implement a replacement document-ingestion pipeline in Phase A.
+
+==================================================
+STEP 4 — DEAD/BROKEN NAVIGATION
+==================================================
+
+Audit KB navigation against actual working routes.
+
+Fix/remove:
+
+- links to nonexistent pages
+- links to dead features
+- stale navigation entries
+- broken routes
+- misleading UI actions
+- buttons that expose unsupported functionality
+
+Every visible navigation/action should either:
+
+A. work correctly
+
+or
+
+B. not be exposed to users.
+
+Do not redesign the entire navigation.
+
+==================================================
+STEP 5 — STABILIZE EXISTING CORE KB FLOWS
+==================================================
+
+Verify existing supported flows without expanding scope:
+
+- KB landing/navigation
+- hierarchy browsing
+- article listing
+- article viewing
+- article search if currently supported
+- existing admin routes
+- existing draft/approved/published behavior where implemented
+- existing TOW → KB deep links/scaffolding
+
+Fix only verified regressions or obvious stability defects.
+
+Do not add new product functionality.
+
+==================================================
+STEP 6 — PRESERVE TOW ↔ KB SCAFFOLDING
+==================================================
+
+John said the existing TOW/KB integration is a good starting point.
+
+Therefore:
+
+DO NOT remove the working integration foundation.
+
+Verify existing integration/deep links remain functional after cleanup.
+
+However, do not expand broader KB exposure in TOW during this phase.
+
+==================================================
+STEP 7 — SECURITY SANITY CHECK
+==================================================
+
+During cleanup, verify we do not accidentally:
+
+- expose admin-only routes
+- bypass existing authorization
+- expose drafts unintentionally
+- expose service credentials
+- weaken API authentication
+- create direct-route access regressions
+
+Do not redesign permission architecture yet.
+
+If a serious authorization vulnerability is discovered:
+
+STOP that portion,
+document it as P0/P1,
+and make only the minimum safe fix if necessary to prevent an active security regression.
+
+==================================================
+STEP 8 — TESTING / REGRESSION
+==================================================
+
+Run all relevant available:
+
+- unit tests
+- integration tests
+- type checks
+- lint
+- production build
+
+Then verify the Phase 1.B/UAT scenarios identified in the existing repository plans.
+
+At minimum verify:
+
+1. KB application loads.
+
+2. Main KB navigation works.
+
+3. Hierarchy browsing works.
+
+4. Existing valid article pages open.
+
+5. Existing supported search/retrieval still works.
+
+6. Dead chatbot/file-upload functionality is no longer misleadingly exposed if confirmed for removal.
+
+7. No broken navigation remains from removed functionality.
+
+8. Existing TOW → KB integration/deep links still work where currently supported.
+
+9. No obvious console/server errors introduced.
+
+==================================================
+SCOPE CONTROL
+==================================================
+
+Do NOT start:
+
+Phase B — schema/content redesign
+
+Phase C — full KB PDP/PEP permission architecture
+
+Phase D — new article workflow architecture
+
+Phase E — new MCP/retrieval implementation
+
+Phase F — agent/document migration
+
+Phase G — GitHub/CI-CD automatic article generation
+
+Phase H — broader TOW ↔ KB exposure
+
+Those are separate implementation phases.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Return:
+
+1. PHASE A STATUS:
+   COMPLETE
+   PARTIALLY COMPLETE
+   or BLOCKED
+
+2. Dead code removed
+   - exact files/components
+   - why each was safe to remove
+
+3. Code intentionally preserved
+   - especially anything initially suspected as dead
+   - why it remains required
+
+4. Navigation fixes
+
+5. Stability fixes
+
+6. Files changed
+
+7. Tests/build/type-check results
+
+8. UAT results
+
+9. TOW ↔ KB regression status
+
+10. Remaining blockers/issues categorized:
+    P0 / P1 / P2 / P3
+
+11. Confirm whether repository is ready for the NEXT implementation phase.
+
+If Phase A is fully complete, recommend exactly ONE next phase based on dependencies and existing repository plans.
+
+Do NOT automatically start that next phase.
+
+STOP after Phase A.
+Do NOT commit.
+Do NOT push.
