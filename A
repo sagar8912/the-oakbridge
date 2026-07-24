@@ -1,283 +1,120 @@
-Proceed with PHASE A ONLY — Knowledge Base Stabilization and Confirmed Dead-Code Cleanup.
+Proceed with PHASE B ONLY — Knowledge Base Schema/Content Foundation.
 
-The previous repository analysis concluded:
-
-READY TO START IMPLEMENTATION
-
-Recommended first phase:
-Phase A — Stabilization / dead-code cleanup
-aligned with the existing repository Track 1, dead-navigation fixes,
-and Phase 1.B UAT.
-
-This is now an IMPLEMENTATION step.
+Phase A (Knowledge Base Stabilization and confirmed dead-code cleanup) is complete.
 
 IMPORTANT:
-Use the repository analysis and existing research/plans you just completed as the source of truth.
-
-Do NOT invent a new architecture.
-Do NOT expand into later phases.
-Do NOT implement new KB permissions yet.
-Do NOT redesign the schema.
-Do NOT implement GitHub/CI-CD article generation yet.
-Do NOT implement new MCP/agent functionality yet.
-Do NOT modify unrelated TOW functionality.
-Do NOT commit or push.
-
-==================================================
-OBJECTIVE
-==================================================
-
-Make the current Knowledge Base application smaller, safer, and more stable before we build additional functionality.
-
-This directly follows John's direction that the KB currently contains scaffolding/dead functionality and should be stabilized before broader TOW integration or user adoption.
-
-==================================================
-STEP 1 — CONFIRM DEAD CODE BEFORE DELETION
-==================================================
-
-Use the dead-code findings from the previous analysis.
-
-For every candidate, verify:
-
-1. Is it reachable from the current UI?
-2. Is it imported by active production code?
-3. Is an API route actively consuming it?
-4. Is it referenced by tests?
-5. Is it required by an existing documented architecture plan?
-6. Could deleting it break an active KB workflow?
-
-Classify:
-
-SAFE TO REMOVE
-KEEP
-DEFER / UNCERTAIN
-
-Only remove code classified SAFE TO REMOVE with concrete evidence.
-
-==================================================
-STEP 2 — CHATBOT DEAD/SCAFFOLDED FUNCTIONALITY
-==================================================
-
-John specifically identified the old/non-working chatbot as functionality that should not remain exposed if it is not actually supported.
-
-Trace the entire chatbot implementation:
-
-UI
-→ components
-→ routes
-→ APIs
-→ services
-→ database dependencies
-→ imports/references.
-
-If the previous analysis and current code prove it is dead/scaffolded:
-
-- remove user-facing navigation/access
-- remove confirmed unused components
-- remove confirmed unused routes/APIs/services
-- remove orphaned imports/references
-
-Do NOT remove shared infrastructure used elsewhere.
-
-If any chatbot component is actively required, preserve it and explain why.
-
-==================================================
-STEP 3 — FILE-UPLOAD DEAD/SCAFFOLDED FUNCTIONALITY
-==================================================
-
-Perform the same dependency trace for old KB file-upload functionality.
-
-Determine whether it is:
-
-- genuinely active
-- partially implemented
-- dead/scaffolded
-
-If confirmed dead:
-
-remove only the dead implementation safely.
-
-IMPORTANT:
-
-Do not remove generic/shared storage or upload infrastructure if another active feature depends on it.
-
-Do not implement a replacement document-ingestion pipeline in Phase A.
-
-==================================================
-STEP 4 — DEAD/BROKEN NAVIGATION
-==================================================
-
-Audit KB navigation against actual working routes.
-
-Fix/remove:
-
-- links to nonexistent pages
-- links to dead features
-- stale navigation entries
-- broken routes
-- misleading UI actions
-- buttons that expose unsupported functionality
-
-Every visible navigation/action should either:
-
-A. work correctly
-
-or
-
-B. not be exposed to users.
-
-Do not redesign the entire navigation.
-
-==================================================
-STEP 5 — STABILIZE EXISTING CORE KB FLOWS
-==================================================
-
-Verify existing supported flows without expanding scope:
-
-- KB landing/navigation
-- hierarchy browsing
-- article listing
-- article viewing
-- article search if currently supported
-- existing admin routes
-- existing draft/approved/published behavior where implemented
-- existing TOW → KB deep links/scaffolding
-
-Fix only verified regressions or obvious stability defects.
-
-Do not add new product functionality.
-
-==================================================
-STEP 6 — PRESERVE TOW ↔ KB SCAFFOLDING
-==================================================
-
-John said the existing TOW/KB integration is a good starting point.
-
-Therefore:
-
-DO NOT remove the working integration foundation.
-
-Verify existing integration/deep links remain functional after cleanup.
-
-However, do not expand broader KB exposure in TOW during this phase.
-
-==================================================
-STEP 7 — SECURITY SANITY CHECK
-==================================================
-
-During cleanup, verify we do not accidentally:
-
-- expose admin-only routes
-- bypass existing authorization
-- expose drafts unintentionally
-- expose service credentials
-- weaken API authentication
-- create direct-route access regressions
-
-Do not redesign permission architecture yet.
-
-If a serious authorization vulnerability is discovered:
-
-STOP that portion,
-document it as P0/P1,
-and make only the minimum safe fix if necessary to prevent an active security regression.
-
-==================================================
-STEP 8 — TESTING / REGRESSION
-==================================================
-
-Run all relevant available:
-
-- unit tests
-- integration tests
-- type checks
-- lint
-- production build
-
-Then verify the Phase 1.B/UAT scenarios identified in the existing repository plans.
-
-At minimum verify:
-
-1. KB application loads.
-
-2. Main KB navigation works.
-
-3. Hierarchy browsing works.
-
-4. Existing valid article pages open.
-
-5. Existing supported search/retrieval still works.
-
-6. Dead chatbot/file-upload functionality is no longer misleadingly exposed if confirmed for removal.
-
-7. No broken navigation remains from removed functionality.
-
-8. Existing TOW → KB integration/deep links still work where currently supported.
-
-9. No obvious console/server errors introduced.
-
-==================================================
-SCOPE CONTROL
-==================================================
-
-Do NOT start:
-
-Phase B — schema/content redesign
-
-Phase C — full KB PDP/PEP permission architecture
-
-Phase D — new article workflow architecture
-
-Phase E — new MCP/retrieval implementation
-
-Phase F — agent/document migration
-
-Phase G — GitHub/CI-CD automatic article generation
-
-Phase H — broader TOW ↔ KB exposure
-
-Those are separate implementation phases.
-
-==================================================
-FINAL REPORT
-==================================================
-
-Return:
-
-1. PHASE A STATUS:
-   COMPLETE
-   PARTIALLY COMPLETE
-   or BLOCKED
-
-2. Dead code removed
-   - exact files/components
-   - why each was safe to remove
-
-3. Code intentionally preserved
-   - especially anything initially suspected as dead
-   - why it remains required
-
-4. Navigation fixes
-
-5. Stability fixes
-
-6. Files changed
-
-7. Tests/build/type-check results
-
-8. UAT results
-
-9. TOW ↔ KB regression status
-
-10. Remaining blockers/issues categorized:
-    P0 / P1 / P2 / P3
-
-11. Confirm whether repository is ready for the NEXT implementation phase.
-
-If Phase A is fully complete, recommend exactly ONE next phase based on dependencies and existing repository plans.
-
-Do NOT automatically start that next phase.
-
-STOP after Phase A.
-Do NOT commit.
-Do NOT push.
+- Do NOT start Phase C or the full hierarchical PDP implementation.
+- Do NOT make assumptions about USER/TEAM inheritance or permission behavior.
+- Preserve all existing working KB Admin and TOW functionality.
+- Do not introduce a new architecture unless it is strictly required by the approved Phase B scope.
+- Do not commit or push changes. Stop after implementation, validation, and reporting.
+
+Before making changes:
+1. Review the existing Phase A work and all relevant analysis/planning documents, especially:
+   - kb-permission-model-analysis.md
+   - existing KB stabilization/stakeholder plan
+   - Track 1 documentation
+   - T1-05 and T1-06 findings
+2. Inspect the current database/schema/migrations and actual application usage.
+3. Confirm the exact Phase B scope from the repository documentation.
+4. Reuse the existing architecture and patterns.
+
+Implement Phase B, beginning with the documented Track 1 leftovers:
+
+T1-05 — documents.ui_section
+
+1. Inspect the `documents` table/schema and all code references to `ui_section`.
+2. Determine its current intended purpose and whether it is actively used.
+3. Check for:
+   - missing/incorrect schema definition
+   - inconsistent values
+   - null/invalid values
+   - frontend/backend mismatches
+   - migration issues
+   - legacy/dead usage
+4. Implement ONLY the fix supported by the existing requirements and repository evidence.
+5. Do not invent new section/category behavior.
+6. Preserve backward compatibility with existing KB documents.
+
+T1-06 — orphan file_upload row cleanup
+
+1. Inspect the existing `file_upload` data model, relationships, foreign keys, and usage before changing anything.
+2. Identify exactly how orphan `file_upload` rows can occur.
+3. Implement a safe cleanup approach for confirmed orphan records only.
+4. Ensure valid file/document relationships cannot accidentally be deleted.
+5. Make the operation safe and repeatable/idempotent where appropriate.
+6. If a migration or cleanup script is required:
+   - follow existing repository conventions
+   - make it auditable
+   - avoid destructive assumptions
+   - document rollback/recovery considerations
+7. Prevent future orphan creation only if the correct fix is clearly supported by the current architecture and requirements.
+
+Then complete the remaining Phase B Schema/Content Foundation work ONLY if it is explicitly documented as approved/in-scope in the existing plan.
+
+For every additional Phase B item:
+- Verify the requirement from repository documentation first.
+- Do not infer or implement unconfirmed product behavior.
+- Keep changes minimal and backward-compatible.
+
+STRICT BOUNDARY:
+
+Do NOT implement Phase C / full hierarchical PDP.
+
+Specifically, do not implement or guess:
+- USER vs TEAM inheritance rules
+- new permission inheritance behavior
+- hierarchical PDP behavior dependent on those rules
+- speculative role/access logic
+
+If any Phase B task depends on unresolved USER/TEAM inheritance described in `kb-permission-model-analysis.md`, mark it as BLOCKED and leave it unchanged.
+
+VALIDATION:
+
+After implementation:
+
+1. Run relevant:
+   - lint
+   - type checks
+   - build
+   - existing automated tests
+
+2. Check for:
+   - broken imports
+   - TypeScript errors
+   - migration/schema errors
+   - broken API contracts
+   - runtime errors
+
+3. Verify existing behavior remains intact:
+   - KB Admin navigation
+   - Knowledge Base pages
+   - document/content loading
+   - file upload/document relationships
+   - direct/deep links
+   - TOW deep links
+   - refresh behavior
+
+4. Specifically validate:
+   - documents.ui_section behavior/data integrity
+   - orphan file_upload cleanup safety
+   - valid file records remain untouched
+   - existing documents remain accessible
+
+At the end, provide a detailed Phase B report with:
+
+A. Phase B scope discovered from repository documentation
+B. Files changed and why
+C. Database/schema/migration changes
+D. T1-05 implementation details
+E. T1-06 implementation details
+F. Any other approved Phase B work completed
+G. Tests/build/type-check results
+H. Manual smoke tests I need to perform
+I. Anything intentionally NOT changed
+J. Blocked items requiring John/product clarification
+K. Confirmation that Phase C and unresolved USER/TEAM inheritance were NOT implemented
+
+Do not commit.
+Do not push.
+STOP after Phase B and wait for my approval before proceeding further.
