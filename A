@@ -4,408 +4,488 @@ We are continuing the Knowledge Base (KB Admin) implementation discussed with Jo
 
 CURRENT STATUS:
 
-- Phase A — Stabilization / Dead-Code Cleanup: COMPLETE
-- Phase B — Schema / Content Foundation: LOCAL IMPLEMENTATION COMPLETE
-- Phase C — Permissions / USER + TEAM Access Foundation: LOCAL IMPLEMENTATION COMPLETE
-- Phase D — Content Lifecycle / Authoring / Approval / Publishing Foundation: LOCAL IMPLEMENTATION COMPLETE
-- Phase E — GitHub / CI-CD → Knowledge Article Generation Foundation: LOCAL IMPLEMENTATION COMPLETE / READY TO CONTINUE
+Phase A — Stabilization / dead-code cleanup:
+LOCAL IMPLEMENTATION COMPLETE
 
-Some staging/integration validations and business decisions remain deferred.
+Phase B — Schema / content foundation:
+LOCAL IMPLEMENTATION COMPLETE
+
+Phase C — Permissions / USER + TEAM access foundation:
+LOCAL IMPLEMENTATION COMPLETE
+
+Phase D — Content lifecycle / authoring / approval / publishing:
+LOCAL IMPLEMENTATION COMPLETE
+
+Phase E — GitHub / CI-CD → KB article generation foundation:
+LOCAL IMPLEMENTATION COMPLETE
+
+Phase F — Retrieval / MCP / agent integration foundation:
+LOCAL IMPLEMENTATION COMPLETE
+
+Cursor has confirmed:
+
+READY FOR NEXT LOCAL PHASE: YES.
+
+Some staging validation, migrations, external integrations, and business decisions remain deferred.
 
 IMPORTANT:
 
-Do NOT block Phase F local implementation on staging, GitHub secrets, merge, deployment, or John’s unresolved Phase E questions.
+Continue LOCAL implementation only.
 
-Do NOT guess unresolved business rules.
+DO NOT:
+- commit
+- push
+- merge
+- create PR
+- deploy
+- modify staging or production
+- expose secrets
 
 Proceed with:
 
-PHASE F ONLY — KNOWLEDGE RETRIEVAL + MCP / AGENT INTEGRATION FOUNDATION
+PHASE G ONLY — KNOWLEDGE INGESTION / DOCUMENT-TO-KB MIGRATION FOUNDATION
 
 ==================================================
-BUSINESS GOAL FROM JOHN
+BUSINESS REQUIREMENT FROM JOHN
 ==================================================
 
-John wants the Knowledge Base to become the authoritative knowledge source that future agents can query.
-
-His example was:
-
-Instead of IT/HR/LangSmith agents referencing:
+John specifically wants the Knowledge Base to eventually replace disconnected knowledge sources such as:
 
 - Word documents
 - PDFs
 - shared-drive documents
-- disconnected files
+- existing IT documentation
+- HR documentation
+- operational/process documentation
 
-they should eventually reference the corresponding approved/published knowledge stored in the Knowledge Base.
+John’s desired future architecture is:
 
-The architecture should support:
-
-Knowledge Sources
+Existing Documents / Knowledge Sources
         ↓
-KB Articles
+Ingestion
         ↓
-Hierarchy + Permissions + Lifecycle
+Structured KB Draft
         ↓
-Retrieval Layer
+Hierarchy Assignment
         ↓
-MCP / Callable API
+Permissions
+        ↓
+Review / Approval
+        ↓
+Published KB Knowledge
+        ↓
+Retrieval / MCP
         ↓
 LangSmith / AI Agents
 
-This phase is FOUNDATION ONLY.
+The goal is NOT to bulk migrate production documents now.
 
-Do NOT migrate a production IT/HR agent yet.
-
-==================================================
-STEP F1 — AUDIT EXISTING RETRIEVAL ARCHITECTURE
-==================================================
-
-Before modifying code, inspect the repository thoroughly.
-
-Audit:
-
-- existing KB search
-- article retrieval APIs
-- hierarchy APIs
-- MCP servers/tools
-- KB MCP implementation
-- search adapters
-- database search functions
-- full-text search
-- embeddings/vector search if present
-- LangSmith references
-- agent integration code
-- authentication
-- API-key authentication
-- PDP/PEP/RLS enforcement
-- existing docs/research/plans related to retrieval/MCP
-
-Identify what already exists.
-
-DO NOT create duplicate architecture if repository functionality already exists.
-
-Report the existing retrieval flow before implementing changes.
+Phase G should build the safe, extensible FOUNDATION that allows documents to be converted into KB content.
 
 ==================================================
-STEP F2 — DEFINE CANONICAL RETRIEVAL CONTRACT
+STEP G1 — AUDIT EXISTING INGESTION CAPABILITIES
 ==================================================
 
-Create or align a canonical retrieval contract suitable for:
+First inspect the entire repository.
 
-1. Human KB search
-2. MCP tools
-3. Future LangSmith agents
-4. Other model-agnostic agent clients
+Look specifically for:
 
-The contract should support, where appropriate:
+- document upload functionality
+- file upload APIs
+- PDF handling
+- DOC/DOCX handling
+- markdown import
+- text extraction
+- document parsers
+- storage buckets
+- Supabase storage
+- ingestion jobs
+- import services
+- migration scripts
+- legacy/dead upload code
+- document metadata
+- existing KB article creation services
+- GitHub-generated draft logic from Phase E
+- any existing LLM transformation adapters
 
-- query
-- hierarchy scope
-- article/content type
-- status
-- tags/categories
-- result limit
-- permission context
+IMPORTANT:
 
-Returned results should contain only useful fields such as:
+Phase A may have intentionally removed dead/non-working upload functionality.
 
-- article/content ID
-- title
-- summary/snippet
-- relevant content
-- hierarchy/location
-- source/reference metadata where appropriate
-- updated/published metadata
-- stable reference for retrieving full content
+DO NOT restore deleted legacy functionality automatically.
 
-Do not expose internal secrets or unnecessary private metadata.
+Determine what architecture is currently valid.
+
+Report before implementing:
+
+EXISTING INGESTION ARCHITECTURE FOUND
+
+and
+
+WHAT SHOULD BE REUSED VS REPLACED.
 
 ==================================================
-STEP F3 — PUBLISHED/AUTHORIZED CONTENT ONLY
+STEP G2 — CREATE CANONICAL INGESTION CONTRACT
 ==================================================
 
-This is critical.
+Design a provider-agnostic ingestion contract.
 
-Normal agent retrieval must NOT automatically expose:
+Conceptually:
 
-- drafts
-- rejected content
-- archived/inactive content where existing lifecycle says it should be hidden
-- content the caller cannot access
+Knowledge Source
+      ↓
+Source Adapter
+      ↓
+Extraction
+      ↓
+Normalization
+      ↓
+KB Draft Creation
+      ↓
+Review Lifecycle
 
-Integrate retrieval with Phase C + Phase D.
+Support future source types such as:
 
-Expected conceptual flow:
+- Markdown
+- plain text
+- PDF
+- DOC/DOCX
+- GitHub documentation
+- shared-drive documents
 
-Agent/User Query
+Do NOT necessarily implement every source type now.
+
+Build the contract so additional adapters can be added later without rewriting KB core logic.
+
+==================================================
+STEP G3 — SOURCE PROVENANCE
+==================================================
+
+Every imported document/article must retain provenance where supported.
+
+Design/reuse metadata for:
+
+- source type
+- source identifier
+- source filename/title
+- source URL/reference where applicable
+- import timestamp
+- source version/hash where appropriate
+- importer/actor
+- original source metadata
+
+This is important so future users and agents can understand:
+
+“Where did this KB article originate?”
+
+Do not expose sensitive external source details unnecessarily.
+
+==================================================
+STEP G4 — SAFE DRAFT-FIRST INGESTION
+==================================================
+
+CRITICAL:
+
+Imported knowledge must NOT automatically become published knowledge.
+
+Expected lifecycle:
+
+Document
+   ↓
+Extract
+   ↓
+Normalize
+   ↓
+CREATE DRAFT
+   ↓
+Human Review
+   ↓
+Approval
+   ↓
+Publish
+
+Integrate with Phase D lifecycle.
+
+No automatic publication.
+
+No bypassing approval.
+
+==================================================
+STEP G5 — CONTENT NORMALIZATION
+==================================================
+
+Create/reuse a normalization layer that maps extracted source content into the canonical KB content structure.
+
+Where supported:
+
+Source document:
+
+Title
+Headings
+Paragraphs
+Lists
+Links
+Metadata
+
+↓
+
+Normalized KB draft:
+
+title
+summary if available/generated safely
+content/body
+hierarchy reference
+source metadata
+tags/categories where explicitly available
+status = draft
+
+Do NOT invent metadata if it cannot be determined.
+
+Do NOT hallucinate missing document content.
+
+==================================================
+STEP G6 — DOCUMENT PARSING BOUNDARY
+==================================================
+
+Keep parsing separate from KB business logic.
+
+Preferred conceptual architecture:
+
+Source
+   ↓
+Parser Adapter
+   ↓
+Normalized Document
+   ↓
+KB Ingestion Service
+   ↓
+KB Draft
+
+Examples:
+
+PDFParser
+
+DocxParser
+
+MarkdownParser
+
+TextParser
+
+But use repository naming conventions and existing architecture.
+
+Do not create unnecessary abstractions if equivalent structures already exist.
+
+==================================================
+STEP G7 — LLM TRANSFORMATION BOUNDARY
+==================================================
+
+John wants future AI-assisted article creation.
+
+However:
+
+Do NOT hardwire ingestion to a specific LLM.
+
+Create/reuse a provider-independent transformation boundary.
+
+Conceptually:
+
+Raw Extracted Content
         ↓
-Authentication
+Optional Transformation Adapter
         ↓
-Permission Scope
-        ↓
-Eligible Published Knowledge
-        ↓
-Search / Retrieval
-        ↓
-Authorized Results Only
+Structured KB Draft
 
-Do not implement search first and filter sensitive results afterward if that could leak unauthorized information.
+The system must still support deterministic/basic ingestion without requiring an LLM.
 
-Enforce access at the appropriate boundary.
+LLM enhancement may later provide:
 
-==================================================
-STEP F4 — HIERARCHY-AWARE RETRIEVAL
-==================================================
+- summary generation
+- title cleanup
+- section restructuring
+- suggested tags
+- suggested hierarchy
 
-Use the KB hierarchy foundation.
+But these must remain suggestions/drafts.
 
-Support retrieval scoped appropriately by:
+Never auto-publish AI-generated content.
 
-- global/all-accessible knowledge
-- hierarchy node
-- child/descendant scope only if existing architecture supports it safely
-- USER/TEAM grants where implemented
-
-Do NOT invent unresolved USER/TEAM inheritance behavior.
-
-If inheritance rules are still awaiting John’s decision:
-
-preserve the current safe semantics and document the limitation.
-
-Do not broaden access.
+If an LLM adapter is already reserved from Phase E, reuse that boundary rather than creating another one.
 
 ==================================================
-STEP F5 — SEARCH QUALITY FOUNDATION
+STEP G8 — DUPLICATE / VERSION SAFETY
 ==================================================
 
-Inspect what search capability currently exists.
+Design safe behavior for repeated ingestion.
 
-Prefer reuse before replacement.
+Avoid blindly creating duplicate KB articles every time the same document is processed.
 
-Support a stable baseline search using repository-supported mechanisms.
+Use existing repository capabilities where possible, such as:
 
-Possible mechanisms:
+- source ID
+- content hash
+- external reference
+- version metadata
 
-- PostgreSQL text search
-- keyword search
-- existing search functions
-- existing vector/embedding infrastructure
+Expected conceptual behavior:
 
-Do NOT introduce a new vector database or AI vendor unless clearly justified by existing approved architecture.
+Same source + unchanged content
+→ detect existing ingestion.
 
-The retrieval architecture should allow future enhancement without rewriting the client/MCP contract.
+Same source + changed content
+→ identify as changed/new version or candidate update.
 
-Separate:
+Do NOT overwrite published knowledge silently.
 
-RETRIEVAL CONTRACT
-
-from:
-
-SEARCH IMPLEMENTATION.
+Changed source content should enter a controlled review workflow.
 
 ==================================================
-STEP F6 — MCP TOOLS
+STEP G9 — HIERARCHY ASSIGNMENT
 ==================================================
 
-Audit existing KB MCP tools first.
+Integrate with the hierarchy foundation.
 
-Reuse or safely extend existing tools rather than creating duplicates.
+Imported content should support assignment to an appropriate KB/hierarchy node.
 
-The MCP layer should provide a minimal useful read-only capability such as:
+If the destination cannot be determined:
 
-KB_SEARCH
+DO NOT guess silently.
 
-Purpose:
-Search authorized published KB content.
+Use:
 
-KB_ARTICLE_GET
+- explicit destination supplied during ingestion
 
-Purpose:
-Retrieve a specific authorized article/content record.
+OR
 
-KB_HIERARCHY
+- safe unassigned/default draft behavior if repository architecture supports it.
 
-Purpose:
-Discover navigable knowledge structure if already supported/required.
-
-Use existing repository naming conventions if equivalent tools already exist.
-
-DO NOT create duplicate tool names simply because these names are suggested.
+Do not invent John’s unresolved default hierarchy decision.
 
 ==================================================
-STEP F7 — MCP SECURITY
+STEP G10 — PERMISSION SAFETY
 ==================================================
 
-MCP must NOT bypass the application security model.
+Ingestion must not bypass Phase C security.
 
 Validate:
 
-- API authentication
-- service authentication where applicable
-- user/actor context where supported
-- hierarchy access
-- USER/TEAM grants
-- publication state
+- who may import/create drafts
+- who may edit imported drafts
+- who may approve
+- who may publish
+- who may view restricted knowledge
 
-Test explicitly:
+Do not invent unresolved USER/TEAM inheritance behavior.
 
-Authorized request
-→ allowed authorized content.
-
-Unauthorized request
-→ rejected or zero inaccessible results.
-
-Draft content
-→ unavailable to normal retrieval.
-
-Restricted content
-→ unavailable without permission.
-
-Do not weaken RLS/PDP/PEP.
+Use existing safe authorization semantics.
 
 ==================================================
-STEP F8 — AGENT-FRIENDLY RESPONSE DESIGN
+STEP G11 — MINIMUM LOCAL POC
 ==================================================
 
-Design retrieval responses so an agent can reliably ground an answer.
+Build a LOCAL proof of concept using safe test fixtures.
 
-Where supported, include stable provenance such as:
+At minimum demonstrate:
 
-- KB article/content ID
-- title
-- hierarchy
-- canonical internal reference
-- last updated/published information
+Sample source document
 
-The goal is to enable future agents to answer:
+→ parser
 
-“According to which knowledge article?”
+→ normalized content
 
-Avoid returning huge unbounded content payloads when a search result + detail retrieval pattern is more appropriate.
+→ KB DRAFT
 
-==================================================
-STEP F9 — MODEL-AGNOSTIC BOUNDARY
-==================================================
+→ provenance retained
 
-John explicitly wants the architecture model-agnostic.
+→ NOT published automatically.
 
-The KB retrieval layer must NOT depend directly on:
+Prefer a Markdown/text fixture first if external PDF/DOCX dependencies would introduce unnecessary complexity.
 
-- one LLM provider
-- one agent framework
-- one LangSmith implementation
+If PDF/DOCX support already exists safely, reuse it.
 
-Architecture:
-
-KB
-   ↓
-Retrieval Service/API
-   ↓
-MCP / Callable Contract
-   ↓
-Any authorized client
-      ├── LangSmith
-      ├── future agents
-      ├── Cursor/Claude-style workflows where appropriate
-      └── other model clients
-
-LangSmith should be a CONSUMER, not the owner of KB retrieval logic.
+Do not add heavy dependencies unless justified.
 
 ==================================================
-STEP F10 — FUTURE IT/HR AGENT MIGRATION CONTRACT
+STEP G12 — FUTURE BULK MIGRATION SEAM
 ==================================================
 
-Prepare the integration seam for John’s stated use case.
+Prepare architecture for future migration of:
 
-Current conceptual state:
+- IT documentation
+- HR documentation
+- shared-drive knowledge
+- existing operational documents
 
-IT/HR Agent
-    ↓
-Word/PDF/Shared Drive
+Do NOT perform the real bulk migration now.
 
-Future:
+Document how a future migration pipeline would work:
 
-IT/HR Agent
-    ↓
-KB MCP / Retrieval API
-    ↓
-Published + Authorized Knowledge Base
-
-DO NOT migrate production agents in Phase F.
-
-Instead:
-
-- document the adapter/interface
-- provide a local example/test consumer if useful
-- identify what a future migration would replace
-- identify configuration required
-
-Do not hardcode production LangSmith credentials.
+Source Inventory
+      ↓
+Batch Ingestion
+      ↓
+Parse
+      ↓
+Normalize
+      ↓
+Deduplicate
+      ↓
+Create Drafts
+      ↓
+Assign Hierarchy
+      ↓
+Human Review
+      ↓
+Publish
+      ↓
+Available through Phase F Retrieval/MCP
 
 ==================================================
-STEP F11 — LOCAL TEST MATRIX
+STEP G13 — TEST MATRIX
 ==================================================
 
-Implement and run local tests for at least:
+Implement/run local tests for at least:
 
-1. Published accessible article
-   → returned by search.
+1. Valid supported document
+   → creates normalized draft.
 
-2. Draft article
-   → not returned to normal agent retrieval.
+2. Imported document
+   → does NOT auto-publish.
 
-3. Restricted article without access
-   → not returned.
+3. Provenance
+   → retained correctly.
 
-4. Restricted article with valid access
-   → returned.
+4. Duplicate unchanged source
+   → does not blindly duplicate.
 
-5. Article detail retrieval without permission
-   → denied/not found safely.
+5. Changed source
+   → handled safely without silently overwriting published content.
 
-6. Hierarchy-scoped query
-   → only permitted scope returned.
-
-7. Empty/no-match search
-   → safe empty result.
-
-8. Invalid authentication
+6. Unauthorized importer
    → rejected.
 
-9. MCP search
-   → same authorization semantics as direct retrieval API.
+7. Invalid/unsupported document
+   → safe failure.
 
-10. MCP article get
-    → cannot bypass permission rules.
+8. Empty document
+   → safe validation failure.
 
-11. Existing TOW/KB functionality
-    → no regression.
+9. Hierarchy assignment
+   → respects valid destination.
 
-==================================================
-STEP F12 — OBSERVABILITY
-==================================================
+10. Restricted hierarchy
+    → permission rules enforced.
 
-Add/reuse appropriate structured diagnostics for:
+11. Existing KB article lifecycle
+    → unaffected.
 
-- retrieval request
-- retrieval failure
-- MCP failure
-- authorization denial
-- search timing where appropriate
-
-Do NOT log:
-
-- secrets
-- API keys
-- tokens
-- unnecessary sensitive article content
+12. Phase F retrieval
+    → drafts created by ingestion are NOT exposed as normal published agent knowledge.
 
 ==================================================
-STEP F13 — REGRESSION
+STEP G14 — REGRESSION
 ==================================================
 
-Run all locally available:
+Run locally available:
 
 - typecheck
 - lint
@@ -415,42 +495,39 @@ Run all locally available:
 
 Verify no regressions to:
 
-- TOW
+- TOW application
 - KB UI
 - authentication
 - hierarchy
-- permissions
-- article lifecycle
-- Phase E generation foundation
-- existing MCP tools
+- USER/TEAM permissions
+- content lifecycle
+- GitHub article-generation foundation
+- MCP/retrieval
+- existing APIs
 
-Fix only issues caused by Phase F.
+Fix only Phase G-related regressions.
 
 ==================================================
 STRICT SCOPE
 ==================================================
 
-DO NOT implement the next phase.
-
-Specifically do NOT yet:
-
-- migrate the real IT ticketing agent
-- migrate the HR agent
-- bulk import Word/PDF/shared-drive documents
-- introduce a new LLM provider
-- create a new vector DB unless already explicitly required
-- change unresolved USER/TEAM inheritance rules
-- automatically publish content
-- modify unrelated TOW features
-
 DO NOT:
 
-- commit
-- push
-- merge
-- create PR
-- deploy
-- apply staging/production changes
+- bulk import real production documents
+- connect production shared drives
+- migrate the IT agent
+- migrate the HR agent
+- automatically publish imported content
+- introduce a vendor-specific LLM dependency
+- change unresolved permission inheritance
+- restore known dead upload/chatbot functionality
+- implement unrelated TOW features
+
+DO NOT COMMIT.
+DO NOT PUSH.
+DO NOT MERGE.
+DO NOT CREATE PR.
+DO NOT DEPLOY.
 
 ==================================================
 FINAL REPORT
@@ -458,23 +535,26 @@ FINAL REPORT
 
 Return:
 
-PHASE F STATUS:
+PHASE G STATUS:
 COMPLETE / PARTIALLY COMPLETE / BLOCKED
 
-Then report:
+Report:
 
-1. Existing retrieval architecture found
+1. Existing ingestion capabilities discovered
 2. Files/components changed
-3. Canonical retrieval contract
-4. Search implementation used
-5. Hierarchy behavior
-6. Permission/security enforcement
-7. MCP tools created/reused/modified
-8. Agent integration boundary
-9. IT/HR future migration seam
-10. Tests executed and exact results
-11. Regression status
-12. Deferred staging/integration work
+3. Canonical ingestion contract
+4. Parser architecture
+5. Supported local source types
+6. Normalization behavior
+7. Provenance implementation
+8. Draft lifecycle integration
+9. Duplicate/version handling
+10. Hierarchy integration
+11. Permission enforcement
+12. Local POC result
+13. Exact tests/results
+14. Regression status
+15. Deferred external/staging work
 
 Clearly separate:
 
@@ -482,19 +562,19 @@ LOCAL IMPLEMENTATION COMPLETE
 
 from:
 
-DEFERRED INTEGRATION/STAGING VALIDATION
+DEFERRED INTEGRATION / STAGING / PRODUCTION WORK
 
-List:
+List genuine:
 
 QUESTIONS FOR JOHN
 
-only where a genuine business decision is required.
+Do not treat those questions as blockers unless technically unavoidable.
 
 Finally answer:
 
 READY FOR NEXT LOCAL PHASE: YES/NO
 
-STOP after Phase F.
+STOP after Phase G.
 
 Do not begin the next phase.
 Do not commit.
