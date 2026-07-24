@@ -4,386 +4,408 @@ We are continuing the Knowledge Base (KB Admin) implementation discussed with Jo
 
 CURRENT STATUS:
 
-- Phase A — KB Stabilization / Dead-Code Cleanup: COMPLETE
-- Phase B — Schema / Content Foundation: LOCAL IMPLEMENTATION COMPLETE; staging validation deferred
-- Phase C — Permissions / USER + TEAM Access-Control Foundation: LOCAL IMPLEMENTATION COMPLETE; final staging/security validation deferred
-- Phase D — Content Lifecycle / Authoring / Approval / Publishing Foundation: COMPLETE ENOUGH TO CONTINUE LOCALLY
+- Phase A — Stabilization / Dead-Code Cleanup: COMPLETE
+- Phase B — Schema / Content Foundation: LOCAL IMPLEMENTATION COMPLETE
+- Phase C — Permissions / USER + TEAM Access Foundation: LOCAL IMPLEMENTATION COMPLETE
+- Phase D — Content Lifecycle / Authoring / Approval / Publishing Foundation: LOCAL IMPLEMENTATION COMPLETE
+- Phase E — GitHub / CI-CD → Knowledge Article Generation Foundation: LOCAL IMPLEMENTATION COMPLETE / READY TO CONTINUE
 
-IMPORTANT WORKFLOW RULE:
+Some staging/integration validations and business decisions remain deferred.
 
-Do NOT:
+IMPORTANT:
 
-- commit
-- push
-- create PR
-- merge
-- deploy
-- apply staging/production migrations
+Do NOT block Phase F local implementation on staging, GitHub secrets, merge, deployment, or John’s unresolved Phase E questions.
 
-We are completing local implementation phases first.
+Do NOT guess unresolved business rules.
 
 Proceed with:
 
-PHASE E ONLY — GITHUB / CI-CD → KNOWLEDGE ARTICLE GENERATION PIPELINE
+PHASE F ONLY — KNOWLEDGE RETRIEVAL + MCP / AGENT INTEGRATION FOUNDATION
 
 ==================================================
-JOHN'S REQUIREMENT
+BUSINESS GOAL FROM JOHN
 ==================================================
 
-John explained that development work already produces useful structured information through:
+John wants the Knowledge Base to become the authoritative knowledge source that future agents can query.
 
-- GitHub PRs
-- Markdown files
-- PRDs
-- implementation plans
-- research documents
-- feature documentation
+His example was:
 
-His goal is that when a feature is developed and eventually released, we should not rely on tribal knowledge to explain the change to users.
+Instead of IT/HR/LangSmith agents referencing:
 
-The development/deployment workflow should be capable of producing a Knowledge Base article from the available development documentation.
+- Word documents
+- PDFs
+- shared-drive documents
+- disconnected files
 
-Conceptually:
+they should eventually reference the corresponding approved/published knowledge stored in the Knowledge Base.
 
-Feature / Requirement
+The architecture should support:
+
+Knowledge Sources
         ↓
-PRD / Markdown / Implementation Documentation
+KB Articles
         ↓
-Pull Request / Development Lifecycle
+Hierarchy + Permissions + Lifecycle
         ↓
-Structured Knowledge Article Draft
+Retrieval Layer
         ↓
-Review / Approval
+MCP / Callable API
         ↓
-Published Knowledge Article
+LangSmith / AI Agents
 
-IMPORTANT:
+This phase is FOUNDATION ONLY.
 
-Do NOT automatically publish generated content.
-
-Generated knowledge must enter the controlled KB lifecycle created in Phase D.
+Do NOT migrate a production IT/HR agent yet.
 
 ==================================================
-STEP E1 — AUDIT EXISTING GITHUB / CI-CD ARCHITECTURE
+STEP F1 — AUDIT EXISTING RETRIEVAL ARCHITECTURE
 ==================================================
 
-Before modifying code, inspect:
+Before modifying code, inspect the repository thoroughly.
 
-- .github/workflows
-- GitHub Actions
-- PR templates
-- markdown documentation
-- docs/research
-- docs/plans
-- PRD locations
-- deployment workflows
-- staging/prod promotion workflows
-- existing automation scripts
-- GitHub API integrations
-- webhooks if any
-- KB APIs/MCP tools capable of creating content
+Audit:
 
-Determine:
+- existing KB search
+- article retrieval APIs
+- hierarchy APIs
+- MCP servers/tools
+- KB MCP implementation
+- search adapters
+- database search functions
+- full-text search
+- embeddings/vector search if present
+- LangSmith references
+- agent integration code
+- authentication
+- API-key authentication
+- PDP/PEP/RLS enforcement
+- existing docs/research/plans related to retrieval/MCP
 
-1. What information is available during a PR.
+Identify what already exists.
 
-2. Where PRDs/implementation docs live.
+DO NOT create duplicate architecture if repository functionality already exists.
 
-3. How a PR relates to a feature.
-
-4. What event currently represents release/deployment.
-
-5. Whether any existing documentation automation exists.
-
-6. Whether repository research/plans already define this pipeline.
-
-Do not modify code until the audit is complete.
+Report the existing retrieval flow before implementing changes.
 
 ==================================================
-STEP E2 — DEFINE CANONICAL KNOWLEDGE GENERATION CONTRACT
+STEP F2 — DEFINE CANONICAL RETRIEVAL CONTRACT
 ==================================================
 
-Define a structured contract for converting development information into a KB article draft.
+Create or align a canonical retrieval contract suitable for:
 
-At minimum consider:
+1. Human KB search
+2. MCP tools
+3. Future LangSmith agents
+4. Other model-agnostic agent clients
 
+The contract should support, where appropriate:
+
+- query
+- hierarchy scope
+- article/content type
+- status
+- tags/categories
+- result limit
+- permission context
+
+Returned results should contain only useful fields such as:
+
+- article/content ID
 - title
-- summary
-- what changed
-- why it changed
-- who is affected
-- how to use the feature
-- user-visible behavior
-- permissions/access considerations
-- known limitations
-- related feature/module
-- source PR
-- source documentation
-- release/deployment reference
-- generated timestamp
+- summary/snippet
+- relevant content
+- hierarchy/location
+- source/reference metadata where appropriate
+- updated/published metadata
+- stable reference for retrieving full content
 
-Do not blindly copy engineering documentation into the KB.
-
-The output should be useful from an END-USER / BUSINESS USER perspective.
-
-Preserve traceability back to source development artifacts.
+Do not expose internal secrets or unnecessary private metadata.
 
 ==================================================
-STEP E3 — SOURCE DISCOVERY
+STEP F3 — PUBLISHED/AUTHORIZED CONTENT ONLY
 ==================================================
 
-Implement a deterministic way to discover relevant documentation associated with a PR/feature.
+This is critical.
 
-Potential sources include existing repository conventions such as:
+Normal agent retrieval must NOT automatically expose:
 
-- PR description
-- linked PRD
-- docs/research
-- docs/plans
-- implementation markdown
-- changed documentation files
+- drafts
+- rejected content
+- archived/inactive content where existing lifecycle says it should be hidden
+- content the caller cannot access
 
-Do NOT invent fragile assumptions if the repository already defines conventions.
+Integrate retrieval with Phase C + Phase D.
 
-Prefer explicit references/metadata where available.
+Expected conceptual flow:
 
-If no reliable association exists, report the gap instead of guessing unrelated documents.
-
-==================================================
-STEP E4 — ARTICLE DRAFT GENERATION
-==================================================
-
-Implement the minimum safe pipeline that can transform the discovered feature information into a structured:
-
-KNOWLEDGE ARTICLE DRAFT
-
-Important:
-
-The generated result MUST NOT bypass Phase D.
-
-It should enter the lifecycle as:
-
-GENERATED CONTENT
+Agent/User Query
         ↓
-DRAFT
+Authentication
         ↓
-HUMAN REVIEW
+Permission Scope
         ↓
-APPROVAL
+Eligible Published Knowledge
         ↓
-PUBLISH
-
-Never:
-
-Generated
+Search / Retrieval
         ↓
-Automatically Published
+Authorized Results Only
 
-unless an existing explicitly approved business rule says otherwise.
+Do not implement search first and filter sensitive results afterward if that could leak unauthorized information.
 
-==================================================
-STEP E5 — IDEMPOTENCY / DUPLICATE PROTECTION
-==================================================
-
-Prevent the same PR/release from creating uncontrolled duplicate articles.
-
-Use an appropriate stable source reference such as:
-
-- repository
-- PR number
-- source identifier
-- deployment/release identifier
-
-consistent with existing architecture.
-
-The pipeline should be capable of determining:
-
-NEW SOURCE
-→ create draft
-
-EXISTING SOURCE
-→ update/revise appropriate draft or safely no-op
-
-Do not overwrite published authoritative content unsafely.
-
-Respect Phase D revision/version behavior.
+Enforce access at the appropriate boundary.
 
 ==================================================
-STEP E6 — TRACEABILITY
+STEP F4 — HIERARCHY-AWARE RETRIEVAL
 ==================================================
 
-Every generated article should retain machine-readable traceability where architecture supports it.
+Use the KB hierarchy foundation.
 
-Examples:
+Support retrieval scoped appropriately by:
 
-- source repository
-- PR number
-- source commit/SHA
-- source document(s)
-- generation method
-- generation timestamp
+- global/all-accessible knowledge
+- hierarchy node
+- child/descendant scope only if existing architecture supports it safely
+- USER/TEAM grants where implemented
 
-This is important so we can answer:
+Do NOT invent unresolved USER/TEAM inheritance behavior.
 
-“Why does this KB article exist?”
+If inheritance rules are still awaiting John’s decision:
 
-and:
+preserve the current safe semantics and document the limitation.
 
-“Which code/change generated it?”
-
-Do not expose unnecessary internal engineering metadata to normal end users if it belongs only in audit metadata.
+Do not broaden access.
 
 ==================================================
-STEP E7 — SECURITY / PERMISSIONS
+STEP F5 — SEARCH QUALITY FOUNDATION
 ==================================================
 
-Integrate with Phase C and Phase D.
+Inspect what search capability currently exists.
 
-The automation identity/process must not become an unrestricted security bypass.
+Prefer reuse before replacement.
 
-Ensure:
+Support a stable baseline search using repository-supported mechanisms.
 
-- article creation uses an explicitly authorized service/system path
-- generated content is DRAFT
-- publication still requires authorized lifecycle action
-- generated articles respect hierarchy/access architecture
-- direct unauthorized API calls remain rejected
+Possible mechanisms:
 
-Do not weaken existing RLS/PDP/PEP protections to make automation easier.
+- PostgreSQL text search
+- keyword search
+- existing search functions
+- existing vector/embedding infrastructure
 
-==================================================
-STEP E8 — GITHUB ACTION / PIPELINE INTEGRATION
-==================================================
+Do NOT introduce a new vector database or AI vendor unless clearly justified by existing approved architecture.
 
-Design and implement the safest integration point supported by the repository.
-
-Possible trigger points may include:
-
-- PR event
-- merge event
-- staging deployment
-- release/deployment completion
-
-Choose based on existing architecture and John's requirement.
-
-IMPORTANT:
-
-Do not introduce automatic production deployment.
-
-Do not require real GitHub secrets for local implementation/testing.
-
-If actual GitHub integration requires credentials/secrets:
-
-Implement the code/configuration contract safely and mark live execution:
-
-DEFERRED — REQUIRES INTEGRATION ENVIRONMENT
-
-Never print or hardcode secrets.
-
-==================================================
-STEP E9 — FAILURE SAFETY
-==================================================
-
-Knowledge generation must NOT break application deployment.
-
-Design failure behavior explicitly.
-
-Examples:
-
-If KB generation fails:
-
-- record/report failure
-- preserve diagnostic information
-- avoid creating corrupt/partial published content
-
-Determine whether it should block deployment only if existing approved requirements say so.
-
-Do not invent a deployment-blocking policy.
-
-==================================================
-STEP E10 — LOCAL TESTING
-==================================================
-
-Create local fixtures/tests representing:
-
-Scenario 1:
-PR with valid linked PRD/docs
-→ structured KB draft generated.
-
-Scenario 2:
-PR with insufficient documentation
-→ safe failure / actionable result.
-
-Scenario 3:
-Same PR processed twice
-→ no uncontrolled duplicate.
-
-Scenario 4:
-Existing draft from same source
-→ safe update/no-op according to architecture.
-
-Scenario 5:
-Existing published article
-→ not silently overwritten.
-
-Scenario 6:
-Generated article
-→ remains draft/unpublished.
-
-Scenario 7:
-Unauthorized caller
-→ cannot abuse generation endpoint/process.
-
-Scenario 8:
-Traceability metadata
-→ correctly retained.
-
-==================================================
-STEP E11 — PRESERVE FUTURE MODEL-AGNOSTIC DESIGN
-==================================================
-
-John wants the architecture to remain model-agnostic.
-
-Do not tightly couple the pipeline to one AI provider unless the repository explicitly requires it.
+The retrieval architecture should allow future enhancement without rewriting the client/MCP contract.
 
 Separate:
 
-SOURCE COLLECTION
+RETRIEVAL CONTRACT
 
-from
+from:
 
-CONTENT TRANSFORMATION
-
-from
-
-KB PERSISTENCE
-
-from
-
-APPROVAL/PUBLISHING.
-
-If AI generation is used or planned, keep the provider boundary replaceable.
-
-Do not implement unnecessary “AI-in-a-box” architecture.
+SEARCH IMPLEMENTATION.
 
 ==================================================
-STEP E12 — REGRESSION
+STEP F6 — MCP TOOLS
 ==================================================
 
-Verify no regressions to:
+Audit existing KB MCP tools first.
 
-- TOW app
-- KB navigation
-- authentication
-- Phase C permissions
-- Phase D lifecycle
+Reuse or safely extend existing tools rather than creating duplicates.
+
+The MCP layer should provide a minimal useful read-only capability such as:
+
+KB_SEARCH
+
+Purpose:
+Search authorized published KB content.
+
+KB_ARTICLE_GET
+
+Purpose:
+Retrieve a specific authorized article/content record.
+
+KB_HIERARCHY
+
+Purpose:
+Discover navigable knowledge structure if already supported/required.
+
+Use existing repository naming conventions if equivalent tools already exist.
+
+DO NOT create duplicate tool names simply because these names are suggested.
+
+==================================================
+STEP F7 — MCP SECURITY
+==================================================
+
+MCP must NOT bypass the application security model.
+
+Validate:
+
+- API authentication
+- service authentication where applicable
+- user/actor context where supported
+- hierarchy access
+- USER/TEAM grants
+- publication state
+
+Test explicitly:
+
+Authorized request
+→ allowed authorized content.
+
+Unauthorized request
+→ rejected or zero inaccessible results.
+
+Draft content
+→ unavailable to normal retrieval.
+
+Restricted content
+→ unavailable without permission.
+
+Do not weaken RLS/PDP/PEP.
+
+==================================================
+STEP F8 — AGENT-FRIENDLY RESPONSE DESIGN
+==================================================
+
+Design retrieval responses so an agent can reliably ground an answer.
+
+Where supported, include stable provenance such as:
+
+- KB article/content ID
+- title
 - hierarchy
-- article reading
-- article creation/editing
-- approval/publishing
-- existing CI/CD
+- canonical internal reference
+- last updated/published information
 
-Run locally available:
+The goal is to enable future agents to answer:
+
+“According to which knowledge article?”
+
+Avoid returning huge unbounded content payloads when a search result + detail retrieval pattern is more appropriate.
+
+==================================================
+STEP F9 — MODEL-AGNOSTIC BOUNDARY
+==================================================
+
+John explicitly wants the architecture model-agnostic.
+
+The KB retrieval layer must NOT depend directly on:
+
+- one LLM provider
+- one agent framework
+- one LangSmith implementation
+
+Architecture:
+
+KB
+   ↓
+Retrieval Service/API
+   ↓
+MCP / Callable Contract
+   ↓
+Any authorized client
+      ├── LangSmith
+      ├── future agents
+      ├── Cursor/Claude-style workflows where appropriate
+      └── other model clients
+
+LangSmith should be a CONSUMER, not the owner of KB retrieval logic.
+
+==================================================
+STEP F10 — FUTURE IT/HR AGENT MIGRATION CONTRACT
+==================================================
+
+Prepare the integration seam for John’s stated use case.
+
+Current conceptual state:
+
+IT/HR Agent
+    ↓
+Word/PDF/Shared Drive
+
+Future:
+
+IT/HR Agent
+    ↓
+KB MCP / Retrieval API
+    ↓
+Published + Authorized Knowledge Base
+
+DO NOT migrate production agents in Phase F.
+
+Instead:
+
+- document the adapter/interface
+- provide a local example/test consumer if useful
+- identify what a future migration would replace
+- identify configuration required
+
+Do not hardcode production LangSmith credentials.
+
+==================================================
+STEP F11 — LOCAL TEST MATRIX
+==================================================
+
+Implement and run local tests for at least:
+
+1. Published accessible article
+   → returned by search.
+
+2. Draft article
+   → not returned to normal agent retrieval.
+
+3. Restricted article without access
+   → not returned.
+
+4. Restricted article with valid access
+   → returned.
+
+5. Article detail retrieval without permission
+   → denied/not found safely.
+
+6. Hierarchy-scoped query
+   → only permitted scope returned.
+
+7. Empty/no-match search
+   → safe empty result.
+
+8. Invalid authentication
+   → rejected.
+
+9. MCP search
+   → same authorization semantics as direct retrieval API.
+
+10. MCP article get
+    → cannot bypass permission rules.
+
+11. Existing TOW/KB functionality
+    → no regression.
+
+==================================================
+STEP F12 — OBSERVABILITY
+==================================================
+
+Add/reuse appropriate structured diagnostics for:
+
+- retrieval request
+- retrieval failure
+- MCP failure
+- authorization denial
+- search timing where appropriate
+
+Do NOT log:
+
+- secrets
+- API keys
+- tokens
+- unnecessary sensitive article content
+
+==================================================
+STEP F13 — REGRESSION
+==================================================
+
+Run all locally available:
 
 - typecheck
 - lint
@@ -391,23 +413,35 @@ Run locally available:
 - integration tests
 - build
 
-Fix only regressions caused by Phase E.
+Verify no regressions to:
+
+- TOW
+- KB UI
+- authentication
+- hierarchy
+- permissions
+- article lifecycle
+- Phase E generation foundation
+- existing MCP tools
+
+Fix only issues caused by Phase F.
 
 ==================================================
 STRICT SCOPE
 ==================================================
 
-DO NOT implement Phase F yet.
+DO NOT implement the next phase.
 
-Specifically do NOT implement:
+Specifically do NOT yet:
 
-- LangSmith agent migration
-- IT/HR agent retrieval changes
-- bulk Word/PDF ingestion
-- full MCP retrieval redesign
-- TOW notification work
-- TOW shared-list work
-- unrelated features
+- migrate the real IT ticketing agent
+- migrate the HR agent
+- bulk import Word/PDF/shared-drive documents
+- introduce a new LLM provider
+- create a new vector DB unless already explicitly required
+- change unresolved USER/TEAM inheritance rules
+- automatically publish content
+- modify unrelated TOW features
 
 DO NOT:
 
@@ -416,7 +450,7 @@ DO NOT:
 - merge
 - create PR
 - deploy
-- apply staging/prod migrations
+- apply staging/production changes
 
 ==================================================
 FINAL REPORT
@@ -424,24 +458,23 @@ FINAL REPORT
 
 Return:
 
-PHASE E STATUS:
+PHASE F STATUS:
 COMPLETE / PARTIALLY COMPLETE / BLOCKED
 
-Report:
+Then report:
 
-1. Existing GitHub/CI-CD architecture discovered
-2. Documentation sources discovered
-3. Generation architecture implemented
-4. Article draft contract
-5. Trigger/integration design
-6. Duplicate/idempotency handling
-7. Traceability implementation
-8. Phase C permission integration
-9. Phase D lifecycle integration
-10. Security behavior
-11. Tests and exact results
-12. CI/CD regression status
-13. Items requiring real GitHub/staging integration later
+1. Existing retrieval architecture found
+2. Files/components changed
+3. Canonical retrieval contract
+4. Search implementation used
+5. Hierarchy behavior
+6. Permission/security enforcement
+7. MCP tools created/reused/modified
+8. Agent integration boundary
+9. IT/HR future migration seam
+10. Tests executed and exact results
+11. Regression status
+12. Deferred staging/integration work
 
 Clearly separate:
 
@@ -449,21 +482,21 @@ LOCAL IMPLEMENTATION COMPLETE
 
 from:
 
-DEFERRED INTEGRATION VALIDATION
+DEFERRED INTEGRATION/STAGING VALIDATION
 
-List any:
+List:
 
 QUESTIONS FOR JOHN
 
-Only if a genuine business decision is unresolved.
+only where a genuine business decision is required.
 
-Finally state:
+Finally answer:
 
-READY FOR PHASE F LOCAL IMPLEMENTATION: YES/NO
+READY FOR NEXT LOCAL PHASE: YES/NO
 
-STOP.
+STOP after Phase F.
 
-Do not start Phase F.
+Do not begin the next phase.
 Do not commit.
 Do not push.
 Do not merge.
