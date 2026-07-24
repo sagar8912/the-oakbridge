@@ -1,143 +1,370 @@
-Continue with PHASE B ONLY — do not start Phase C.
+Act as a Principal Full-Stack Engineer / Solution Architect.
 
-Current status:
-PHASE B PARTIALLY COMPLETE.
+We are continuing the Knowledge Base (KB Admin) stabilization and architecture work discussed with John.
 
-The T1-05/T1-06 migrations and DocumentManager/ERD alignment are implemented, but Phase B must be fully validated before we move to permissions/PDP-PEP.
+IMPORTANT WORKFLOW DECISION:
+
+Phase B implementation work is complete enough to continue local development, but its final staging validation is intentionally DEFERRED.
+
+Do NOT:
+- merge to staging
+- commit
+- push
+- create a PR
+- deploy
+- run production migrations
+- modify production data
+
+We will perform integration, staging deployment, migrations, and final Phase B validation later after the planned implementation work is complete.
+
+Proceed with PHASE C ONLY:
+
+KNOWLEDGE BASE PERMISSIONING / ACCESS-CONTROL FOUNDATION.
+
+==================================================
+BUSINESS CONTEXT FROM JOHN
+==================================================
+
+John specifically raised the following concerns:
+
+1. The Knowledge Base currently has little/no mature permissioning.
+
+2. KB and TOW are in the same ecosystem/monorepo and share the same user base.
+
+3. Where architecturally appropriate, existing TOW user/team identity and permission concepts should be reused rather than creating an unrelated duplicate identity system.
+
+4. We need control over who can:
+
+- view knowledge
+- author/create articles
+- edit articles
+- approve/publish where applicable
+- delete/manage articles
+
+5. Knowledge permissions may also exist at levels of the KB hierarchy.
+
+John specifically mentioned the ability to assign a USER or TEAM at levels of the Knowledge Base hierarchy.
+
+6. Permission behavior may therefore require inheritance from parent hierarchy nodes to descendants.
+
+However:
+
+DO NOT INVENT BUSINESS RULES that John has not explicitly confirmed.
+
+If exact USER/TEAM inheritance semantics are not defined in the repository/docs, implement only the safe foundation necessary to support them and clearly document the unresolved decision.
+
+==================================================
+STEP C1 — REPOSITORY AND EXISTING PERMISSION AUDIT
+==================================================
+
+Before modifying code, inspect the complete current implementation.
+
+Identify:
+
+- KB authentication
+- KB authorization
+- users
+- teams
+- roles
+- existing TOW PDP/PEP implementation
+- existing permission tables
+- RLS policies
+- middleware
+- API authorization checks
+- hierarchy/node access logic
+- article access logic
+- author/editor/admin concepts
+- approval/publishing permissions
+
+Determine whether KB currently:
+
+- duplicates TOW identity concepts
+- already references shared users
+- already references teams
+- has incomplete/scaffolded permission code
+- has hard-coded permissions
+- has permission bypasses
+- exposes routes without authorization
+
+Produce a concise CURRENT STATE report.
+
+Do not change code until this audit is complete.
+
+==================================================
+STEP C2 — DEFINE THE MINIMUM SAFE PERMISSION MODEL
+==================================================
+
+Based strictly on existing architecture and John's confirmed requirements, design the minimum permission foundation supporting:
+
+VIEW
+CREATE/AUTHOR
+EDIT
+APPROVE/PUBLISH
+DELETE/MANAGE
+
+Determine whether permissions should be represented as:
+
+- existing roles/permissions,
+- explicit capability flags,
+- grants,
+- hierarchy assignments,
+
+or a combination consistent with the repository architecture.
+
+Prefer reuse over duplication.
+
+Do NOT create a second independent user/identity system.
+
+==================================================
+STEP C3 — USER AND TEAM SUBJECT SUPPORT
+==================================================
+
+The architecture must be capable of granting KB access to:
+
+A. individual USER
+
+and
+
+B. TEAM
+
+Reuse existing canonical TOW/shared identities where possible.
+
+Do not duplicate user/team records merely for KB permissioning unless repository architecture absolutely requires it.
+
+Maintain referential integrity.
+
+==================================================
+STEP C4 — HIERARCHY PERMISSION FOUNDATION
+==================================================
+
+Inspect the KB hierarchy/schema.
+
+Implement the minimum safe architecture required to associate permission/access assignments with the appropriate hierarchy level.
+
+It must be structurally capable of supporting:
+
+Hierarchy node
+    ↓
+USER and/or TEAM assignment
+    ↓
+Access to relevant knowledge beneath that hierarchy
 
 IMPORTANT:
-- Do NOT start Phase C.
-- Do NOT invent USER/TEAM inheritance rules.
-- Do NOT make unrelated TOW changes.
-- Do NOT expand scope beyond the approved Phase B architecture.
-- Do NOT commit or push unless explicitly instructed.
-- Do NOT expose or print secrets.
 
-STEP 1 — REVIEW PHASE B CHANGES
+If the exact inheritance algorithm is NOT explicitly defined in existing approved documentation:
 
-Re-audit all Phase B changes already made.
+DO NOT invent rules such as:
 
-Confirm:
-- T1-05 migration is correct and dependency-safe.
-- T1-06 migration is correct and dependency-safe.
-- Migration ordering is correct.
-- Existing production/staging data is preserved.
-- No destructive migration exists unless explicitly required by the approved repo plan.
-- DocumentManager matches the intended schema.
-- ERD/docs match the actual implementation.
+- whether child permissions override parent permissions
+- whether deny overrides allow
+- whether inheritance can be broken
+- whether multiple team grants combine
+- precedence between USER and TEAM grants
 
-Report any mismatch before proceeding.
+Instead:
 
-STEP 2 — DETERMINE SAFE VALIDATION PATH
+1. Build only the schema/domain/service foundation that is safe regardless of the final inheritance decision.
 
-Determine whether the current environment is connected to:
+2. Clearly mark the inheritance resolver/policy as requiring stakeholder confirmation.
 
-LOCAL
-STAGING
-or PRODUCTION.
+3. Do not silently choose security-sensitive defaults.
 
-Never apply unverified migrations to production.
+==================================================
+STEP C5 — SERVER-SIDE ENFORCEMENT
+==================================================
 
-If a safe staging/local database is available and credentials/configuration are already correctly configured:
+Permissions must never rely only on UI visibility.
 
-Apply T1-05/T1-06 using the repository's existing migration mechanism.
+Audit and secure relevant:
 
-Do not invent a new migration process.
+- API routes
+- server actions
+- database access paths
+- article mutations
+- hierarchy mutations
+- approval/publish operations
+- delete operations
 
-If migration application is blocked because code must first be merged/deployed or because GitHub integration is required:
+Unauthorized direct requests must be rejected server-side.
 
-DO NOT bypass that process.
+Use the existing PDP/PEP/security architecture where applicable.
 
-Instead report the exact blocker and the exact manual action required.
+Do not create parallel authorization logic if an approved centralized mechanism already exists.
 
-STEP 3 — DATABASE VALIDATION
+==================================================
+STEP C6 — UI PERMISSION BEHAVIOR
+==================================================
 
-After migration application, verify:
+Update KB UI behavior only where supported by confirmed permissions.
 
-- expected tables/columns/constraints exist
-- foreign keys are correct
-- indexes are present where specified
-- existing records remain intact
-- article/content/version relationships work
-- hierarchy relationships work
-- no duplicate or orphaned records were introduced
+Examples:
 
-STEP 4 — CORE KB SMOKE TEST
+Users without CREATE:
+- should not receive functional create controls.
 
-Validate existing supported KB functionality against the updated schema:
+Users without EDIT:
+- should not receive functional edit controls.
 
-1. KB application loads.
-2. Hierarchy/navigation loads.
-3. Existing article list loads.
-4. Existing article opens correctly.
-5. Existing content renders correctly.
-6. Existing supported create/edit flow still works where currently implemented.
-7. Existing approval/publish behavior still works where currently implemented.
-8. Search/retrieval still works where currently supported.
-9. Existing TOW → KB deep links/scaffolding still work.
-10. No new server/browser errors are introduced.
+Users without DELETE:
+- should not receive functional delete controls.
 
-STEP 5 — AUTOMATED VALIDATION
+Users without APPROVE/PUBLISH:
+- should not receive approval/publish actions.
 
-Run all available relevant:
+But remember:
 
+UI hiding is NOT authorization.
+
+Server-side enforcement remains mandatory.
+
+Do not redesign unrelated UI.
+
+==================================================
+STEP C7 — SECURITY TEST MATRIX
+==================================================
+
+Create tests for at least:
+
+1. Authorized user can view permitted content.
+
+2. Unauthorized user cannot access protected content directly through API.
+
+3. Authorized author can create where permitted.
+
+4. Unauthorized user cannot create.
+
+5. Authorized editor can edit.
+
+6. Unauthorized user cannot edit through direct API request.
+
+7. Publish/approval permissions are enforced.
+
+8. Delete/manage permissions are enforced.
+
+9. USER-based assignments resolve correctly for confirmed behavior.
+
+10. TEAM-based assignments resolve correctly for confirmed behavior.
+
+For inheritance-dependent scenarios whose rules are not confirmed:
+
+Mark them:
+
+BLOCKED — BUSINESS RULE CONFIRMATION REQUIRED
+
+Do not invent expected behavior.
+
+==================================================
+STEP C8 — REGRESSION PROTECTION
+==================================================
+
+Verify Phase C does not break:
+
+- TOW authentication
+- existing TOW permissions/PDP/PEP
+- KB navigation
+- KB article reading
+- hierarchy navigation
+- Phase A stabilization work
+- Phase B schema/content foundation
+- existing TOW → KB integration/deep links
+
+Run all locally available:
+
+- typecheck
+- lint
 - unit tests
 - integration tests
-- type checks
-- lint
 - build
-- migration/schema validation
 
-If local automated validation is blocked by environment/tooling limitations, clearly separate:
+Fix only regressions caused by Phase C.
 
-CODE FAILURE
+==================================================
+STRICT SCOPE CONTROL
+==================================================
 
-from
+DO NOT implement yet:
 
-ENVIRONMENT/EXECUTION BLOCKER.
+- automatic GitHub PR → KB article generation
+- LangSmith agent retrieval changes
+- document/PDF migration
+- chatbot functionality
+- unrelated TOW features
+- notification changes
+- shared-list fixes
+- production deployment
+- staging deployment
 
-Do not mark Phase B failed merely because this machine cannot execute an external integration.
+Those belong to separate phases/workstreams.
 
-STEP 6 — PHASE B ACCEPTANCE
+DO NOT:
+- commit
+- push
+- merge
+- deploy
 
-Compare the implementation against the existing repository Track/T1-05/T1-06 acceptance criteria.
-
-Do not use Phase C permission requirements as Phase B acceptance criteria.
-
-USER/TEAM permission inheritance must remain deferred until Phase C and must not be invented.
-
+==================================================
 FINAL REPORT
+==================================================
 
-Return exactly:
+At completion provide:
 
-PHASE B STATUS:
-COMPLETE
-PARTIALLY COMPLETE
-or BLOCKED
+PHASE C STATUS:
+COMPLETE / PARTIALLY COMPLETE / BLOCKED
 
-Then provide:
+Then report:
 
-1. T1-05 status
-2. T1-06 status
-3. Migration application status
-4. Database validation result
-5. DocumentManager/ERD alignment result
-6. Automated test/build results
-7. KB smoke/UAT results
-8. TOW → KB regression result
-9. Remaining blockers, if any
-10. Exact manual action required, if any
+1. Existing permission architecture discovered.
 
-Finally answer:
+2. Files/schema/components changed.
 
-CAN PHASE B BE CLOSED? YES/NO
+3. USER support implemented.
 
-If YES:
-State that Phase C may be planned next, but DO NOT start it.
+4. TEAM support implemented.
 
-If NO:
-Give only the minimum actions necessary to close Phase B.
+5. Permission capabilities implemented:
+   VIEW
+   CREATE
+   EDIT
+   APPROVE/PUBLISH
+   DELETE/MANAGE
 
-STOP after this validation.
-Do not start Phase C.
-Do not commit or push.
+6. Server-side enforcement implemented.
+
+7. UI enforcement implemented.
+
+8. Tests added and exact results.
+
+9. Regression results.
+
+10. Any unresolved decisions requiring John.
+
+Create a separate section:
+
+QUESTIONS FOR JOHN
+
+Include ONLY decisions that genuinely cannot be derived from approved repository documentation.
+
+Especially clarify, if unresolved:
+
+- Do hierarchy permissions automatically inherit to all descendants?
+
+- Can a child node override parent permissions?
+
+- Can inheritance be explicitly disabled at a child?
+
+- If USER and TEAM permissions conflict, what is the precedence?
+
+- Are permissions additive only, or do explicit DENY permissions exist?
+
+- Who can change hierarchy-level permission assignments?
+
+Finally state:
+
+READY FOR NEXT LOCAL PHASE: YES/NO
+
+STOP after Phase C.
+
+Do not commit.
+Do not push.
+Do not merge.
+Do not deploy.
