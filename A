@@ -1,274 +1,377 @@
 Act as a Principal Full-Stack Engineer / Solution Architect.
 
-We are continuing the Knowledge Base (KB Admin) stabilization and architecture work discussed with John.
+We are continuing the Knowledge Base (KB Admin) implementation discussed with John.
 
-IMPORTANT WORKFLOW DECISION:
+CURRENT STATUS:
 
-Phase B implementation work is complete enough to continue local development, but its final staging validation is intentionally DEFERRED.
-
-Do NOT:
-- merge to staging
-- commit
-- push
-- create a PR
-- deploy
-- run production migrations
-- modify production data
-
-We will perform integration, staging deployment, migrations, and final Phase B validation later after the planned implementation work is complete.
-
-Proceed with PHASE C ONLY:
-
-KNOWLEDGE BASE PERMISSIONING / ACCESS-CONTROL FOUNDATION.
-
-==================================================
-BUSINESS CONTEXT FROM JOHN
-==================================================
-
-John specifically raised the following concerns:
-
-1. The Knowledge Base currently has little/no mature permissioning.
-
-2. KB and TOW are in the same ecosystem/monorepo and share the same user base.
-
-3. Where architecturally appropriate, existing TOW user/team identity and permission concepts should be reused rather than creating an unrelated duplicate identity system.
-
-4. We need control over who can:
-
-- view knowledge
-- author/create articles
-- edit articles
-- approve/publish where applicable
-- delete/manage articles
-
-5. Knowledge permissions may also exist at levels of the KB hierarchy.
-
-John specifically mentioned the ability to assign a USER or TEAM at levels of the Knowledge Base hierarchy.
-
-6. Permission behavior may therefore require inheritance from parent hierarchy nodes to descendants.
-
-However:
-
-DO NOT INVENT BUSINESS RULES that John has not explicitly confirmed.
-
-If exact USER/TEAM inheritance semantics are not defined in the repository/docs, implement only the safe foundation necessary to support them and clearly document the unresolved decision.
-
-==================================================
-STEP C1 — REPOSITORY AND EXISTING PERMISSION AUDIT
-==================================================
-
-Before modifying code, inspect the complete current implementation.
-
-Identify:
-
-- KB authentication
-- KB authorization
-- users
-- teams
-- roles
-- existing TOW PDP/PEP implementation
-- existing permission tables
-- RLS policies
-- middleware
-- API authorization checks
-- hierarchy/node access logic
-- article access logic
-- author/editor/admin concepts
-- approval/publishing permissions
-
-Determine whether KB currently:
-
-- duplicates TOW identity concepts
-- already references shared users
-- already references teams
-- has incomplete/scaffolded permission code
-- has hard-coded permissions
-- has permission bypasses
-- exposes routes without authorization
-
-Produce a concise CURRENT STATE report.
-
-Do not change code until this audit is complete.
-
-==================================================
-STEP C2 — DEFINE THE MINIMUM SAFE PERMISSION MODEL
-==================================================
-
-Based strictly on existing architecture and John's confirmed requirements, design the minimum permission foundation supporting:
-
-VIEW
-CREATE/AUTHOR
-EDIT
-APPROVE/PUBLISH
-DELETE/MANAGE
-
-Determine whether permissions should be represented as:
-
-- existing roles/permissions,
-- explicit capability flags,
-- grants,
-- hierarchy assignments,
-
-or a combination consistent with the repository architecture.
-
-Prefer reuse over duplication.
-
-Do NOT create a second independent user/identity system.
-
-==================================================
-STEP C3 — USER AND TEAM SUBJECT SUPPORT
-==================================================
-
-The architecture must be capable of granting KB access to:
-
-A. individual USER
-
-and
-
-B. TEAM
-
-Reuse existing canonical TOW/shared identities where possible.
-
-Do not duplicate user/team records merely for KB permissioning unless repository architecture absolutely requires it.
-
-Maintain referential integrity.
-
-==================================================
-STEP C4 — HIERARCHY PERMISSION FOUNDATION
-==================================================
-
-Inspect the KB hierarchy/schema.
-
-Implement the minimum safe architecture required to associate permission/access assignments with the appropriate hierarchy level.
-
-It must be structurally capable of supporting:
-
-Hierarchy node
-    ↓
-USER and/or TEAM assignment
-    ↓
-Access to relevant knowledge beneath that hierarchy
+- Phase A: Stabilization / confirmed dead-code cleanup — COMPLETE
+- Phase B: Schema / Content Foundation — implementation completed locally; staging migration and final validation DEFERRED
+- Phase C: Permissioning / USER + TEAM access-control foundation — completed sufficiently to continue local development; final migration/security validation DEFERRED
 
 IMPORTANT:
 
-If the exact inheritance algorithm is NOT explicitly defined in existing approved documentation:
+We intentionally do NOT want to:
 
-DO NOT invent rules such as:
+- commit
+- push
+- create PR
+- merge
+- deploy
+- apply staging/production migrations
 
-- whether child permissions override parent permissions
-- whether deny overrides allow
-- whether inheritance can be broken
-- whether multiple team grants combine
-- precedence between USER and TEAM grants
+at this stage.
 
-Instead:
+All integration/deployment/staging validation will be performed later after the planned local implementation phases are complete.
 
-1. Build only the schema/domain/service foundation that is safe regardless of the final inheritance decision.
+Proceed with:
 
-2. Clearly mark the inheritance resolver/policy as requiring stakeholder confirmation.
-
-3. Do not silently choose security-sensitive defaults.
-
-==================================================
-STEP C5 — SERVER-SIDE ENFORCEMENT
-==================================================
-
-Permissions must never rely only on UI visibility.
-
-Audit and secure relevant:
-
-- API routes
-- server actions
-- database access paths
-- article mutations
-- hierarchy mutations
-- approval/publish operations
-- delete operations
-
-Unauthorized direct requests must be rejected server-side.
-
-Use the existing PDP/PEP/security architecture where applicable.
-
-Do not create parallel authorization logic if an approved centralized mechanism already exists.
+PHASE D ONLY — KNOWLEDGE BASE CONTENT LIFECYCLE, AUTHORING, APPROVAL AND PUBLISHING FOUNDATION.
 
 ==================================================
-STEP C6 — UI PERMISSION BEHAVIOR
+JOHN'S BUSINESS OBJECTIVE
 ==================================================
 
-Update KB UI behavior only where supported by confirmed permissions.
+John wants the Knowledge Base to become a reliable, governed source of organizational knowledge.
+
+He specifically does NOT want an uncontrolled KB where anyone can freely create/delete/publish content.
+
+The KB must eventually support:
+
+- controlled article creation
+- editing
+- review/approval
+- publishing
+- hierarchy organization
+- permissions
+- reliable authoritative content
+
+It should support many types of knowledge, not only TOW application documentation.
+
+Examples include:
+
+- application training
+- company/process knowledge
+- vendor knowledge
+- policies/procedures
+- operational knowledge
+- future agent-consumable knowledge
+
+Do NOT narrow the architecture to TOW documentation only.
+
+==================================================
+STEP D1 — AUDIT CURRENT CONTENT LIFECYCLE
+==================================================
+
+First inspect the existing repository.
+
+Determine exactly how KB content currently works:
+
+- article creation
+- article editing
+- drafts
+- approval
+- publishing
+- rejection
+- archival
+- deletion
+- versioning/revisions
+- authoritative article designation
+- hierarchy placement
+- ownership
+- author information
+- approval metadata
+
+Identify:
+
+- implemented functionality
+- partial/scaffolded functionality
+- dead functionality
+- duplicated lifecycle logic
+- missing enforcement
+- database state/status fields
+- UI/API inconsistencies
+
+Also inspect any existing docs/research/plans in the repository related to KB lifecycle.
+
+Do NOT modify code until this audit is complete.
+
+==================================================
+STEP D2 — DEFINE CANONICAL ARTICLE LIFECYCLE
+==================================================
+
+Reuse existing approved architecture wherever possible.
+
+Establish or normalize a clear lifecycle such as:
+
+DRAFT
+   ↓
+SUBMITTED / IN REVIEW
+   ↓
+APPROVED
+   ↓
+PUBLISHED
+
+with appropriate handling for:
+
+REJECTED / CHANGES REQUESTED
+
+and
+
+ARCHIVED
+
+Do NOT invent unnecessary statuses if equivalent repository-defined states already exist.
+
+Document the allowed transitions.
+
+Prevent invalid transitions.
 
 Examples:
 
-Users without CREATE:
-- should not receive functional create controls.
+A draft should not accidentally become published through a direct client request.
 
-Users without EDIT:
-- should not receive functional edit controls.
-
-Users without DELETE:
-- should not receive functional delete controls.
-
-Users without APPROVE/PUBLISH:
-- should not receive approval/publish actions.
-
-But remember:
-
-UI hiding is NOT authorization.
-
-Server-side enforcement remains mandatory.
-
-Do not redesign unrelated UI.
+Archived content should not behave as active published content.
 
 ==================================================
-STEP C7 — SECURITY TEST MATRIX
+STEP D3 — ARTICLE AUTHORING
 ==================================================
 
-Create tests for at least:
+Ensure authorized users can:
 
-1. Authorized user can view permitted content.
+- create an article
+- save a draft
+- edit permitted drafts/content
+- assign/select appropriate hierarchy location where allowed
+- provide required metadata
+- submit content for review
 
-2. Unauthorized user cannot access protected content directly through API.
+Reuse Phase C permission capabilities.
 
-3. Authorized author can create where permitted.
+Do not create a second authorization model.
 
-4. Unauthorized user cannot create.
-
-5. Authorized editor can edit.
-
-6. Unauthorized user cannot edit through direct API request.
-
-7. Publish/approval permissions are enforced.
-
-8. Delete/manage permissions are enforced.
-
-9. USER-based assignments resolve correctly for confirmed behavior.
-
-10. TEAM-based assignments resolve correctly for confirmed behavior.
-
-For inheritance-dependent scenarios whose rules are not confirmed:
-
-Mark them:
-
-BLOCKED — BUSINESS RULE CONFIRMATION REQUIRED
-
-Do not invent expected behavior.
+Unauthorized users must not be able to bypass restrictions through direct API calls.
 
 ==================================================
-STEP C8 — REGRESSION PROTECTION
+STEP D4 — REVIEW AND APPROVAL WORKFLOW
 ==================================================
 
-Verify Phase C does not break:
+Implement or harden the existing review workflow.
 
-- TOW authentication
-- existing TOW permissions/PDP/PEP
-- KB navigation
-- KB article reading
-- hierarchy navigation
-- Phase A stabilization work
-- Phase B schema/content foundation
-- existing TOW → KB integration/deep links
+Support, where consistent with repository architecture:
 
-Run all locally available:
+Author
+    ↓
+Draft
+    ↓
+Submit for Review
+    ↓
+Authorized Reviewer/Approver
+    ↓
+Approve OR Request Changes/Reject
+    ↓
+Publish
+
+Record appropriate audit metadata such as:
+
+- created_by
+- updated_by
+- submitted_by
+- approved_by
+- timestamps
+
+Only where consistent with existing schema/architecture.
+
+Do not duplicate fields that already exist.
+
+==================================================
+STEP D5 — PUBLISHING CONTROL
+==================================================
+
+Publishing must be controlled.
+
+Ensure:
+
+- only authorized users/processes can publish
+- publication state is enforced server-side
+- unauthorized direct API publication fails
+- unpublished content does not accidentally appear as authoritative public knowledge
+
+Reuse Phase C APPROVE/PUBLISH permissions.
+
+==================================================
+STEP D6 — AUTHORITATIVE CONTENT
+==================================================
+
+Inspect the existing concept of:
+
+- authoritative article
+- approved knowledge
+- published article
+
+Normalize behavior so consumers can reliably distinguish:
+
+AUTHORITATIVE/PUBLISHED KNOWLEDGE
+
+from:
+
+DRAFT / UNAPPROVED / ARCHIVED KNOWLEDGE.
+
+This is important because future:
+
+- TOW integration
+- MCP tools
+- LangSmith agents
+- search/retrieval
+
+must be able to consume trusted knowledge.
+
+Do NOT implement the agent integration yet.
+
+Only ensure the lifecycle/data model supports it.
+
+==================================================
+STEP D7 — VERSIONING / REVISION SAFETY
+==================================================
+
+Inspect whether article versioning/revisions already exist.
+
+If supported by existing architecture, ensure editing a published article does not silently destroy the authoritative published version.
+
+Prefer a safe model such as:
+
+Published Version
+      ↓
+New Revision/Draft
+      ↓
+Review
+      ↓
+Approval
+      ↓
+New Published Version
+
+But DO NOT introduce a large new versioning architecture if repository plans specify another approach.
+
+Follow approved repository research/plans first.
+
+==================================================
+STEP D8 — ARCHIVE / DELETE SAFETY
+==================================================
+
+Review delete behavior carefully.
+
+Avoid destructive deletion of important published organizational knowledge unless explicitly required.
+
+Prefer existing archive/soft-delete architecture where available.
+
+Ensure unauthorized users cannot:
+
+- delete
+- archive
+- restore
+
+content through direct API calls.
+
+Do not invent new retention policy.
+
+If business clarification is required, report it.
+
+==================================================
+STEP D9 — HIERARCHY INTEGRATION
+==================================================
+
+Ensure articles integrate correctly with the existing KB hierarchy.
+
+Validate:
+
+- article → hierarchy relationship
+- movement between hierarchy nodes
+- hierarchy deletion impact
+- permission interaction from Phase C
+
+Do NOT invent unresolved USER/TEAM inheritance semantics.
+
+If Phase D behavior depends on unresolved inheritance rules, mark:
+
+BLOCKED — JOHN CONFIRMATION REQUIRED
+
+and implement only the safe foundation.
+
+==================================================
+STEP D10 — UI WORKFLOW
+==================================================
+
+Ensure the UI clearly reflects lifecycle state.
+
+Where supported by permissions, users should be able to understand whether content is:
+
+- Draft
+- In Review
+- Approved
+- Published
+- Changes Requested/Rejected
+- Archived
+
+Only show actionable controls when appropriate.
+
+Examples:
+
+Submit for Review
+Approve
+Request Changes
+Publish
+Archive
+
+must appear only when:
+
+1. the lifecycle state allows the action
+AND
+2. the user has permission.
+
+Do not perform unrelated visual redesign.
+
+==================================================
+STEP D11 — SERVER-SIDE ENFORCEMENT
+==================================================
+
+Every lifecycle transition must be validated server-side.
+
+Do not trust:
+
+- hidden buttons
+- disabled controls
+- client-supplied status
+- client-supplied permission claims
+
+Test direct API attempts for invalid/unauthorized transitions.
+
+==================================================
+STEP D12 — TEST MATRIX
+==================================================
+
+Create/update tests covering at minimum:
+
+1. Authorized user creates draft.
+2. Unauthorized user cannot create.
+3. Draft can be edited by authorized user.
+4. Draft can be submitted for review.
+5. Unauthorized user cannot approve.
+6. Authorized approver can approve.
+7. Unauthorized user cannot publish.
+8. Authorized publisher can publish.
+9. Invalid lifecycle transitions fail.
+10. Published/authoritative content is distinguishable from drafts.
+11. Archive/delete permissions are enforced.
+12. Hierarchy relationships remain valid.
+13. Existing Phase C permission enforcement is not bypassed.
+
+If versioning exists:
+
+14. Editing published content preserves appropriate revision/history behavior.
+
+==================================================
+STEP D13 — REGRESSION VALIDATION
+==================================================
+
+Run locally available:
 
 - typecheck
 - lint
@@ -276,7 +379,20 @@ Run all locally available:
 - integration tests
 - build
 
-Fix only regressions caused by Phase C.
+Verify no regression to:
+
+- TOW app
+- authentication
+- PDP/PEP
+- Phase A stabilization
+- Phase B schema/content foundation
+- Phase C permission foundation
+- KB navigation
+- hierarchy
+- article reading
+- existing TOW → KB deep links
+
+Fix only issues caused by Phase D.
 
 ==================================================
 STRICT SCOPE CONTROL
@@ -284,86 +400,66 @@ STRICT SCOPE CONTROL
 
 DO NOT implement yet:
 
-- automatic GitHub PR → KB article generation
-- LangSmith agent retrieval changes
-- document/PDF migration
-- chatbot functionality
+- GitHub PR → automatic KB article generation
+- CI/CD knowledge generation
+- LangSmith agent integration
+- document/PDF bulk migration
+- TOW notification fixes
+- TOW shared-list fixes
 - unrelated TOW features
-- notification changes
-- shared-list fixes
-- production deployment
-- staging deployment
 
-Those belong to separate phases/workstreams.
+These belong to separate workstreams/phases.
 
 DO NOT:
+
 - commit
 - push
 - merge
+- create PR
 - deploy
+- run staging/production migrations
 
 ==================================================
 FINAL REPORT
 ==================================================
 
-At completion provide:
+Return:
 
-PHASE C STATUS:
+PHASE D STATUS:
 COMPLETE / PARTIALLY COMPLETE / BLOCKED
 
-Then report:
+Then provide:
 
-1. Existing permission architecture discovered.
+1. Existing lifecycle discovered
+2. Canonical lifecycle after Phase D
+3. Files/schema/components changed
+4. Authoring functionality completed
+5. Review functionality completed
+6. Approval functionality completed
+7. Publishing controls completed
+8. Authoritative-content handling
+9. Version/revision handling
+10. Archive/delete handling
+11. Permission integration with Phase C
+12. Tests and exact results
+13. Regression results
+14. Deferred staging/migration work
 
-2. Files/schema/components changed.
-
-3. USER support implemented.
-
-4. TEAM support implemented.
-
-5. Permission capabilities implemented:
-   VIEW
-   CREATE
-   EDIT
-   APPROVE/PUBLISH
-   DELETE/MANAGE
-
-6. Server-side enforcement implemented.
-
-7. UI enforcement implemented.
-
-8. Tests added and exact results.
-
-9. Regression results.
-
-10. Any unresolved decisions requiring John.
-
-Create a separate section:
+Create:
 
 QUESTIONS FOR JOHN
 
-Include ONLY decisions that genuinely cannot be derived from approved repository documentation.
+Only include genuine unresolved business decisions.
 
-Especially clarify, if unresolved:
-
-- Do hierarchy permissions automatically inherit to all descendants?
-
-- Can a child node override parent permissions?
-
-- Can inheritance be explicitly disabled at a child?
-
-- If USER and TEAM permissions conflict, what is the precedence?
-
-- Are permissions additive only, or do explicit DENY permissions exist?
-
-- Who can change hierarchy-level permission assignments?
+Do not invent answers.
 
 Finally state:
 
-READY FOR NEXT LOCAL PHASE: YES/NO
+READY FOR PHASE E LOCAL IMPLEMENTATION: YES/NO
 
-STOP after Phase C.
+STOP after Phase D.
 
+Do not start Phase E.
 Do not commit.
 Do not push.
 Do not merge.
