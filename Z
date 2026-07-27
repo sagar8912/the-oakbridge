@@ -1,0 +1,412 @@
+Act as a Principal Full-Stack Engineer.
+
+Implement a complete GitHub PR Integration in the KB Admin application.
+
+This must be production-ready and fully integrated with the existing KB Admin architecture. Follow the existing coding standards, authentication, authorization, audit logging, database design, and UI patterns.
+
+Do not create a demo or mock implementation.
+
+==================================
+OBJECTIVE
+==================================
+
+Allow KB Admin users to automatically create or update Knowledge Base articles from GitHub Pull Requests and Markdown documentation.
+
+The integration should reduce manual documentation work while keeping every imported article traceable back to GitHub.
+
+==================================
+BACKEND
+==================================
+
+Create secure GitHub integration services.
+
+Support:
+
+• GitHub OAuth or Personal Access Token
+• Repository configuration
+• Organization configuration
+• Branch selection
+• Webhook support
+• Scheduled sync
+
+Create APIs for:
+
+GET /api/admin/github/status
+
+GET /api/admin/github/repositories
+
+GET /api/admin/github/branches
+
+GET /api/admin/github/pull-requests
+
+GET /api/admin/github/pull-requests/:id
+
+POST /api/admin/github/import-pr
+
+POST /api/admin/github/import-markdown
+
+POST /api/admin/github/sync
+
+POST /api/admin/github/webhook
+
+==================================
+SUPPORTED CONTENT
+==================================
+
+Import:
+
+README.md
+
+Markdown documentation
+
+docs/
+
+wiki/
+
+ADR documents
+
+Architecture docs
+
+Release notes
+
+API documentation
+
+Workflow documentation
+
+==================================
+IMPORT LOGIC
+==================================
+
+When importing a PR:
+
+Read changed markdown files.
+
+Extract:
+
+Title
+
+Headings
+
+Sections
+
+Tables
+
+Lists
+
+Images
+
+Code blocks
+
+Links
+
+Create or update KB Articles.
+
+Never overwrite manually edited content without confirmation.
+
+==================================
+STORE SOURCE METADATA
+==================================
+
+Store:
+
+Repository
+
+Organization
+
+PR Number
+
+Branch
+
+Commit SHA
+
+Author
+
+Reviewer
+
+Merge Date
+
+Source URL
+
+Last Sync
+
+Imported By
+
+==================================
+DATABASE
+==================================
+
+Create tables if required:
+
+github_connections
+
+github_sync_jobs
+
+github_import_history
+
+github_webhooks
+
+github_documents
+
+github_repositories
+
+github_pull_requests
+
+==================================
+UI
+==================================
+
+Add new menu:
+
+Administration
+
+→ GitHub Integration
+
+Pages:
+
+Repositories
+
+Connections
+
+Pull Requests
+
+Import History
+
+Sync Status
+
+Settings
+
+==================================
+REPOSITORY PAGE
+==================================
+
+Show:
+
+Repository
+
+Branch
+
+Default Branch
+
+Connection Status
+
+Last Sync
+
+Actions
+
+Connect
+
+Disconnect
+
+Sync
+
+==================================
+PULL REQUEST PAGE
+==================================
+
+Display:
+
+PR Number
+
+Title
+
+Repository
+
+Author
+
+Status
+
+Created Date
+
+Merged Date
+
+Files Changed
+
+Documentation Files
+
+Import Button
+
+Preview Button
+
+==================================
+IMPORT SCREEN
+==================================
+
+Allow admin to:
+
+Preview markdown
+
+Choose KB
+
+Choose Category
+
+Choose Parent Node
+
+Choose Workflow
+
+Import
+
+Update Existing
+
+Create New
+
+==================================
+MANAGE DOCUMENTS
+==================================
+
+Inside every KB article under
+
+Manage Documents
+
+show:
+
+Source = GitHub
+
+Repository
+
+Branch
+
+PR Number
+
+Commit
+
+Last Sync
+
+Sync Again
+
+Open PR
+
+Open Repository
+
+View Diff
+
+==================================
+WEBHOOK SUPPORT
+==================================
+
+When PR is:
+
+Opened
+
+Updated
+
+Merged
+
+Closed
+
+Automatically update sync status.
+
+==================================
+SEARCH
+==================================
+
+Imported documentation must become searchable immediately.
+
+Use the same indexing pipeline already used by uploaded documents.
+
+==================================
+AUDIT
+==================================
+
+Log:
+
+Imported
+
+Updated
+
+Synced
+
+Deleted
+
+Repository Changed
+
+Webhook Triggered
+
+==================================
+PERMISSIONS
+==================================
+
+Create permissions:
+
+Manage GitHub Integration
+
+Import GitHub Docs
+
+Sync GitHub
+
+View GitHub Sources
+
+Only authorized admins may perform imports.
+
+==================================
+ERROR HANDLING
+==================================
+
+Handle:
+
+Expired tokens
+
+Missing repositories
+
+Deleted branches
+
+Deleted PRs
+
+GitHub API rate limits
+
+Merge conflicts
+
+Large markdown files
+
+==================================
+NOTIFICATIONS
+==================================
+
+Notify admins when:
+
+Import succeeds
+
+Import fails
+
+Sync completes
+
+Webhook fails
+
+==================================
+TESTING
+==================================
+
+Add unit tests.
+
+Add integration tests.
+
+Add API tests.
+
+Add UI tests.
+
+==================================
+DELIVERABLE
+==================================
+
+After implementation provide:
+
+1. Files created
+
+2. Files modified
+
+3. Database migrations
+
+4. New APIs
+
+5. UI pages
+
+6. Permission changes
+
+7. Test commands
+
+8. Manual testing checklist
+
+Do not leave TODOs.
+
+Do not use mocked data.
+
+Everything must be fully wired into the existing KB Admin application.
