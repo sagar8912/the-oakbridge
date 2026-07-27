@@ -1,191 +1,157 @@
-Act as a Principal AI Engineer, Full-Stack Architect, and Product Engineer.
+Act as a Principal Full-Stack Engineer / Solution Architect.
 
-We have completed the core KB Admin implementation.
+We need to implement a complete Document Management module inside KB Admin.
 
-Now implement an enterprise AI Knowledge Assistant inside the KB Admin application.
+Current state:
+- The "Manage Documents" tab exists.
+- No document upload functionality is available.
+- We want to support enterprise document management and use these documents as the primary knowledge source for the AI Assistant.
 
-IMPORTANT GOALS
+Objectives:
+1. Upload documents from the Manage Documents tab.
+2. Store metadata and files securely.
+3. Connect uploaded documents with KB Articles.
+4. Make uploaded documents searchable.
+5. Allow the AI Assistant to answer questions using uploaded documents.
+6. Keep all existing permission and KB access rules.
 
-1. The chatbot must answer questions ONLY from the Knowledge Base content and approved application metadata.
-2. The chatbot must NEVER hallucinate or invent answers.
-3. If the answer cannot be found in the KB, it must clearly say:
-   "I couldn't find this information in the Knowledge Base."
-4. The chatbot must appear as a floating assistant in the lower-right corner of the KB Admin application.
-5. The solution must be production-ready and enterprise quality.
+=====================================
+SUPPORTED FILE TYPES
+=====================================
 
-========================================
-UI REQUIREMENTS
-========================================
+Support uploading:
 
-Create a floating AI Assistant similar to Microsoft Copilot.
+- PDF
+- DOC / DOCX
+- PPT / PPTX
+- XLS / XLSX
+- CSV
+- JSON
+- TXT
+- Markdown (.md)
 
-Requirements:
+Validate:
+- File type
+- File size
+- Duplicate filename handling
 
-- Floating chat button in the bottom-right corner.
-- Expandable chat panel.
-- Minimize and close support.
-- Conversation history within the current session.
-- Auto-scroll.
-- Typing indicator.
-- Streaming responses (if supported).
-- Markdown rendering.
-- Code blocks.
-- Tables.
-- Links to KB articles.
-- Mobile responsive.
-- Dark mode compatible.
+=====================================
+UI
+=====================================
 
-========================================
-KNOWLEDGE SOURCE
-========================================
+Inside Manage Documents implement:
 
-The chatbot MUST answer using:
+Upload button
 
-- Published Knowledge Base articles
-- Categories
-- Workflows
-- Documents
-- Relationships
-- Metadata
-- Approved content only
+Drag & Drop upload
 
-Do NOT use unpublished drafts unless the current user has permission.
+Progress bar
 
-Respect all existing permission rules.
+Recent uploads
 
-========================================
-PERMISSION AWARENESS
-========================================
+Search documents
 
-The assistant must respect:
+Filter by:
+- File type
+- Uploaded by
+- Upload date
+- Knowledge Base
 
-KB Role
-Feature Permissions
-Knowledge Base Scope
-Team Access
-kb_access_grants
-Inherited permissions
-Direct permissions
+Document table showing:
 
-If the user cannot access an article:
+File Name
 
-Never reveal its contents.
+Type
 
-Instead respond:
+Size
 
-"You don't have permission to access this knowledge."
+Uploaded By
 
-========================================
-RAG PIPELINE
-========================================
-
-Implement Retrieval-Augmented Generation.
-
-Pipeline:
-
-User Question
-↓
-
-Permission Filter
-
-↓
-
-Knowledge Search
-
-↓
-
-Semantic Search
-
-↓
-
-Top Relevant Documents
-
-↓
-
-Context Builder
-
-↓
-
-LLM
-
-↓
-
-Grounded Response
-
-The LLM MUST NOT answer without retrieved evidence.
-
-========================================
-GROUNDING
-========================================
-
-Every answer must include:
-
-Sources used
+Upload Date
 
 Knowledge Base
 
-Article name
+Status
 
-Section
+Actions
 
-Confidence level
+Actions:
 
-Example:
+Preview
 
-Sources:
-• TOW App > Goals > Goal Creation
-• Technical Documents > Workflow Engine
+Download
 
-Confidence:
-High
+Replace Version
 
-========================================
-HALLUCINATION PROTECTION
-========================================
+Delete
 
-Never fabricate.
+View Metadata
 
-If confidence is low:
+=====================================
+DOCUMENT PREVIEW
+=====================================
 
-Say:
+Preview without downloading.
 
-"I couldn't find enough verified information in the Knowledge Base."
+PDF viewer
 
-Never guess.
+Word preview
 
-Never invent APIs.
+PowerPoint preview
 
-Never invent workflows.
+Excel table preview
 
-Never invent permissions.
+JSON viewer
 
-========================================
-SUPPORTED QUESTIONS
-========================================
+Markdown renderer
 
-Examples:
+Text viewer
 
-How do I create a Goal?
+=====================================
+VERSIONING
+=====================================
 
-Who can publish articles?
+Support version history.
 
-What does Reviewer permission do?
+Version 1
 
-How do workflows work?
+Version 2
 
-How is KB Access configured?
+Version 3
 
-How do Notifications work?
+Show:
 
-Explain the TOW Goal workflow.
+Created By
 
-How does Team permission inheritance work?
+Date
 
-What is the difference between Reader and Editor?
+Comment
 
-========================================
+Allow rollback.
+
+=====================================
+KB INTEGRATION
+=====================================
+
+Every uploaded document can be linked to:
+
+Knowledge Base
+
+Category
+
+Workflow
+
+Article
+
+Relationship
+
+Multiple documents per article.
+
+=====================================
 SEARCH
-========================================
+=====================================
+
+Index uploaded files.
 
 Support:
 
@@ -193,115 +159,160 @@ Keyword search
 
 Semantic search
 
-Natural language
+OCR (future-ready)
 
-Synonyms
+Content search
 
-Misspellings
+=====================================
+AI INTEGRATION
+=====================================
 
-Partial matches
+Uploaded documents become searchable by the AI Assistant.
 
-========================================
-REFERENCES
-========================================
+Pipeline:
 
-Every response should include:
+User Question
+↓
 
-Related Articles
+Permission Filter
+↓
 
-Suggested Reading
+KB Articles
++
 
-Open Article button
+Uploaded Documents
+↓
 
-========================================
+Relevant Chunks
+↓
+
+LLM
+↓
+
+Grounded Answer
+
+Never answer without retrieved evidence.
+
+=====================================
+PERMISSIONS
+=====================================
+
+Respect existing:
+
+KB Role
+
+Feature Permissions
+
+Knowledge Base Scope
+
+kb_access_grants
+
+Team permissions
+
+Users without permission must not:
+
+View
+
+Download
+
+Preview
+
+Search
+
+Use documents for AI answers.
+
+=====================================
 AUDIT
-========================================
+=====================================
 
-Log:
+Track:
 
-User
+Upload
 
-Question
+Delete
 
-Articles retrieved
+Download
 
-Confidence
+Preview
+
+Replace Version
+
+Permission changes
 
 Timestamp
 
-Response generated
+User
 
-========================================
-BACKEND
-========================================
+=====================================
+DATABASE
+=====================================
 
-Create secure APIs.
+Create document metadata model.
 
-Permission filtering before retrieval.
+Store:
 
-No client-side bypass.
+Document ID
 
-========================================
-FRONTEND
-========================================
+Article ID
 
-Floating AI assistant
+KB ID
 
-Chat window
+Version
 
-Source cards
+Storage Path
 
-Suggested follow-up questions
+File Type
 
-Loading animation
+Checksum
 
-Error handling
+Uploaded By
 
-========================================
+Created At
+
+Updated At
+
+=====================================
 TESTING
-========================================
+=====================================
 
 Verify:
 
-Correct answers
+Upload every supported file type
 
-Permission enforcement
+Preview works
 
-No hallucinations
+Download works
 
-No access leakage
+Delete works
 
-Performance
+Replace version works
 
-Search quality
+Search works
 
-Responsive UI
+Permissions enforced
 
-========================================
+AI retrieves uploaded documents
+
+No unauthorized access
+
+=====================================
 IMPORTANT
-
-Do not create fake knowledge.
-
-Do not answer without retrieved evidence.
-
-Use existing authentication.
-
-Use existing permission model.
 
 Do not break existing KB Admin functionality.
 
-Do not commit.
+Reuse existing permission middleware.
 
-Do not merge.
+Do not create duplicate permission logic.
 
-Do not push.
+Do not commit, merge, push, or deploy.
 
 At the end provide:
 
 1. Files modified
-2. Architecture diagram
+2. Database changes
 3. APIs created
 4. Components created
-5. RAG flow
-6. How hallucination prevention is implemented
-7. Test scenarios
+5. Storage architecture
+6. Search indexing flow
+7. AI document retrieval flow
+8. Test scenarios
