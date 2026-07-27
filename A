@@ -1,58 +1,24 @@
 Act as a Principal Full-Stack Engineer.
 
-The Team Assignment section in KB Admin is only partially implemented.
+Implement Option 3 only.
 
-Current status:
-- Existing assigned teams are displayed.
-- Clicking Add Team or Remove Team shows:
-  "Team membership mutate API is not available in kb-admin yet."
-- No backend mutation exists.
-
-Implement the complete Team Assignment feature.
+Do NOT implement Team Membership management inside KB Admin.
 
 Requirements:
 
-1. Backend
-- Implement APIs to:
-  - Add a team to a user.
-  - Remove a team from a user.
-  - Return updated team assignments after every change.
-- Validate that the team exists.
-- Prevent duplicate team assignments.
-- Return appropriate HTTP status codes and error messages.
+1. Keep Team Assignment as read-only.
+   - Display the teams the user belongs to.
+   - Remove or disable Add Team and Remove Team actions.
+   - Show a note that team membership is managed by the TOW application.
 
-2. Frontend
-- Make the Add Team button functional.
-- Make the Remove Team button functional.
-- Refresh the Team Assignment list immediately after a successful update.
-- Display success and error toast messages.
-- Disable buttons while requests are in progress.
+2. Implement Knowledge Base access management only.
+   - Manage kb_access_grants for users and teams.
+   - Allow granting and revoking access to Knowledge Bases.
+   - Persist changes through the existing KB permission APIs.
 
-3. Security
-- Only users with Manage Users / Manage Permissions privilege can modify team assignments.
-- Users without permission should receive Access Denied.
-- Do not allow unauthorized API access.
+3. Do not create or modify the OOO/TOW team_members model.
+4. Do not duplicate team management functionality.
+5. Keep all authorization, audit logging, and validation intact.
+6. Do not commit, merge, push, or deploy.
 
-4. Validation
-- Prevent assigning the same team twice.
-- Prevent removing a team that is not assigned.
-- Handle network/API failures gracefully.
-
-5. Audit
-- Record who added or removed the team.
-- Record timestamp and action type.
-
-6. Testing
-Verify:
-- Add Team works.
-- Remove Team works.
-- UI refreshes automatically.
-- Team assignments persist after page reload.
-- Unauthorized users cannot modify assignments.
-
-Important:
-- Modify only the Team Assignment feature.
-- Do not change unrelated permission logic.
-- Do not modify authentication unless required.
-- Do not commit, merge, push, or deploy.
-- At the end, list every modified file and explain what was implemented.
+At the end, list every modified file and explain the changes.
