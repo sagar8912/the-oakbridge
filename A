@@ -1,222 +1,286 @@
-Act as a Principal Security Architect and Full-Stack Engineer.
+Act as a Principal Full-Stack Engineer and Security Architect.
 
-We found a permission enforcement bug in KB Admin.
+We found a critical authorization bug in KB Admin.
 
-Current behavior:
+Current behavior
 
-- Admin A edits Admin B's KB permissions.
-- The permission changes are successfully saved.
-- However, Admin B still has unrestricted access because their System Role is Admin/Super Admin.
-- The KB permission model is not overriding the system role as expected.
+Custom permission overrides work correctly for normal users.
 
-Goal
+However, they DO NOT work for Super Admin/Admin users.
 
-The KB Permission model must become the effective authorization layer for KB Admin.
+Example
 
-Requirements
+Admin A
+System Role = Super Admin
 
-1. Investigate current authorization flow.
+Admin B edits Admin A permissions.
 
-Determine whether authorization currently follows:
+Admin B removes:
+
+- Edit Articles
+- Publish Articles
+- Manage Users
+- Manage Permissions
+
+Changes are saved successfully.
+
+But when Admin A logs in:
+
+/api/admin/session-kb-access
+
+still returns
+
+features:
+{
+  "edit_articles": true,
+  "publish_articles": true,
+  "manage_users": true,
+  "manage_permissions": true
+}
+
+because the session builder is granting all permissions based solely on System Role.
+
+This is incorrect.
+
+--------------------------------------------------
+
+GOAL
+
+System Role should only determine authentication and application access.
+
+Inside KB Admin, authorization must be determined by:
+
+System Authentication
+↓
 
 System Role
-        ↓
-Allow everything
+↓
 
-instead of
-
-System Role
-        ↓
 KB Role
-        ↓
-Direct Permission Overrides
-        ↓
-Effective Permissions
-
-Document the current evaluation order.
-
-----------------------------------------
-
-2. Effective Permission Resolution
-
-Implement a single permission resolver.
-
-Example:
-
-getEffectivePermissions(user)
-
-Evaluation order:
-
-System authentication
-↓
-
-System Role
-
-↓
-
-KB Role
-
 ↓
 
 Direct Permission Overrides
-
 ↓
 
 Knowledge Base Scope
-
 ↓
 
 Team Scope
-
 ↓
 
-Final Effective Permissions
+Effective Permissions
 
-Every UI page and API must use ONLY this resolver.
+The effective permissions must be used everywhere.
 
-----------------------------------------
+--------------------------------------------------
 
-3. Admin Override Rules
+Requirements
 
-A System Admin should NOT automatically bypass KB permissions.
+1.
 
-If Admin has:
+Find where
 
-Manage Permissions = false
+/api/admin/session-kb-access
 
-they must NOT access:
+constructs:
 
-- KB Access Grants
-- Permission Management
-- User Permission pages
+uiCaps
 
-If Admin has:
+features
 
-Edit Articles = false
+Replace any logic like:
 
-they must not edit articles.
+if (isSuperAdmin) {
+    allowEverything = true
+}
 
-If Admin has:
+with:
 
-Publish Articles = false
+effectivePermissions = resolveKbPermissions(user)
 
-they must not publish.
+2.
 
-Only authentication/system ownership should remain outside the KB permission model.
+Implement one centralized permission resolver.
 
-----------------------------------------
+Example
 
-4. Refresh Authorization
+resolveKbPermissions(user)
 
-After permissions are changed:
+The resolver must combine:
 
-Invalidate cached permissions.
+- System Role
+- KB Role
+- Direct Permission Overrides
+- kb_access_grants
+- Team assignments
+- Knowledge Base scope
 
-Reload permission context.
+Return the final effective permission object.
 
-If JWT/session stores permissions:
+No page or API should bypass this resolver.
 
-refresh session immediately.
+3.
 
-User should not need to restart the application.
+Super Admin must NOT automatically bypass KB permissions.
 
-----------------------------------------
+Example
 
-5. Backend Enforcement
+System Role = Super Admin
 
-Every protected endpoint must use:
+KB Permission
 
-getEffectivePermissions()
+manage_permissions = false
+
+Result
+
+Cannot access
+
+/admin/kb-users
+
+/admin/permissions
+
+/admin/kb-access-grants
+
+Likewise
+
+edit_articles = false
+
+Reader UI only.
+
+publish_articles = false
+
+Publish button hidden.
+
+Backend returns 403.
+
+4.
+
+Update every frontend authorization hook.
+
+Replace any checks like:
+
+isSuperAdmin
+
+isAdmin
+
+with
+
+canManagePermissions()
+
+canEditArticles()
+
+canPublishArticles()
+
+etc.
+
+5.
+
+Protect backend APIs.
+
+Every protected endpoint must validate
+
+resolveKbPermissions()
 
 Never trust:
 
 System Role alone.
 
-Never trust:
+Return HTTP 403 when permission is missing.
 
-Frontend state.
+6.
 
-Return HTTP 403 whenever effective permission is missing.
+Refresh permissions immediately.
 
-----------------------------------------
+When Admin B changes Admin A permissions:
 
-6. Frontend Enforcement
+invalidate permission cache
 
-Hide or disable UI according to effective permissions.
+refresh session
 
-Examples:
+recompute
+
+/api/admin/session-kb-access
+
+No logout/login should be required if possible.
+
+7.
+
+Validation
+
+Scenario 1
+
+Admin A
+
+System Role = Super Admin
+
+Admin B removes
+
+Edit Articles
+
+Result
+
+Cannot edit articles.
+
+Save button hidden.
+
+PATCH returns 403.
+
+---------------------------------
+
+Scenario 2
+
+Admin B removes
 
 Manage Permissions
-Manage Users
-Publish
-Delete
-Edit
-Vendor Management
 
-must disappear immediately after permission refresh.
+Result
 
-----------------------------------------
+Cannot access
 
-7. Validation
+KB Access Grants
 
-Test:
+Permission Management
 
-Scenario A
+Returns 403.
 
-Admin → Remove "Edit Articles"
+---------------------------------
 
-Result:
+Scenario 3
 
-Cannot edit.
+Admin B restores permissions.
 
-Cannot save.
+Permissions become available immediately after refresh.
 
-API returns 403.
+---------------------------------
 
-----------------------------------------
+Scenario 4
 
-Scenario B
+Reader behavior remains unchanged.
 
-Admin → Remove "Manage Permissions"
+---------------------------------
 
-Result:
+8.
 
-Cannot access KB Access Grants.
-
-Cannot access Permission Management.
-
-Route returns 403.
-
-----------------------------------------
-
-Scenario C
-
-Reader
-
-Verify behavior unchanged.
-
-----------------------------------------
-
-Scenario D
-
-Editor
-
-Verify behavior unchanged.
-
-----------------------------------------
-
-8. Deliverables
+Deliverables
 
 List every modified file.
 
-Explain:
+Explain
 
-- previous permission flow
-- new effective permission flow
-- cache/session refresh logic
-- backend authorization flow
+Old permission flow
+
+New permission flow
+
+Session permission generation
+
+Permission resolver
+
+Backend enforcement
 
 Do NOT commit.
+
 Do NOT merge.
+
 Do NOT push.
+
 Do NOT deploy.
