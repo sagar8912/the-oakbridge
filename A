@@ -1,50 +1,307 @@
-Act as a Senior Full-Stack Engineer.
+Act as a Principal AI Engineer, Full-Stack Architect, and Product Engineer.
 
-The endpoint
+We have completed the core KB Admin implementation.
 
-/api/admin/session-kb-access
+Now implement an enterprise AI Knowledge Assistant inside the KB Admin application.
 
-returns a 404.
+IMPORTANT GOALS
 
-Please investigate why.
+1. The chatbot must answer questions ONLY from the Knowledge Base content and approved application metadata.
+2. The chatbot must NEVER hallucinate or invent answers.
+3. If the answer cannot be found in the KB, it must clearly say:
+   "I couldn't find this information in the Knowledge Base."
+4. The chatbot must appear as a floating assistant in the lower-right corner of the KB Admin application.
+5. The solution must be production-ready and enterprise quality.
 
-Tasks:
+========================================
+UI REQUIREMENTS
+========================================
 
-1. Search the entire repository for:
-   - session-kb-access
-   - resolveKbPermissions
-   - kb_access_grants
-   - session permission API
+Create a floating AI Assistant similar to Microsoft Copilot.
 
-2. Determine whether:
-   - the route was renamed,
-   - the route was deleted,
-   - the frontend is calling the wrong URL,
-   - or the API was never implemented.
+Requirements:
 
-3. If the route should exist:
-   - implement or restore it,
-   - register it correctly in the Next.js App Router,
-   - ensure it returns the current session's effective KB permissions.
+- Floating chat button in the bottom-right corner.
+- Expandable chat panel.
+- Minimize and close support.
+- Conversation history within the current session.
+- Auto-scroll.
+- Typing indicator.
+- Streaming responses (if supported).
+- Markdown rendering.
+- Code blocks.
+- Tables.
+- Links to KB articles.
+- Mobile responsive.
+- Dark mode compatible.
 
-4. If the route has been renamed:
-   - update every frontend caller to use the correct endpoint.
+========================================
+KNOWLEDGE SOURCE
+========================================
 
-5. Verify:
-   - GET /api/admin/session-kb-access returns HTTP 200.
-   - Response contains:
-     - systemRole
-     - kbRole
-     - effective feature permissions
-     - KB scope
-     - team grants
-   - No 404 occurs.
+The chatbot MUST answer using:
 
-6. Do not modify unrelated functionality.
+- Published Knowledge Base articles
+- Categories
+- Workflows
+- Documents
+- Relationships
+- Metadata
+- Approved content only
 
-7. Do not commit, merge, push, or deploy.
+Do NOT use unpublished drafts unless the current user has permission.
 
-Finally report:
-- Root cause.
-- Files modified.
-- Correct endpoint URL.
+Respect all existing permission rules.
+
+========================================
+PERMISSION AWARENESS
+========================================
+
+The assistant must respect:
+
+KB Role
+Feature Permissions
+Knowledge Base Scope
+Team Access
+kb_access_grants
+Inherited permissions
+Direct permissions
+
+If the user cannot access an article:
+
+Never reveal its contents.
+
+Instead respond:
+
+"You don't have permission to access this knowledge."
+
+========================================
+RAG PIPELINE
+========================================
+
+Implement Retrieval-Augmented Generation.
+
+Pipeline:
+
+User Question
+↓
+
+Permission Filter
+
+↓
+
+Knowledge Search
+
+↓
+
+Semantic Search
+
+↓
+
+Top Relevant Documents
+
+↓
+
+Context Builder
+
+↓
+
+LLM
+
+↓
+
+Grounded Response
+
+The LLM MUST NOT answer without retrieved evidence.
+
+========================================
+GROUNDING
+========================================
+
+Every answer must include:
+
+Sources used
+
+Knowledge Base
+
+Article name
+
+Section
+
+Confidence level
+
+Example:
+
+Sources:
+• TOW App > Goals > Goal Creation
+• Technical Documents > Workflow Engine
+
+Confidence:
+High
+
+========================================
+HALLUCINATION PROTECTION
+========================================
+
+Never fabricate.
+
+If confidence is low:
+
+Say:
+
+"I couldn't find enough verified information in the Knowledge Base."
+
+Never guess.
+
+Never invent APIs.
+
+Never invent workflows.
+
+Never invent permissions.
+
+========================================
+SUPPORTED QUESTIONS
+========================================
+
+Examples:
+
+How do I create a Goal?
+
+Who can publish articles?
+
+What does Reviewer permission do?
+
+How do workflows work?
+
+How is KB Access configured?
+
+How do Notifications work?
+
+Explain the TOW Goal workflow.
+
+How does Team permission inheritance work?
+
+What is the difference between Reader and Editor?
+
+========================================
+SEARCH
+========================================
+
+Support:
+
+Keyword search
+
+Semantic search
+
+Natural language
+
+Synonyms
+
+Misspellings
+
+Partial matches
+
+========================================
+REFERENCES
+========================================
+
+Every response should include:
+
+Related Articles
+
+Suggested Reading
+
+Open Article button
+
+========================================
+AUDIT
+========================================
+
+Log:
+
+User
+
+Question
+
+Articles retrieved
+
+Confidence
+
+Timestamp
+
+Response generated
+
+========================================
+BACKEND
+========================================
+
+Create secure APIs.
+
+Permission filtering before retrieval.
+
+No client-side bypass.
+
+========================================
+FRONTEND
+========================================
+
+Floating AI assistant
+
+Chat window
+
+Source cards
+
+Suggested follow-up questions
+
+Loading animation
+
+Error handling
+
+========================================
+TESTING
+========================================
+
+Verify:
+
+Correct answers
+
+Permission enforcement
+
+No hallucinations
+
+No access leakage
+
+Performance
+
+Search quality
+
+Responsive UI
+
+========================================
+IMPORTANT
+
+Do not create fake knowledge.
+
+Do not answer without retrieved evidence.
+
+Use existing authentication.
+
+Use existing permission model.
+
+Do not break existing KB Admin functionality.
+
+Do not commit.
+
+Do not merge.
+
+Do not push.
+
+At the end provide:
+
+1. Files modified
+2. Architecture diagram
+3. APIs created
+4. Components created
+5. RAG flow
+6. How hallucination prevention is implemented
+7. Test scenarios
