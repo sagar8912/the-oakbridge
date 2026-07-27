@@ -1,583 +1,65 @@
-Act as a Principal Full-Stack Engineer / Solution Architect.
-
-We are continuing the Knowledge Base (KB Admin) implementation discussed with John.
-
-CURRENT STATUS:
-
-Phase A — Stabilization / dead-code cleanup:
-LOCAL IMPLEMENTATION COMPLETE
-
-Phase B — Schema / content foundation:
-LOCAL IMPLEMENTATION COMPLETE
-
-Phase C — Permissions / USER + TEAM access foundation:
-LOCAL IMPLEMENTATION COMPLETE
-
-Phase D — Content lifecycle / authoring / approval / publishing:
-LOCAL IMPLEMENTATION COMPLETE
-
-Phase E — GitHub / CI-CD → KB article generation foundation:
-LOCAL IMPLEMENTATION COMPLETE
-
-Phase F — Retrieval / MCP / agent integration foundation:
-LOCAL IMPLEMENTATION COMPLETE
-
-Cursor has confirmed:
-
-READY FOR NEXT LOCAL PHASE: YES.
-
-Some staging validation, migrations, external integrations, and business decisions remain deferred.
-
-IMPORTANT:
-
-Continue LOCAL implementation only.
-
-DO NOT:
-- commit
-- push
-- merge
-- create PR
-- deploy
-- modify staging or production
-- expose secrets
-
-Proceed with:
-
-PHASE G ONLY — KNOWLEDGE INGESTION / DOCUMENT-TO-KB MIGRATION FOUNDATION
-
-==================================================
-BUSINESS REQUIREMENT FROM JOHN
-==================================================
-
-John specifically wants the Knowledge Base to eventually replace disconnected knowledge sources such as:
-
-- Word documents
-- PDFs
-- shared-drive documents
-- existing IT documentation
-- HR documentation
-- operational/process documentation
-
-John’s desired future architecture is:
-
-Existing Documents / Knowledge Sources
-        ↓
-Ingestion
-        ↓
-Structured KB Draft
-        ↓
-Hierarchy Assignment
-        ↓
-Permissions
-        ↓
-Review / Approval
-        ↓
-Published KB Knowledge
-        ↓
-Retrieval / MCP
-        ↓
-LangSmith / AI Agents
-
-The goal is NOT to bulk migrate production documents now.
-
-Phase G should build the safe, extensible FOUNDATION that allows documents to be converted into KB content.
-
-==================================================
-STEP G1 — AUDIT EXISTING INGESTION CAPABILITIES
-==================================================
-
-First inspect the entire repository.
-
-Look specifically for:
-
-- document upload functionality
-- file upload APIs
-- PDF handling
-- DOC/DOCX handling
-- markdown import
-- text extraction
-- document parsers
-- storage buckets
-- Supabase storage
-- ingestion jobs
-- import services
-- migration scripts
-- legacy/dead upload code
-- document metadata
-- existing KB article creation services
-- GitHub-generated draft logic from Phase E
-- any existing LLM transformation adapters
-
-IMPORTANT:
-
-Phase A may have intentionally removed dead/non-working upload functionality.
-
-DO NOT restore deleted legacy functionality automatically.
-
-Determine what architecture is currently valid.
-
-Report before implementing:
-
-EXISTING INGESTION ARCHITECTURE FOUND
-
-and
-
-WHAT SHOULD BE REUSED VS REPLACED.
-
-==================================================
-STEP G2 — CREATE CANONICAL INGESTION CONTRACT
-==================================================
-
-Design a provider-agnostic ingestion contract.
-
-Conceptually:
-
-Knowledge Source
-      ↓
-Source Adapter
-      ↓
-Extraction
-      ↓
-Normalization
-      ↓
-KB Draft Creation
-      ↓
-Review Lifecycle
-
-Support future source types such as:
-
-- Markdown
-- plain text
-- PDF
-- DOC/DOCX
-- GitHub documentation
-- shared-drive documents
-
-Do NOT necessarily implement every source type now.
-
-Build the contract so additional adapters can be added later without rewriting KB core logic.
-
-==================================================
-STEP G3 — SOURCE PROVENANCE
-==================================================
-
-Every imported document/article must retain provenance where supported.
-
-Design/reuse metadata for:
-
-- source type
-- source identifier
-- source filename/title
-- source URL/reference where applicable
-- import timestamp
-- source version/hash where appropriate
-- importer/actor
-- original source metadata
-
-This is important so future users and agents can understand:
-
-“Where did this KB article originate?”
-
-Do not expose sensitive external source details unnecessarily.
-
-==================================================
-STEP G4 — SAFE DRAFT-FIRST INGESTION
-==================================================
-
-CRITICAL:
-
-Imported knowledge must NOT automatically become published knowledge.
-
-Expected lifecycle:
-
-Document
-   ↓
-Extract
-   ↓
-Normalize
-   ↓
-CREATE DRAFT
-   ↓
-Human Review
-   ↓
-Approval
-   ↓
-Publish
-
-Integrate with Phase D lifecycle.
-
-No automatic publication.
-
-No bypassing approval.
-
-==================================================
-STEP G5 — CONTENT NORMALIZATION
-==================================================
-
-Create/reuse a normalization layer that maps extracted source content into the canonical KB content structure.
-
-Where supported:
-
-Source document:
-
-Title
-Headings
-Paragraphs
-Lists
-Links
-Metadata
-
-↓
-
-Normalized KB draft:
-
-title
-summary if available/generated safely
-content/body
-hierarchy reference
-source metadata
-tags/categories where explicitly available
-status = draft
-
-Do NOT invent metadata if it cannot be determined.
-
-Do NOT hallucinate missing document content.
-
-==================================================
-STEP G6 — DOCUMENT PARSING BOUNDARY
-==================================================
-
-Keep parsing separate from KB business logic.
-
-Preferred conceptual architecture:
-
-Source
-   ↓
-Parser Adapter
-   ↓
-Normalized Document
-   ↓
-KB Ingestion Service
-   ↓
-KB Draft
-
-Examples:
-
-PDFParser
-
-DocxParser
-
-MarkdownParser
-
-TextParser
-
-But use repository naming conventions and existing architecture.
-
-Do not create unnecessary abstractions if equivalent structures already exist.
-
-==================================================
-STEP G7 — LLM TRANSFORMATION BOUNDARY
-==================================================
-
-John wants future AI-assisted article creation.
-
-However:
-
-Do NOT hardwire ingestion to a specific LLM.
-
-Create/reuse a provider-independent transformation boundary.
-
-Conceptually:
-
-Raw Extracted Content
-        ↓
-Optional Transformation Adapter
-        ↓
-Structured KB Draft
-
-The system must still support deterministic/basic ingestion without requiring an LLM.
-
-LLM enhancement may later provide:
-
-- summary generation
-- title cleanup
-- section restructuring
-- suggested tags
-- suggested hierarchy
-
-But these must remain suggestions/drafts.
-
-Never auto-publish AI-generated content.
-
-If an LLM adapter is already reserved from Phase E, reuse that boundary rather than creating another one.
-
-==================================================
-STEP G8 — DUPLICATE / VERSION SAFETY
-==================================================
-
-Design safe behavior for repeated ingestion.
-
-Avoid blindly creating duplicate KB articles every time the same document is processed.
-
-Use existing repository capabilities where possible, such as:
-
-- source ID
-- content hash
-- external reference
-- version metadata
-
-Expected conceptual behavior:
-
-Same source + unchanged content
-→ detect existing ingestion.
-
-Same source + changed content
-→ identify as changed/new version or candidate update.
-
-Do NOT overwrite published knowledge silently.
-
-Changed source content should enter a controlled review workflow.
-
-==================================================
-STEP G9 — HIERARCHY ASSIGNMENT
-==================================================
-
-Integrate with the hierarchy foundation.
-
-Imported content should support assignment to an appropriate KB/hierarchy node.
-
-If the destination cannot be determined:
-
-DO NOT guess silently.
-
-Use:
-
-- explicit destination supplied during ingestion
-
-OR
-
-- safe unassigned/default draft behavior if repository architecture supports it.
-
-Do not invent John’s unresolved default hierarchy decision.
-
-==================================================
-STEP G10 — PERMISSION SAFETY
-==================================================
-
-Ingestion must not bypass Phase C security.
-
-Validate:
-
-- who may import/create drafts
-- who may edit imported drafts
-- who may approve
-- who may publish
-- who may view restricted knowledge
-
-Do not invent unresolved USER/TEAM inheritance behavior.
-
-Use existing safe authorization semantics.
-
-==================================================
-STEP G11 — MINIMUM LOCAL POC
-==================================================
-
-Build a LOCAL proof of concept using safe test fixtures.
-
-At minimum demonstrate:
-
-Sample source document
-
-→ parser
-
-→ normalized content
-
-→ KB DRAFT
-
-→ provenance retained
-
-→ NOT published automatically.
-
-Prefer a Markdown/text fixture first if external PDF/DOCX dependencies would introduce unnecessary complexity.
-
-If PDF/DOCX support already exists safely, reuse it.
-
-Do not add heavy dependencies unless justified.
-
-==================================================
-STEP G12 — FUTURE BULK MIGRATION SEAM
-==================================================
-
-Prepare architecture for future migration of:
-
-- IT documentation
-- HR documentation
-- shared-drive knowledge
-- existing operational documents
-
-Do NOT perform the real bulk migration now.
-
-Document how a future migration pipeline would work:
-
-Source Inventory
-      ↓
-Batch Ingestion
-      ↓
-Parse
-      ↓
-Normalize
-      ↓
-Deduplicate
-      ↓
-Create Drafts
-      ↓
-Assign Hierarchy
-      ↓
-Human Review
-      ↓
-Publish
-      ↓
-Available through Phase F Retrieval/MCP
-
-==================================================
-STEP G13 — TEST MATRIX
-==================================================
-
-Implement/run local tests for at least:
-
-1. Valid supported document
-   → creates normalized draft.
-
-2. Imported document
-   → does NOT auto-publish.
-
-3. Provenance
-   → retained correctly.
-
-4. Duplicate unchanged source
-   → does not blindly duplicate.
-
-5. Changed source
-   → handled safely without silently overwriting published content.
-
-6. Unauthorized importer
-   → rejected.
-
-7. Invalid/unsupported document
-   → safe failure.
-
-8. Empty document
-   → safe validation failure.
-
-9. Hierarchy assignment
-   → respects valid destination.
-
-10. Restricted hierarchy
-    → permission rules enforced.
-
-11. Existing KB article lifecycle
-    → unaffected.
-
-12. Phase F retrieval
-    → drafts created by ingestion are NOT exposed as normal published agent knowledge.
-
-==================================================
-STEP G14 — REGRESSION
-==================================================
-
-Run locally available:
-
-- typecheck
-- lint
-- unit tests
-- integration tests
-- build
-
-Verify no regressions to:
-
-- TOW application
-- KB UI
-- authentication
-- hierarchy
-- USER/TEAM permissions
-- content lifecycle
-- GitHub article-generation foundation
-- MCP/retrieval
-- existing APIs
-
-Fix only Phase G-related regressions.
-
-==================================================
-STRICT SCOPE
-==================================================
-
-DO NOT:
-
-- bulk import real production documents
-- connect production shared drives
-- migrate the IT agent
-- migrate the HR agent
-- automatically publish imported content
-- introduce a vendor-specific LLM dependency
-- change unresolved permission inheritance
-- restore known dead upload/chatbot functionality
-- implement unrelated TOW features
-
-DO NOT COMMIT.
-DO NOT PUSH.
-DO NOT MERGE.
-DO NOT CREATE PR.
-DO NOT DEPLOY.
-
-==================================================
-FINAL REPORT
-==================================================
-
-Return:
-
-PHASE G STATUS:
-COMPLETE / PARTIALLY COMPLETE / BLOCKED
-
-Report:
-
-1. Existing ingestion capabilities discovered
-2. Files/components changed
-3. Canonical ingestion contract
-4. Parser architecture
-5. Supported local source types
-6. Normalization behavior
-7. Provenance implementation
-8. Draft lifecycle integration
-9. Duplicate/version handling
-10. Hierarchy integration
-11. Permission enforcement
-12. Local POC result
-13. Exact tests/results
-14. Regression status
-15. Deferred external/staging work
-
-Clearly separate:
-
-LOCAL IMPLEMENTATION COMPLETE
-
-from:
-
-DEFERRED INTEGRATION / STAGING / PRODUCTION WORK
-
-List genuine:
-
-QUESTIONS FOR JOHN
-
-Do not treat those questions as blockers unless technically unavoidable.
-
-Finally answer:
-
-READY FOR NEXT LOCAL PHASE: YES/NO
-
-STOP after Phase G.
-
-Do not begin the next phase.
-Do not commit.
-Do not push.
-Do not merge.
-Do not deploy.
+Act as a Senior React + Next.js + TypeScript engineer.
+
+There is a bug in the Knowledge Bases page.
+
+Current issue:
+- Typing "tow" in the search box returns "No knowledge bases found".
+- However, a Knowledge Base named "TOW App" exists and is visible in the hierarchy.
+- Search should not be case-sensitive.
+- The search should filter the Knowledge Bases table correctly.
+
+Requirements:
+
+1. Investigate the current search implementation on the Knowledge Bases page.
+2. Identify whether filtering is happening:
+   - before data loads,
+   - against the wrong dataset,
+   - against stale state,
+   - or only against one field.
+
+3. Update the search so it is:
+   - case-insensitive,
+   - trimmed (ignore leading/trailing spaces),
+   - reactive while typing,
+   - stable with large datasets.
+
+4. Search should match any of these fields:
+   - Name
+   - Code
+   - Description
+   - Primary Objective
+
+5. If the backend already supports search:
+   - use the backend search correctly.
+   - do not duplicate filtering unnecessarily.
+
+6. If filtering is client-side:
+   - ensure it uses the latest fetched data.
+   - never mutate the original dataset.
+   - use memoization where appropriate.
+
+7. Preserve:
+   - sorting
+   - pagination
+   - column visibility
+   - row selection
+
+8. Add loading and empty states:
+   - "Loading..."
+   - "No matching knowledge bases found."
+
+9. Add/update unit tests covering:
+   - searching "tow" finds "TOW App"
+   - uppercase/lowercase searches
+   - partial matches
+   - searching by code
+   - searching by description
+   - clearing search restores all records
+
+10. Do not change unrelated functionality.
+11. Follow the existing coding standards.
+12. At the end provide:
+    - files modified
+    - root cause
+    - fix implemented
+    - test results.
