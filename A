@@ -1,36 +1,17 @@
-Act as a Senior React + Next.js + TypeScript engineer.
+Step 3 – Verify Permission Section
 
-There is a usability issue on the KB Admin > KB Users page.
+Check that the Permission section is visible.
 
-Current behavior:
-- Users are listed correctly.
-- Role dropdown works.
-- Clicking the username does nothing.
+Look for:
 
-Expected behavior:
-- The username should be clickable.
-- Clicking a user should navigate to a User Details page or open a User Details drawer/modal (follow the existing project pattern).
-- Display:
-  - User information
-  - System Role
-  - KB Role
-  - Team memberships (if available)
-  - Permission summary
-  - Audit metadata (if available)
+* Roles
+* Permission checkboxes/toggles
+* Access groups
+* Feature permissions
 
-Requirements:
-1. Investigate why the username is not clickable.
-2. Add the missing click handler if it is absent.
-3. Reuse existing routing/components if a user details page already exists.
-4. If no details page exists, implement a reusable User Details drawer/modal instead of leaving the username non-functional.
-5. Preserve existing role assignment functionality.
-6. Add loading, empty, and error states.
-7. Ensure keyboard accessibility.
-8. Do not modify unrelated code.
-9. Follow the project's existing UI patterns.
+Verify:
 
-At the end provide:
-- Root cause
-- Files modified
-- What was implemented
-- How to test the fix.
+* All permissions are displayed.
+* Labels are readable.
+* No duplicate permissions.
+* No broken layout.
