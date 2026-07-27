@@ -1,232 +1,222 @@
-Act as a Principal Full-Stack Engineer / Security Architect.
+Act as a Principal Security Architect and Full-Stack Engineer.
 
-We discovered a real authorization bug in the KB Admin application.
+We found a permission enforcement bug in KB Admin.
 
 Current behavior:
-- User "ssaini_exl" has KB Role = Reader.
-- Reader can still:
-  1. Open article edit pages.
-  2. Modify article details.
-  3. Access KB Access Grants / Permission Management.
-  4. Potentially call protected APIs.
 
-This is incorrect.
+- Admin A edits Admin B's KB permissions.
+- The permission changes are successfully saved.
+- However, Admin B still has unrestricted access because their System Role is Admin/Super Admin.
+- The KB permission model is not overriding the system role as expected.
 
-Implement proper permission enforcement across the entire KB Admin application.
+Goal
+
+The KB Permission model must become the effective authorization layer for KB Admin.
 
 Requirements
 
-========================
-1. Frontend Route Protection
-========================
+1. Investigate current authorization flow.
 
-Protect all KB Admin routes.
+Determine whether authorization currently follows:
 
-Reader users MUST NOT access pages used for:
+System Role
+        ↓
+Allow everything
 
-- Edit Article
-- Create Article
-- Delete Article
-- Publish
-- Archive
-- Restore
-- Vendor Management
-- Category Management
-- Template Management
-- KB Access Grants
-- User Management
-- Permission Management
+instead of
 
-If user lacks permission:
+System Role
+        ↓
+KB Role
+        ↓
+Direct Permission Overrides
+        ↓
+Effective Permissions
 
-- redirect to Unauthorized page
-OR
-- display 403 Access Denied
+Document the current evaluation order.
 
-Never render editable UI.
+----------------------------------------
 
-========================
-2. Component-Level Authorization
-========================
+2. Effective Permission Resolution
 
-Hide or disable:
-
-- Save buttons
-- Edit buttons
-- Delete buttons
-- Publish buttons
-- Archive buttons
-- Restore buttons
-- Add buttons
-- Permission buttons
-
-Do NOT rely only on hiding buttons.
-
-========================
-3. Backend Authorization
-========================
-
-Every protected API must verify permissions.
-
-Never trust the frontend.
-
-Validate:
-
-- View Articles
-- Create Articles
-- Edit Articles
-- Delete Articles
-- Publish Articles
-- Manage Users
-- Manage Permissions
-- Manage Categories
-- Manage Templates
-- Manage Vendors
-
-Return HTTP 403 if permission missing.
-
-========================
-4. KB Access Grant Protection
-========================
-
-Only Admin users may access:
-
-/admin/kb-users
-/admin/kb-access-grants
-/admin/permissions
-
-Reader and Editor users must receive:
-
-403 Forbidden
-
-========================
-5. Article Editing
-========================
-
-If user lacks Edit Articles:
-
-- article opens read-only
-OR
-- redirect to View page
-
-Inputs must be disabled.
-
-Save button hidden.
-
-Backend must reject update requests.
-
-========================
-6. Permission Matrix
-========================
-
-Reader
-
-✔ View Articles
-
-✖ Create
-
-✖ Edit
-
-✖ Delete
-
-✖ Publish
-
-✖ Archive
-
-✖ Restore
-
-✖ Manage Users
-
-✖ Manage Permissions
-
-✖ Manage Vendors
-
-✖ Manage Categories
-
-✖ Manage Templates
-
------------------------------------
-
-Editor
-
-✔ View
-
-✔ Create
-
-✔ Edit
-
-✔ Submit Review
-
-✖ Publish
-
-✖ Manage Permissions
-
------------------------------------
-
-Admin
-
-Full access.
-
-========================
-7. Authorization Hook
-========================
-
-Create a centralized authorization utility.
-
-Avoid duplicated permission logic.
+Implement a single permission resolver.
 
 Example:
 
-canViewArticles()
+getEffectivePermissions(user)
 
-canEditArticles()
+Evaluation order:
 
-canPublishArticles()
+System authentication
+↓
 
-canManagePermissions()
+System Role
 
-Use this throughout the UI.
+↓
 
-========================
-8. Testing
-========================
+KB Role
 
-Verify:
+↓
+
+Direct Permission Overrides
+
+↓
+
+Knowledge Base Scope
+
+↓
+
+Team Scope
+
+↓
+
+Final Effective Permissions
+
+Every UI page and API must use ONLY this resolver.
+
+----------------------------------------
+
+3. Admin Override Rules
+
+A System Admin should NOT automatically bypass KB permissions.
+
+If Admin has:
+
+Manage Permissions = false
+
+they must NOT access:
+
+- KB Access Grants
+- Permission Management
+- User Permission pages
+
+If Admin has:
+
+Edit Articles = false
+
+they must not edit articles.
+
+If Admin has:
+
+Publish Articles = false
+
+they must not publish.
+
+Only authentication/system ownership should remain outside the KB permission model.
+
+----------------------------------------
+
+4. Refresh Authorization
+
+After permissions are changed:
+
+Invalidate cached permissions.
+
+Reload permission context.
+
+If JWT/session stores permissions:
+
+refresh session immediately.
+
+User should not need to restart the application.
+
+----------------------------------------
+
+5. Backend Enforcement
+
+Every protected endpoint must use:
+
+getEffectivePermissions()
+
+Never trust:
+
+System Role alone.
+
+Never trust:
+
+Frontend state.
+
+Return HTTP 403 whenever effective permission is missing.
+
+----------------------------------------
+
+6. Frontend Enforcement
+
+Hide or disable UI according to effective permissions.
+
+Examples:
+
+Manage Permissions
+Manage Users
+Publish
+Delete
+Edit
+Vendor Management
+
+must disappear immediately after permission refresh.
+
+----------------------------------------
+
+7. Validation
+
+Test:
+
+Scenario A
+
+Admin → Remove "Edit Articles"
+
+Result:
+
+Cannot edit.
+
+Cannot save.
+
+API returns 403.
+
+----------------------------------------
+
+Scenario B
+
+Admin → Remove "Manage Permissions"
+
+Result:
+
+Cannot access KB Access Grants.
+
+Cannot access Permission Management.
+
+Route returns 403.
+
+----------------------------------------
+
+Scenario C
 
 Reader
 
-- cannot edit article
-- cannot save article
-- cannot access KB Access Grants
-- cannot access User Management
-- cannot access Permission page
+Verify behavior unchanged.
+
+----------------------------------------
+
+Scenario D
 
 Editor
 
-- can edit
-- cannot manage permissions
+Verify behavior unchanged.
 
-Admin
+----------------------------------------
 
-- full access
-
-========================
-9. Deliverables
-========================
+8. Deliverables
 
 List every modified file.
 
 Explain:
 
-- Route protection
-- Backend authorization
-- UI authorization
-- Permission evaluation flow
+- previous permission flow
+- new effective permission flow
+- cache/session refresh logic
+- backend authorization flow
 
 Do NOT commit.
-
 Do NOT merge.
-
 Do NOT push.
-
 Do NOT deploy.
