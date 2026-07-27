@@ -1,320 +1,92 @@
 
-GROQ_API_KEY=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
-Act as a Principal Full-Stack Engineer / Solution Architect.
-
-We need to implement a complete Document Management module inside KB Admin.
-
-Current state:
-- The "Manage Documents" tab exists.
-- No document upload functionality is available.
-- We want to support enterprise document management and use these documents as the primary knowledge source for the AI Assistant.
-
-Objectives:
-1. Upload documents from the Manage Documents tab.
-2. Store metadata and files securely.
-3. Connect uploaded documents with KB Articles.
-4. Make uploaded documents searchable.
-5. Allow the AI Assistant to answer questions using uploaded documents.
-6. Keep all existing permission and KB access rules.
-
-=====================================
-SUPPORTED FILE TYPES
-=====================================
-
-Support uploading:
-
-- PDF
-- DOC / DOCX
-- PPT / PPTX
-- XLS / XLSX
-- CSV
-- JSON
-- TXT
-- Markdown (.md)
-
-Validate:
-- File type
-- File size
-- Duplicate filename handling
-
-=====================================
-UI
-=====================================
-
-Inside Manage Documents implement:
-
-Upload button
-
-Drag & Drop upload
-
-Progress bar
-
-Recent uploads
-
-Search documents
-
-Filter by:
-- File type
-- Uploaded by
-- Upload date
-- Knowledge Base
-
-Document table showing:
-
-File Name
-
-Type
-
-Size
-
-Uploaded By
-
-Upload Date
-
-Knowledge Base
-
-Status
-
-Actions
-
-Actions:
-
-Preview
-
-Download
-
-Replace Version
-
-Delete
-
-View Metadata
-
-=====================================
-DOCUMENT PREVIEW
-=====================================
-
-Preview without downloading.
-
-PDF viewer
-
-Word preview
-
-PowerPoint preview
-
-Excel table preview
-
-JSON viewer
-
-Markdown renderer
-
-Text viewer
-
-=====================================
-VERSIONING
-=====================================
-
-Support version history.
-
-Version 1
-
-Version 2
-
-Version 3
-
-Show:
-
-Created By
-
-Date
-
-Comment
-
-Allow rollback.
-
-=====================================
-KB INTEGRATION
-=====================================
-
-Every uploaded document can be linked to:
-
-Knowledge Base
-
-Category
-
-Workflow
-
-Article
-
-Relationship
-
-Multiple documents per article.
-
-=====================================
-SEARCH
-=====================================
-
-Index uploaded files.
-
-Support:
-
-Keyword search
-
-Semantic search
-
-OCR (future-ready)
-
-Content search
-
-=====================================
-AI INTEGRATION
-=====================================
-
-Uploaded documents become searchable by the AI Assistant.
-
-Pipeline:
-
-User Question
-↓
-
-Permission Filter
-↓
-
-KB Articles
-+
-
-Uploaded Documents
-↓
-
-Relevant Chunks
-↓
-
-LLM
-↓
-
-Grounded Answer
-
-Never answer without retrieved evidence.
-
-=====================================
-PERMISSIONS
-=====================================
-
-Respect existing:
-
-KB Role
-
-Feature Permissions
-
-Knowledge Base Scope
-
-kb_access_grants
-
-Team permissions
-
-Users without permission must not:
-
-View
-
-Download
-
-Preview
-
-Search
-
-Use documents for AI answers.
-
-=====================================
-AUDIT
-=====================================
-
-Track:
-
-Upload
-
-Delete
-
-Download
-
-Preview
-
-Replace Version
-
-Permission changes
-
-Timestamp
-
-User
-
-=====================================
-DATABASE
-=====================================
-
-Create document metadata model.
-
-Store:
-
-Document ID
-
-Article ID
-
-KB ID
-
-Version
-
-Storage Path
-
-File Type
-
-Checksum
-
-Uploaded By
-
-Created At
-
-Updated At
-
-=====================================
-TESTING
-=====================================
-
-Verify:
-
-Upload every supported file type
-
-Preview works
-
-Download works
-
-Delete works
-
-Replace version works
-
-Search works
-
-Permissions enforced
-
-AI retrieves uploaded documents
-
-No unauthorized access
-
-=====================================
-IMPORTANT
-
-Do not break existing KB Admin functionality.
-
-Reuse existing permission middleware.
-
-Do not create duplicate permission logic.
-
-Do not commit, merge, push, or deploy.
-
-At the end provide:
-
-1. Files modified
-2. Database changes
-3. APIs created
-4. Components created
-5. Storage architecture
-6. Search indexing flow
-7. AI document retrieval flow
-8. Test scenarios
+Act as a Principal AI Engineer and Full-Stack Architect.
+
+We are migrating the KB Admin chatbot from OpenAI to Anthropic Claude.
+
+The chatbot is currently implemented using OPENAI_API_KEY and the OpenAI SDK.
+
+I want you to refactor the implementation to use ANTHROPIC_API_KEY and the official Anthropic SDK while preserving all existing functionality.
+
+Requirements:
+
+1. Remove all OpenAI-specific code.
+   - Remove OpenAI SDK imports.
+   - Remove OpenAI client initialization.
+   - Remove all ChatCompletion / Responses API calls.
+   - Remove OpenAI-specific request/response parsing.
+
+2. Replace with Anthropic.
+   - Use the official @anthropic-ai/sdk package.
+   - Initialize the client using:
+     process.env.ANTHROPIC_API_KEY
+   - Use Claude Messages API.
+
+3. Keep the chatbot UI exactly the same.
+   - Do not change React components.
+   - Do not change styling.
+   - Do not change routing.
+   - Do not change chat history behavior.
+
+4. Preserve all chatbot capabilities.
+   - Streaming responses (if already implemented).
+   - Conversation history.
+   - Context injection.
+   - KB retrieval.
+   - RAG pipeline.
+   - Citations.
+   - Session handling.
+   - Error handling.
+   - Typing indicator.
+   - Retry logic.
+
+5. Replace environment variables.
+   Remove:
+   OPENAI_API_KEY
+
+   Add:
+   ANTHROPIC_API_KEY
+
+6. Update backend API routes to call Claude instead of OpenAI.
+
+7. If embeddings are currently generated using OpenAI:
+   - Do NOT silently replace them.
+   - Clearly identify every embedding dependency.
+   - Keep embeddings unchanged unless required.
+   - Explain which embedding provider is currently used.
+
+8. Update configuration files.
+   - package.json
+   - env validation
+   - docker
+   - deployment configs
+   - README
+   - setup documentation
+
+9. Update all helper utilities that reference OpenAI.
+
+10. Maintain the existing system prompt, RAG prompt, and prompt engineering exactly as before.
+
+11. Preserve hallucination protection.
+   The chatbot must:
+   - Answer only from KB Admin/TOW knowledge.
+   - Never fabricate information.
+   - If information is unavailable, respond:
+     "I couldn't find this information in the Knowledge Base."
+   - Never invent APIs, pages, workflows, or permissions.
+
+12. Preserve source attribution and citations if implemented.
+
+13. Keep authentication, authorization, and permission checks unchanged.
+
+14. Use the latest supported Claude model through Anthropic.
+
+15. Do not introduce any breaking changes.
+
+Deliverables:
+- List every file modified.
+- Show every OpenAI dependency removed.
+- Show every Anthropic dependency added.
+- Show the updated environment variables.
+- Show the exact npm/pnpm package to install.
+- Confirm that all chatbot features continue to work after migration.
+- Ensure the project builds successfully with no TypeScript or lint errors.
