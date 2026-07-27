@@ -1,286 +1,58 @@
-Act as a Principal Full-Stack Engineer and Security Architect.
-
-We found a critical authorization bug in KB Admin.
-
-Current behavior
-
-Custom permission overrides work correctly for normal users.
-
-However, they DO NOT work for Super Admin/Admin users.
-
-Example
-
-Admin A
-System Role = Super Admin
-
-Admin B edits Admin A permissions.
-
-Admin B removes:
-
-- Edit Articles
-- Publish Articles
-- Manage Users
-- Manage Permissions
-
-Changes are saved successfully.
-
-But when Admin A logs in:
-
-/api/admin/session-kb-access
-
-still returns
-
-features:
-{
-  "edit_articles": true,
-  "publish_articles": true,
-  "manage_users": true,
-  "manage_permissions": true
-}
-
-because the session builder is granting all permissions based solely on System Role.
-
-This is incorrect.
-
---------------------------------------------------
-
-GOAL
-
-System Role should only determine authentication and application access.
-
-Inside KB Admin, authorization must be determined by:
-
-System Authentication
-↓
-
-System Role
-↓
-
-KB Role
-↓
-
-Direct Permission Overrides
-↓
-
-Knowledge Base Scope
-↓
-
-Team Scope
-↓
-
-Effective Permissions
-
-The effective permissions must be used everywhere.
-
---------------------------------------------------
-
-Requirements
-
-1.
-
-Find where
-
-/api/admin/session-kb-access
-
-constructs:
-
-uiCaps
-
-features
-
-Replace any logic like:
-
-if (isSuperAdmin) {
-    allowEverything = true
-}
-
-with:
-
-effectivePermissions = resolveKbPermissions(user)
-
-2.
-
-Implement one centralized permission resolver.
-
-Example
-
-resolveKbPermissions(user)
-
-The resolver must combine:
-
-- System Role
-- KB Role
-- Direct Permission Overrides
-- kb_access_grants
-- Team assignments
-- Knowledge Base scope
-
-Return the final effective permission object.
-
-No page or API should bypass this resolver.
-
-3.
-
-Super Admin must NOT automatically bypass KB permissions.
-
-Example
-
-System Role = Super Admin
-
-KB Permission
-
-manage_permissions = false
-
-Result
-
-Cannot access
-
-/admin/kb-users
-
-/admin/permissions
-
-/admin/kb-access-grants
-
-Likewise
-
-edit_articles = false
-
-Reader UI only.
-
-publish_articles = false
-
-Publish button hidden.
-
-Backend returns 403.
-
-4.
-
-Update every frontend authorization hook.
-
-Replace any checks like:
-
-isSuperAdmin
-
-isAdmin
-
-with
-
-canManagePermissions()
-
-canEditArticles()
-
-canPublishArticles()
-
-etc.
-
-5.
-
-Protect backend APIs.
-
-Every protected endpoint must validate
-
-resolveKbPermissions()
-
-Never trust:
-
-System Role alone.
-
-Return HTTP 403 when permission is missing.
-
-6.
-
-Refresh permissions immediately.
-
-When Admin B changes Admin A permissions:
-
-invalidate permission cache
-
-refresh session
-
-recompute
-
-/api/admin/session-kb-access
-
-No logout/login should be required if possible.
-
-7.
-
-Validation
-
-Scenario 1
-
-Admin A
-
-System Role = Super Admin
-
-Admin B removes
-
-Edit Articles
-
-Result
-
-Cannot edit articles.
-
-Save button hidden.
-
-PATCH returns 403.
-
----------------------------------
-
-Scenario 2
-
-Admin B removes
-
-Manage Permissions
-
-Result
-
-Cannot access
-
-KB Access Grants
-
-Permission Management
-
-Returns 403.
-
----------------------------------
-
-Scenario 3
-
-Admin B restores permissions.
-
-Permissions become available immediately after refresh.
-
----------------------------------
-
-Scenario 4
-
-Reader behavior remains unchanged.
-
----------------------------------
-
-8.
-
-Deliverables
-
-List every modified file.
-
-Explain
-
-Old permission flow
-
-New permission flow
-
-Session permission generation
-
-Permission resolver
-
-Backend enforcement
-
-Do NOT commit.
-
-Do NOT merge.
-
-Do NOT push.
-
-Do NOT deploy.
+Act as a Principal Full-Stack Engineer.
+
+The Team Assignment section in KB Admin is only partially implemented.
+
+Current status:
+- Existing assigned teams are displayed.
+- Clicking Add Team or Remove Team shows:
+  "Team membership mutate API is not available in kb-admin yet."
+- No backend mutation exists.
+
+Implement the complete Team Assignment feature.
+
+Requirements:
+
+1. Backend
+- Implement APIs to:
+  - Add a team to a user.
+  - Remove a team from a user.
+  - Return updated team assignments after every change.
+- Validate that the team exists.
+- Prevent duplicate team assignments.
+- Return appropriate HTTP status codes and error messages.
+
+2. Frontend
+- Make the Add Team button functional.
+- Make the Remove Team button functional.
+- Refresh the Team Assignment list immediately after a successful update.
+- Display success and error toast messages.
+- Disable buttons while requests are in progress.
+
+3. Security
+- Only users with Manage Users / Manage Permissions privilege can modify team assignments.
+- Users without permission should receive Access Denied.
+- Do not allow unauthorized API access.
+
+4. Validation
+- Prevent assigning the same team twice.
+- Prevent removing a team that is not assigned.
+- Handle network/API failures gracefully.
+
+5. Audit
+- Record who added or removed the team.
+- Record timestamp and action type.
+
+6. Testing
+Verify:
+- Add Team works.
+- Remove Team works.
+- UI refreshes automatically.
+- Team assignments persist after page reload.
+- Unauthorized users cannot modify assignments.
+
+Important:
+- Modify only the Team Assignment feature.
+- Do not change unrelated permission logic.
+- Do not modify authentication unless required.
+- Do not commit, merge, push, or deploy.
+- At the end, list every modified file and explain what was implemented.
