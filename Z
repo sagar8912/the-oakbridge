@@ -1,412 +1,258 @@
-Act as a Principal Full-Stack Engineer.
+Act as a Principal AI Engineer specializing in enterprise RAG systems.
 
-Implement a complete GitHub PR Integration in the KB Admin application.
+The current Knowledge Assistant in KB Admin is working, but it only answers a limited set of questions.
 
-This must be production-ready and fully integrated with the existing KB Admin architecture. Follow the existing coding standards, authentication, authorization, audit logging, database design, and UI patterns.
+I want to transform it into a production-grade enterprise assistant that can answer any question related to the KB Admin application and the TOW application while preventing hallucinations.
 
-Do not create a demo or mock implementation.
+Do NOT build a generic LLM chatbot.
 
-==================================
-OBJECTIVE
-==================================
+Instead, build a complete Retrieval-Augmented Generation (RAG) assistant.
 
-Allow KB Admin users to automatically create or update Knowledge Base articles from GitHub Pull Requests and Markdown documentation.
+==========================================
+PRIMARY GOAL
+==========================================
 
-The integration should reduce manual documentation work while keeping every imported article traceable back to GitHub.
+The assistant must answer questions about:
 
-==================================
-BACKEND
-==================================
+• KB Admin
+• The Oakbridge Way (TOW)
+• Workflows
+• Knowledge Bases
+• Articles
+• Categories
+• Documents
+• Permissions
+• KB Users
+• KB Access Grants
+• GitHub Integration
+• Uploaded Documents
+• Teams
+• Roles
+• Settings
+• Audit Logs
+• APIs
+• Application features
+• User Guides
+• Release Notes
+• Markdown documentation
+• PDF documentation
+• Word documents
+• Excel
+• CSV
+• JSON
+• PPT/PPTX
+• Source code documentation
 
-Create secure GitHub integration services.
+==========================================
+RAG IMPROVEMENTS
+==========================================
+
+Improve retrieval by:
+
+1. Index every KB article.
+
+2. Index uploaded documents.
+
+3. Index GitHub imported markdown.
+
+4. Index article metadata.
+
+5. Index workflow descriptions.
+
+6. Index permissions.
+
+7. Index settings.
+
+8. Index API documentation.
+
+9. Index comments and relationships if available.
+
+10. Use semantic search instead of keyword search.
+
+11. Retrieve the top relevant chunks.
+
+12. Re-rank retrieved chunks before sending them to the LLM.
+
+==========================================
+MULTI-STEP RETRIEVAL
+==========================================
+
+For every question:
+
+Step 1
+Understand the user's intent.
+
+Step 2
+Search the KB.
+
+Step 3
+Search uploaded documents.
+
+Step 4
+Search GitHub imported documentation.
+
+Step 5
+Search workflow metadata.
+
+Step 6
+Merge results.
+
+Step 7
+Remove duplicates.
+
+Step 8
+Rank by confidence.
+
+Step 9
+Generate the answer only from retrieved evidence.
+
+==========================================
+HALLUCINATION PROTECTION
+==========================================
+
+Never invent:
+
+Pages
+
+Features
+
+Permissions
+
+Articles
+
+Workflows
+
+APIs
+
+Documentation
+
+If the answer cannot be found, reply:
+
+"I couldn't find enough information in the Knowledge Base to answer this question."
+
+Never guess.
+
+Never fabricate.
+
+==========================================
+SOURCE CITATIONS
+==========================================
+
+Every answer must include sources.
+
+Example:
+
+Sources
+
+Mission Article
+
+Workflow Documentation
+
+Playbook.pdf
+
+GitHub PR #123
+
+Knowledge Base: TOW App
+
+==========================================
+FOLLOW-UP QUESTIONS
+==========================================
+
+Maintain conversation history.
+
+Allow follow-up questions like:
+
+"Explain more."
+
+"Show me where."
+
+"What permissions are required?"
+
+"Which workflow uses this?"
+
+==========================================
+APPLICATION CONTEXT
+==========================================
+
+The assistant should understand:
+
+Navigation
+
+Relationships
+
+Permissions
+
+Dependencies
+
+Workflow hierarchy
+
+Knowledge Base hierarchy
+
+GitHub imports
+
+Document uploads
+
+Role-based access
+
+==========================================
+USER EXPERIENCE
+==========================================
 
 Support:
 
-• GitHub OAuth or Personal Access Token
-• Repository configuration
-• Organization configuration
-• Branch selection
-• Webhook support
-• Scheduled sync
+Streaming responses
 
-Create APIs for:
+Typing indicator
 
-GET /api/admin/github/status
+Suggested follow-up questions
 
-GET /api/admin/github/repositories
+Recent chats
 
-GET /api/admin/github/branches
+Conversation history
 
-GET /api/admin/github/pull-requests
+Copy answer
 
-GET /api/admin/github/pull-requests/:id
+Expand sources
 
-POST /api/admin/github/import-pr
+==========================================
+PERFORMANCE
+==========================================
 
-POST /api/admin/github/import-markdown
+Cache embeddings.
 
-POST /api/admin/github/sync
+Cache search results.
 
-POST /api/admin/github/webhook
+Limit context intelligently.
 
-==================================
-SUPPORTED CONTENT
-==================================
+Return answers in under 5 seconds whenever possible.
 
-Import:
-
-README.md
-
-Markdown documentation
-
-docs/
-
-wiki/
-
-ADR documents
-
-Architecture docs
-
-Release notes
-
-API documentation
-
-Workflow documentation
-
-==================================
-IMPORT LOGIC
-==================================
-
-When importing a PR:
-
-Read changed markdown files.
-
-Extract:
-
-Title
-
-Headings
-
-Sections
-
-Tables
-
-Lists
-
-Images
-
-Code blocks
-
-Links
-
-Create or update KB Articles.
-
-Never overwrite manually edited content without confirmation.
-
-==================================
-STORE SOURCE METADATA
-==================================
-
-Store:
-
-Repository
-
-Organization
-
-PR Number
-
-Branch
-
-Commit SHA
-
-Author
-
-Reviewer
-
-Merge Date
-
-Source URL
-
-Last Sync
-
-Imported By
-
-==================================
-DATABASE
-==================================
-
-Create tables if required:
-
-github_connections
-
-github_sync_jobs
-
-github_import_history
-
-github_webhooks
-
-github_documents
-
-github_repositories
-
-github_pull_requests
-
-==================================
-UI
-==================================
-
-Add new menu:
-
-Administration
-
-→ GitHub Integration
-
-Pages:
-
-Repositories
-
-Connections
-
-Pull Requests
-
-Import History
-
-Sync Status
-
-Settings
-
-==================================
-REPOSITORY PAGE
-==================================
-
-Show:
-
-Repository
-
-Branch
-
-Default Branch
-
-Connection Status
-
-Last Sync
-
-Actions
-
-Connect
-
-Disconnect
-
-Sync
-
-==================================
-PULL REQUEST PAGE
-==================================
-
-Display:
-
-PR Number
-
-Title
-
-Repository
-
-Author
-
-Status
-
-Created Date
-
-Merged Date
-
-Files Changed
-
-Documentation Files
-
-Import Button
-
-Preview Button
-
-==================================
-IMPORT SCREEN
-==================================
-
-Allow admin to:
-
-Preview markdown
-
-Choose KB
-
-Choose Category
-
-Choose Parent Node
-
-Choose Workflow
-
-Import
-
-Update Existing
-
-Create New
-
-==================================
-MANAGE DOCUMENTS
-==================================
-
-Inside every KB article under
-
-Manage Documents
-
-show:
-
-Source = GitHub
-
-Repository
-
-Branch
-
-PR Number
-
-Commit
-
-Last Sync
-
-Sync Again
-
-Open PR
-
-Open Repository
-
-View Diff
-
-==================================
-WEBHOOK SUPPORT
-==================================
-
-When PR is:
-
-Opened
-
-Updated
-
-Merged
-
-Closed
-
-Automatically update sync status.
-
-==================================
-SEARCH
-==================================
-
-Imported documentation must become searchable immediately.
-
-Use the same indexing pipeline already used by uploaded documents.
-
-==================================
-AUDIT
-==================================
-
-Log:
-
-Imported
-
-Updated
-
-Synced
-
-Deleted
-
-Repository Changed
-
-Webhook Triggered
-
-==================================
-PERMISSIONS
-==================================
-
-Create permissions:
-
-Manage GitHub Integration
-
-Import GitHub Docs
-
-Sync GitHub
-
-View GitHub Sources
-
-Only authorized admins may perform imports.
-
-==================================
-ERROR HANDLING
-==================================
-
-Handle:
-
-Expired tokens
-
-Missing repositories
-
-Deleted branches
-
-Deleted PRs
-
-GitHub API rate limits
-
-Merge conflicts
-
-Large markdown files
-
-==================================
-NOTIFICATIONS
-==================================
-
-Notify admins when:
-
-Import succeeds
-
-Import fails
-
-Sync completes
-
-Webhook fails
-
-==================================
+==========================================
 TESTING
-==================================
+==========================================
 
-Add unit tests.
+Provide a manual testing checklist with at least 50 questions covering:
+- Permissions
+- GitHub Integration
+- KB Access Grants
+- Workflows
+- Documents
+- Navigation
+- Articles
+- Teams
+- Settings
+- Search
 
-Add integration tests.
-
-Add API tests.
-
-Add UI tests.
-
-==================================
+==========================================
 DELIVERABLE
-==================================
+==========================================
 
-After implementation provide:
+At the end, provide:
 
-1. Files created
-
-2. Files modified
-
-3. Database migrations
-
-4. New APIs
-
-5. UI pages
-
-6. Permission changes
-
-7. Test commands
-
-8. Manual testing checklist
-
-Do not leave TODOs.
-
-Do not use mocked data.
-
-Everything must be fully wired into the existing KB Admin application.
+1. Files modified.
+2. New APIs.
+3. Database changes.
+4. Search/indexing changes.
+5. RAG architecture.
+6. Prompt changes.
+7. Test cases.
+8. Performance improvements.
