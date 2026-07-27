@@ -1,17 +1,229 @@
-Step 3 – Verify Permission Section
+Act as a Principal Full-Stack Engineer / Solution Architect.
 
-Check that the Permission section is visible.
+Context:
+This implementation must align with John's stakeholder meeting requirements.
 
-Look for:
+Current State:
+- The KB Users page already supports assigning a single KB Role:
+  - None
+  - Reader
+  - Editor
+  - Admin
+- This is not sufficient.
+- John specifically requested a scalable permission model for the Knowledge Base before broader rollout.
+- Do NOT modify the existing role assignment behavior.
 
-* Roles
-* Permission checkboxes/toggles
-* Access groups
-* Feature permissions
+Objective:
+Extend the KB Users interface to support detailed permission management while keeping the current KB Role dropdown intact.
 
-Verify:
+Requirements
 
-* All permissions are displayed.
-* Labels are readable.
-* No duplicate permissions.
-* No broken layout.
+1. User Details Panel
+When clicking a user, open a right-side drawer (preferred) or modal showing:
+
+- User Name
+- Email
+- System Role
+- KB Role
+- Assigned Teams (if available)
+- Assigned Knowledge Bases (if available)
+- Permission Summary
+- Last Updated
+- Updated By
+
+Reuse existing design components where possible.
+
+------------------------------------------------
+
+2. Feature Permission Section
+
+Add grouped permission toggles.
+
+Content Permissions
+
+☐ View Articles
+☐ Create Articles
+☐ Edit Articles
+☐ Delete Articles
+☐ Publish Articles
+☐ Archive Articles
+☐ Restore Articles
+
+Workflow Permissions
+
+☐ Submit for Review
+☐ Approve Review
+☐ Reject Review
+
+Administration Permissions
+
+☐ Manage Knowledge Bases
+☐ Manage Categories
+☐ Manage Templates
+☐ Manage Vendors
+☐ Manage Users
+☐ Manage Permissions
+
+------------------------------------------------
+
+3. Permission Inheritance
+
+Display a read-only section showing permission inheritance.
+
+Inherited From
+
+- System Role
+- KB Role
+- Team Membership
+- Knowledge Base Assignment
+
+Display badges indicating whether a permission is inherited or directly assigned.
+
+------------------------------------------------
+
+4. Knowledge Base Scope
+
+Support permission scope.
+
+Example:
+
+Knowledge Base
+
+□ TOW App
+□ Client Lifecycle
+□ Data & Analytics
+□ Human Resources
+□ Marketing
+□ Accounting
+
+Permissions should be assignable per Knowledge Base.
+
+------------------------------------------------
+
+5. Team Assignment
+
+Display assigned teams.
+
+Allow adding/removing teams if backend already supports it.
+
+If backend is unavailable, build the UI and clearly mark API integration points with TODO comments.
+
+------------------------------------------------
+
+6. Permission Summary
+
+At the top of the drawer show a summary.
+
+Example
+
+System Role:
+Super Admin
+
+KB Role:
+Editor
+
+Effective Permissions:
+18
+
+Knowledge Bases:
+5
+
+Teams:
+3
+
+------------------------------------------------
+
+7. Audit Section
+
+Display
+
+Created By
+
+Created Date
+
+Updated By
+
+Updated Date
+
+Last Permission Change
+
+Only show fields if data exists.
+
+------------------------------------------------
+
+8. Validation
+
+Do not allow Save if nothing changed.
+
+Show success toast after save.
+
+Show error toast on failure.
+
+------------------------------------------------
+
+9. UI Requirements
+
+Follow existing KB Admin design.
+
+Responsive layout.
+
+Keyboard accessible.
+
+No duplicated controls.
+
+No broken spacing.
+
+No horizontal scrolling.
+
+------------------------------------------------
+
+10. Technical Requirements
+
+Reuse existing components.
+
+Do not duplicate permission logic.
+
+Keep role assignment backward compatible.
+
+Separate UI from API calls.
+
+Use strongly typed TypeScript interfaces.
+
+Follow existing coding standards.
+
+------------------------------------------------
+
+11. Testing
+
+Add/update tests covering:
+
+- User drawer opens
+- Permission toggles render
+- Save enabled only after changes
+- Cancel restores original values
+- Role dropdown still works
+- Permission summary updates
+- Responsive rendering
+- Keyboard navigation
+
+------------------------------------------------
+
+12. Deliverables
+
+At completion provide:
+
+1. Files modified
+2. Components created
+3. API endpoints used
+4. Remaining backend work (if any)
+5. Test results
+6. Screenshots or preview description
+
+IMPORTANT
+
+- Do NOT invent new backend APIs.
+- Do NOT change authentication.
+- Do NOT remove existing role functionality.
+- Build the UI so it is ready for backend integration if required.
+- Keep all work local only.
+- Do NOT commit, merge, push, or deploy anything.
