@@ -1,65 +1,36 @@
 Act as a Senior React + Next.js + TypeScript engineer.
 
-There is a bug in the Knowledge Bases page.
+There is a usability issue on the KB Admin > KB Users page.
 
-Current issue:
-- Typing "tow" in the search box returns "No knowledge bases found".
-- However, a Knowledge Base named "TOW App" exists and is visible in the hierarchy.
-- Search should not be case-sensitive.
-- The search should filter the Knowledge Bases table correctly.
+Current behavior:
+- Users are listed correctly.
+- Role dropdown works.
+- Clicking the username does nothing.
+
+Expected behavior:
+- The username should be clickable.
+- Clicking a user should navigate to a User Details page or open a User Details drawer/modal (follow the existing project pattern).
+- Display:
+  - User information
+  - System Role
+  - KB Role
+  - Team memberships (if available)
+  - Permission summary
+  - Audit metadata (if available)
 
 Requirements:
+1. Investigate why the username is not clickable.
+2. Add the missing click handler if it is absent.
+3. Reuse existing routing/components if a user details page already exists.
+4. If no details page exists, implement a reusable User Details drawer/modal instead of leaving the username non-functional.
+5. Preserve existing role assignment functionality.
+6. Add loading, empty, and error states.
+7. Ensure keyboard accessibility.
+8. Do not modify unrelated code.
+9. Follow the project's existing UI patterns.
 
-1. Investigate the current search implementation on the Knowledge Bases page.
-2. Identify whether filtering is happening:
-   - before data loads,
-   - against the wrong dataset,
-   - against stale state,
-   - or only against one field.
-
-3. Update the search so it is:
-   - case-insensitive,
-   - trimmed (ignore leading/trailing spaces),
-   - reactive while typing,
-   - stable with large datasets.
-
-4. Search should match any of these fields:
-   - Name
-   - Code
-   - Description
-   - Primary Objective
-
-5. If the backend already supports search:
-   - use the backend search correctly.
-   - do not duplicate filtering unnecessarily.
-
-6. If filtering is client-side:
-   - ensure it uses the latest fetched data.
-   - never mutate the original dataset.
-   - use memoization where appropriate.
-
-7. Preserve:
-   - sorting
-   - pagination
-   - column visibility
-   - row selection
-
-8. Add loading and empty states:
-   - "Loading..."
-   - "No matching knowledge bases found."
-
-9. Add/update unit tests covering:
-   - searching "tow" finds "TOW App"
-   - uppercase/lowercase searches
-   - partial matches
-   - searching by code
-   - searching by description
-   - clearing search restores all records
-
-10. Do not change unrelated functionality.
-11. Follow the existing coding standards.
-12. At the end provide:
-    - files modified
-    - root cause
-    - fix implemented
-    - test results.
+At the end provide:
+- Root cause
+- Files modified
+- What was implemented
+- How to test the fix.
