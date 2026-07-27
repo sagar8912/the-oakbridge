@@ -1,57 +1,232 @@
-Act as a Principal Full-Stack Engineer.
+Act as a Principal Full-Stack Engineer / Security Architect.
 
-Implement Phase 2 (Integration) for the KB Admin Permission Management.
+We discovered a real authorization bug in the KB Admin application.
 
-Goal:
-Connect the Permission Management UI to the real backend permission APIs and database. Remove any mock, placeholder, or local-only state.
+Current behavior:
+- User "ssaini_exl" has KB Role = Reader.
+- Reader can still:
+  1. Open article edit pages.
+  2. Modify article details.
+  3. Access KB Access Grants / Permission Management.
+  4. Potentially call protected APIs.
 
-Requirements:
+This is incorrect.
 
-1. Load data
-- When the Permission drawer opens, fetch the selected user's permission profile from the backend.
-- Load:
-  - KB Role
-  - Feature permissions
-  - Workflow permissions
-  - Administration permissions
-  - Knowledge Base scope
-  - Team assignments
+Implement proper permission enforcement across the entire KB Admin application.
 
-2. Save
-- Clicking Save must call the real backend API.
-- Persist all permission changes to the database.
-- Show loading state while saving.
-- Show success/error toast.
+Requirements
 
-3. Refresh
-- After saving, close/reopen the drawer or refresh the page.
-- Verify the saved values are loaded from the database.
+========================
+1. Frontend Route Protection
+========================
 
-4. Validation
-- Handle API failures gracefully.
-- Prevent duplicate save requests.
-- Disable Save while saving.
-- Only send changed values if supported.
+Protect all KB Admin routes.
 
-5. Remove mock logic
-- Remove hardcoded permissions.
-- Remove local-only state used for demo purposes.
-- Ensure all displayed values come from backend APIs.
+Reader users MUST NOT access pages used for:
 
-6. Authorization
-- Respect backend authorization rules.
-- Prevent unauthorized users from changing permissions.
-- Display appropriate error messages.
+- Edit Article
+- Create Article
+- Delete Article
+- Publish
+- Archive
+- Restore
+- Vendor Management
+- Category Management
+- Template Management
+- KB Access Grants
+- User Management
+- Permission Management
 
-7. Code quality
-- Follow existing project architecture.
-- Reuse existing API clients and services.
-- Keep TypeScript types consistent.
-- Do not introduce breaking changes.
+If user lacks permission:
 
-Deliverables:
-- List every modified file.
-- Specify which API endpoints are used.
-- Specify which database tables/RPCs are updated.
-- Explain the end-to-end request flow.
-- Do NOT commit, merge, push, or deploy anything.
+- redirect to Unauthorized page
+OR
+- display 403 Access Denied
+
+Never render editable UI.
+
+========================
+2. Component-Level Authorization
+========================
+
+Hide or disable:
+
+- Save buttons
+- Edit buttons
+- Delete buttons
+- Publish buttons
+- Archive buttons
+- Restore buttons
+- Add buttons
+- Permission buttons
+
+Do NOT rely only on hiding buttons.
+
+========================
+3. Backend Authorization
+========================
+
+Every protected API must verify permissions.
+
+Never trust the frontend.
+
+Validate:
+
+- View Articles
+- Create Articles
+- Edit Articles
+- Delete Articles
+- Publish Articles
+- Manage Users
+- Manage Permissions
+- Manage Categories
+- Manage Templates
+- Manage Vendors
+
+Return HTTP 403 if permission missing.
+
+========================
+4. KB Access Grant Protection
+========================
+
+Only Admin users may access:
+
+/admin/kb-users
+/admin/kb-access-grants
+/admin/permissions
+
+Reader and Editor users must receive:
+
+403 Forbidden
+
+========================
+5. Article Editing
+========================
+
+If user lacks Edit Articles:
+
+- article opens read-only
+OR
+- redirect to View page
+
+Inputs must be disabled.
+
+Save button hidden.
+
+Backend must reject update requests.
+
+========================
+6. Permission Matrix
+========================
+
+Reader
+
+✔ View Articles
+
+✖ Create
+
+✖ Edit
+
+✖ Delete
+
+✖ Publish
+
+✖ Archive
+
+✖ Restore
+
+✖ Manage Users
+
+✖ Manage Permissions
+
+✖ Manage Vendors
+
+✖ Manage Categories
+
+✖ Manage Templates
+
+-----------------------------------
+
+Editor
+
+✔ View
+
+✔ Create
+
+✔ Edit
+
+✔ Submit Review
+
+✖ Publish
+
+✖ Manage Permissions
+
+-----------------------------------
+
+Admin
+
+Full access.
+
+========================
+7. Authorization Hook
+========================
+
+Create a centralized authorization utility.
+
+Avoid duplicated permission logic.
+
+Example:
+
+canViewArticles()
+
+canEditArticles()
+
+canPublishArticles()
+
+canManagePermissions()
+
+Use this throughout the UI.
+
+========================
+8. Testing
+========================
+
+Verify:
+
+Reader
+
+- cannot edit article
+- cannot save article
+- cannot access KB Access Grants
+- cannot access User Management
+- cannot access Permission page
+
+Editor
+
+- can edit
+- cannot manage permissions
+
+Admin
+
+- full access
+
+========================
+9. Deliverables
+========================
+
+List every modified file.
+
+Explain:
+
+- Route protection
+- Backend authorization
+- UI authorization
+- Permission evaluation flow
+
+Do NOT commit.
+
+Do NOT merge.
+
+Do NOT push.
+
+Do NOT deploy.
