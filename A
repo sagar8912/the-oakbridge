@@ -1,276 +1,163 @@
 
-Act as a Principal AI + Full-Stack Engineer.
+Act as a Principal AI Architect.
 
-The Retrieval / MCP Foundation currently depends on OpenAI.
+Objective:
+Establish the Knowledge Base as the governed enterprise knowledge source for all AI consumers, including:
+- Knowledge Assistant
+- Future AI Agents
+- Ticketing systems (ServiceNow/Jira/Zendesk/Freshservice)
+- MCP tools
+- LangSmith evaluation pipelines
+- Future enterprise copilots
 
-Our project has migrated completely to Anthropic.
+Design and implement an enterprise knowledge platform instead of a chatbot-only solution.
 
-Replace the Retrieval layer so that it uses Anthropic everywhere instead of OpenAI.
-
+====================================
 Requirements
+====================================
 
-1. Remove all OpenAI dependencies.
+1. Single Source of Truth
+- All AI systems must retrieve knowledge only from the KB.
+- No duplicate knowledge stores.
+- Every answer must originate from approved KB content.
 
-Search the entire repository for:
+2. Governed Knowledge
+Each article must support:
+- Draft
+- Review
+- Approved
+- Archived
+- Version history
+- Approval workflow
+- Owner
+- Reviewer
+- Last modified
+- Effective date
+- Expiration date
 
-OPENAI_API_KEY
+Only Approved articles may be retrieved by AI.
 
-openai_key_missing
+3. Shared Retrieval Service
+Create one centralized Retrieval Service that is used by:
+- KB Assistant
+- MCP Server
+- GitHub Integration
+- Future Ticketing integrations
+- LangSmith evaluation
+- Future APIs
 
-OpenAI
+Avoid duplicate retrieval logic.
 
-openai
+4. MCP Integration
+Expose enterprise tools such as:
+- SearchKnowledge
+- SearchDocuments
+- SearchHierarchy
+- GetArticle
+- GetMetadata
+- SearchGitHub
+- SearchConfluence (future)
+- SearchSharePoint (future)
+- SearchTickets (future)
 
-gpt-
+All AI consumers must use these tools.
 
-text-embedding-3-small
+5. Ticketing Integration
+Design APIs so ticket systems can:
+- Search KB before ticket creation
+- Recommend existing articles
+- Suggest troubleshooting steps
+- Generate draft responses using approved KB content
+- Link KB articles to tickets
+- Record article usage analytics
 
-text-embedding-3-large
+6. LangSmith Readiness
+Expose retrieval pipeline for LangSmith.
+Capture:
+- User question
+- Retrieved chunks
+- Source articles
+- Metadata
+- Confidence score
+- Citations
+- Latency
+- LLM response
+- User feedback
 
-text-embedding-ada
+7. Grounded AI
+The assistant must:
+- Answer only from retrieved evidence.
+- Never hallucinate.
+- Say "I could not find information in the Knowledge Base" if evidence is insufficient.
+- Always include citations.
 
-openai client
+8. Knowledge APIs
+Provide reusable APIs:
 
-OpenAI SDK
+GET /api/knowledge/search
+GET /api/knowledge/article/:id
+GET /api/knowledge/hierarchy
+GET /api/knowledge/documents
+GET /api/knowledge/metadata
 
-Replace every reference with the Anthropic implementation.
+These APIs must be reusable by every application.
 
---------------------------------------------------
+9. Analytics
+Create dashboards showing:
+- Most searched topics
+- Failed searches
+- Article usage
+- AI answer success rate
+- Ticket deflection
+- Top referenced articles
+- Stale content
+- Articles needing review
 
-2. Environment Variables
+10. Security
+Respect existing RBAC.
+Users may retrieve only content they are authorized to access.
+Draft and restricted content must never be exposed.
 
-Replace:
+11. Architecture
+Refactor into:
 
-OPENAI_API_KEY
-
-with
-
-ANTHROPIC_API_KEY
-
-Update:
-
-.env.example
-
-README
-
-Configuration
-
-Validation
-
-Startup checks
-
-Health endpoints
-
-Admin dashboard
-
-Retrieval dashboard
-
-Error messages
-
---------------------------------------------------
-
-3. Retrieval Dashboard
-
-Replace
-
-openai_key_missing
-
-with
-
-anthropic_key_missing
-
-When the key exists display
-
-Anthropic Connected
-
-When missing display
-
-Anthropic API Key Missing
-
-Do not mention OpenAI anywhere.
-
---------------------------------------------------
-
-4. LLM Provider
-
-Replace the OpenAI client with the Anthropic SDK.
-
-Use the existing project configuration for Anthropic.
-
-Do not introduce a second provider.
-
---------------------------------------------------
-
-5. Retrieval Pipeline
-
-Keep the existing flow:
-
-User
-
+Knowledge Repository
 ↓
-
-Retriever
-
+Embedding Index
 ↓
-
-Re-ranker
-
+Retrieval Service
 ↓
-
-Context Builder
-
+MCP Layer
 ↓
-
-Anthropic
-
-↓
-
-Grounded Answer
-
-Only replace the LLM provider.
-
---------------------------------------------------
-
-6. MCP Tools
-
-Ensure every MCP tool now invokes Anthropic.
-
-Examples:
-
-SearchKnowledge
-
-SearchDocuments
-
-SearchGitHub
-
-SearchHierarchy
-
-GetArticle
-
-GetSection
-
-GetMetadata
-
-ListKnowledgeBases
-
---------------------------------------------------
-
-7. Prompt Builder
-
-Reuse the existing prompt templates.
-
-Only change the model invocation.
-
---------------------------------------------------
-
-8. Streaming
-
-Maintain streaming responses.
-
-No functionality regression.
-
---------------------------------------------------
-
-9. Error Handling
-
-Replace all OpenAI errors with Anthropic errors.
-
-Examples:
-
-openai_key_missing
-
-↓
-
-anthropic_key_missing
-
-Invalid OpenAI key
-
-↓
-
-Invalid Anthropic API key
-
-OpenAI request failed
-
-↓
-
-Anthropic request failed
-
---------------------------------------------------
-
-10. Logging
-
-Update logs:
-
-Provider: Anthropic
-
-Model Name
-
-Latency
-
-Tokens
-
-Errors
-
---------------------------------------------------
-
-11. Health Check
-
-The Retrieval Dashboard should display:
-
-LLM Provider
-
-Anthropic
-
-Status
-
-Connected
-
-Model
-
-(Current Anthropic model configured in the project)
-
-API Key
-
-Configured / Missing
-
-Last Successful Call
-
---------------------------------------------------
-
-12. Testing
-
-Verify:
-
-✓ No OpenAI imports remain
-
-✓ No OpenAI SDK remains
-
-✓ No OPENAI_API_KEY references remain
-
-✓ Retrieval Dashboard shows Anthropic
-
-✓ Anthropic key validation works
-
-✓ Chatbot retrieves KB articles correctly
-
-✓ Citations still work
-
-✓ Streaming works
-
-✓ MCP tools still work
-
-✓ Hallucination protection unchanged
-
---------------------------------------------------
-
-Deliverables
-
-Provide:
-
-1. Files modified
-2. OpenAI references removed
-3. Anthropic files added/updated
-4. Environment variables updated
-5. Retrieval Dashboard changes
-6. Health check changes
-7. Test results
+AI Consumers
+   • Knowledge Assistant
+   • Ticket Systems
+   • LangSmith
+   • Future AI Agents
+
+12. Extensibility
+Support future integrations without changing retrieval logic:
+- Jira
+- ServiceNow
+- Zendesk
+- Freshservice
+- Slack
+- Microsoft Teams
+- SharePoint
+- Confluence
+- GitHub
+- Azure DevOps
+
+13. Deliverables
+- Architecture diagram
+- Database changes (if required)
+- API contracts
+- Retrieval flow
+- MCP tool definitions
+- Folder structure
+- Implementation plan
+- Unit tests
+- Integration tests
+- Documentation
+
+Do not break existing functionality. Extend the current KB Admin architecture using the existing Anthropic-based Retrieval and MCP implementation.
