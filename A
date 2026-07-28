@@ -1,97 +1,71 @@
 
-Act as a Principal AI + RAG + LangSmith Engineer.
+Act as a Principal AI + RAG + Analytics Engineer.
 
-After the recent LangSmith integration, the Knowledge Assistant is no longer answering questions correctly.
+BUG:
 
-Current issue:
-- Every question returns:
+The Retrieval Dashboard analytics are incorrect.
+
+Current behavior:
+- The Knowledge Assistant returns:
   "I couldn't find information in the Knowledge Base."
-- This happened only after the LangSmith changes.
-- Anthropic API is configured and connected.
-- Retrieval Dashboard shows indexed articles and indexed chunks.
-- MCP tools are registered.
-- The chatbot was working correctly before the LangSmith changes.
+- However, "Failed Searches" remains 0.
+- AI Success Rate is still 100%.
 
-Your task is to find and fix the root cause instead of adding temporary workarounds.
+Expected behavior:
+Whenever Retrieval returns zero relevant documents or the assistant responds with:
+"I couldn't find information in the Knowledge Base."
+the system must:
 
-Perform a complete end-to-end audit of the chatbot pipeline:
+1. Record a Failed Search event.
+2. Increment Failed Searches.
+3. Recalculate AI Success Rate.
+4. Store:
+   - question
+   - user
+   - timestamp
+   - retrieval mode
+   - retrieval tools executed
+   - retrieved chunk count
+   - reason for failure
 
-1. User Query
-   - Verify the user question reaches the backend correctly.
+Audit the entire analytics pipeline.
 
-2. Retrieval
-   - Verify SearchKnowledge executes.
-   - Verify SearchDocuments executes.
-   - Verify SearchHierarchy executes.
-   - Verify SearchGitHub executes when applicable.
-   - Verify retrieved chunks are not empty.
-   - Log retrieved article IDs and chunk count.
+Verify:
+- SearchKnowledge
+- SearchDocuments
+- SearchHierarchy
+- SearchGitHub
+- Analytics event creation
+- Dashboard query
+- Database persistence
 
-3. MCP
-   - Ensure every MCP tool is executing successfully.
-   - If a tool throws an error, continue with remaining tools.
-   - Do not allow one MCP failure to stop the pipeline.
+Fix any missing analytics writes.
 
-4. LangSmith
-   - Verify LangSmith tracing is NON-BLOCKING.
-   - If LangSmith is unavailable or throws an exception:
-       - Continue retrieval.
-       - Continue Anthropic response generation.
-       - Log the tracing error only.
-   - LangSmith must never prevent answers from being generated.
+AI Success Rate must be calculated as:
+Successful Answers / Total Questions × 100
 
-5. Anthropic
-   - Verify retrieved context is actually passed to Claude.
-   - Verify the final prompt contains:
-       - System prompt
-       - Retrieved context
-       - User question
+Example:
+Question 1 -> success
+Question 2 -> success
+Question 3 -> no evidence
 
-6. Response Generation
-   - Only return
-     "I couldn't find information in the Knowledge Base."
-     if ALL retrieval sources return zero relevant documents.
-   - Otherwise generate an answer using retrieved evidence.
+Dashboard should display:
+AI Success Rate = 66.7%
+Failed Searches = 1
 
-7. Logging
-   Add detailed debug logs for:
-   - User question
-   - Retrieved article count
-   - Retrieved chunk count
-   - MCP tool results
-   - Final prompt size
-   - Anthropic request
-   - Anthropic response
-   - LangSmith trace status
-   - Any exception
+Add logging to show:
+- Retrieved chunk count
+- Success/Failure
+- Analytics event written
+- Updated dashboard values
 
-8. Fail-safe
-   If LangSmith fails:
-   - Disable tracing automatically for that request.
-   - Continue normal chatbot execution.
-   - Never fail the request because of tracing.
+After fixing, automatically run these tests:
 
-9. Validation
-   Test these questions:
-   - What is Mission?
-   - Explain Goals.
-   - What is Vision?
-   - What is Workflow Test?
-   - What is Technical Documents?
-   - How do I create a Goal?
-   - What is GitHub Integration?
-   - What documents are uploaded?
-   - Explain TOW App.
-   - Explain KB Users.
+1. "What is Mission?" (Expected: Success)
+2. "Generate PDF" (Expected: Failed Search)
+3. "Random Unknown Question" (Expected: Failed Search)
 
-For every test show:
-- Retrieval succeeded? (Yes/No)
-- Number of retrieved chunks
-- MCP tools executed
-- LangSmith trace created? (Yes/No)
-- Anthropic request succeeded? (Yes/No)
-- Final answer generated? (Yes/No)
-
-Do not reduce chatbot functionality.
-Do not remove LangSmith.
-Fix the integration so Retrieval, MCP, Anthropic, and LangSmith all work together.
+Verify that:
+- Failed Searches increments correctly.
+- AI Success Rate updates correctly.
+- Dashboard reflects live analytics without refresh issues.
