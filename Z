@@ -1,258 +1,38 @@
-Act as a Principal AI Engineer specializing in enterprise RAG systems.
+Act as a Principal Full Stack Engineer.
 
-The current Knowledge Assistant in KB Admin is working, but it only answers a limited set of questions.
+Implement Ticket Link analytics for the Retrieval Dashboard.
 
-I want to transform it into a production-grade enterprise assistant that can answer any question related to the KB Admin application and the TOW application while preventing hallucinations.
+Requirements:
 
-Do NOT build a generic LLM chatbot.
+1. Create a Ticket Links table to store:
+   - Ticket ID
+   - Ticket System (Jira/ServiceNow/Local)
+   - Knowledge Article ID
+   - Linked By
+   - Linked Date
+   - Status
 
-Instead, build a complete Retrieval-Augmented Generation (RAG) assistant.
+2. Create a backend API:
+   POST /api/admin/knowledge/ticket-links
 
-==========================================
-PRIMARY GOAL
-==========================================
+3. Create a simple "Link Ticket" button on every Knowledge Article.
 
-The assistant must answer questions about:
+4. Clicking the button should:
+   - Enter Ticket ID
+   - Save the link
+   - Create a Ticket Link record
+   - Update Retrieval Dashboard analytics immediately
 
-• KB Admin
-• The Oakbridge Way (TOW)
-• Workflows
-• Knowledge Bases
-• Articles
-• Categories
-• Documents
-• Permissions
-• KB Users
-• KB Access Grants
-• GitHub Integration
-• Uploaded Documents
-• Teams
-• Roles
-• Settings
-• Audit Logs
-• APIs
-• Application features
-• User Guides
-• Release Notes
-• Markdown documentation
-• PDF documentation
-• Word documents
-• Excel
-• CSV
-• JSON
-• PPT/PPTX
-• Source code documentation
+5. Ticket Links card should show the total number of linked tickets.
 
-==========================================
-RAG IMPROVEMENTS
-==========================================
+6. Add a test page to simulate ticket creation without requiring Jira or ServiceNow.
 
-Improve retrieval by:
+7. Add unit tests.
 
-1. Index every KB article.
-
-2. Index uploaded documents.
-
-3. Index GitHub imported markdown.
-
-4. Index article metadata.
-
-5. Index workflow descriptions.
-
-6. Index permissions.
-
-7. Index settings.
-
-8. Index API documentation.
-
-9. Index comments and relationships if available.
-
-10. Use semantic search instead of keyword search.
-
-11. Retrieve the top relevant chunks.
-
-12. Re-rank retrieved chunks before sending them to the LLM.
-
-==========================================
-MULTI-STEP RETRIEVAL
-==========================================
-
-For every question:
-
-Step 1
-Understand the user's intent.
-
-Step 2
-Search the KB.
-
-Step 3
-Search uploaded documents.
-
-Step 4
-Search GitHub imported documentation.
-
-Step 5
-Search workflow metadata.
-
-Step 6
-Merge results.
-
-Step 7
-Remove duplicates.
-
-Step 8
-Rank by confidence.
-
-Step 9
-Generate the answer only from retrieved evidence.
-
-==========================================
-HALLUCINATION PROTECTION
-==========================================
-
-Never invent:
-
-Pages
-
-Features
-
-Permissions
-
-Articles
-
-Workflows
-
-APIs
-
-Documentation
-
-If the answer cannot be found, reply:
-
-"I couldn't find enough information in the Knowledge Base to answer this question."
-
-Never guess.
-
-Never fabricate.
-
-==========================================
-SOURCE CITATIONS
-==========================================
-
-Every answer must include sources.
-
-Example:
-
-Sources
-
-Mission Article
-
-Workflow Documentation
-
-Playbook.pdf
-
-GitHub PR #123
-
-Knowledge Base: TOW App
-
-==========================================
-FOLLOW-UP QUESTIONS
-==========================================
-
-Maintain conversation history.
-
-Allow follow-up questions like:
-
-"Explain more."
-
-"Show me where."
-
-"What permissions are required?"
-
-"Which workflow uses this?"
-
-==========================================
-APPLICATION CONTEXT
-==========================================
-
-The assistant should understand:
-
-Navigation
-
-Relationships
-
-Permissions
-
-Dependencies
-
-Workflow hierarchy
-
-Knowledge Base hierarchy
-
-GitHub imports
-
-Document uploads
-
-Role-based access
-
-==========================================
-USER EXPERIENCE
-==========================================
-
-Support:
-
-Streaming responses
-
-Typing indicator
-
-Suggested follow-up questions
-
-Recent chats
-
-Conversation history
-
-Copy answer
-
-Expand sources
-
-==========================================
-PERFORMANCE
-==========================================
-
-Cache embeddings.
-
-Cache search results.
-
-Limit context intelligently.
-
-Return answers in under 5 seconds whenever possible.
-
-==========================================
-TESTING
-==========================================
-
-Provide a manual testing checklist with at least 50 questions covering:
-- Permissions
-- GitHub Integration
-- KB Access Grants
-- Workflows
-- Documents
-- Navigation
-- Articles
-- Teams
-- Settings
-- Search
-
-==========================================
-DELIVERABLE
-==========================================
-
-At the end, provide:
-
-1. Files modified.
-2. New APIs.
-3. Database changes.
-4. Search/indexing changes.
-5. RAG architecture.
-6. Prompt changes.
-7. Test cases.
-8. Performance improvements.
+After implementation I should be able to:
+- Open a KB article.
+- Click "Link Ticket".
+- Enter "INC-1001".
+- Save.
+- Refresh Retrieval Dashboard.
+- Ticket Links should become 1.
