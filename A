@@ -1,76 +1,125 @@
 
-Act as a Principal Full-Stack Engineer.
+Act as a Principal AI + Full-Stack Engineer.
 
-Implement a production-ready GitHub CI/CD integration for the KB Admin application so that Knowledge Base articles are automatically created and updated from GitHub repositories.
+Implement a production-ready Retrieval / MCP Foundation for the KB Admin application.
 
-Objective
+The objective is to transform the existing Knowledge Assistant into an enterprise-grade Retrieval-Augmented Generation (RAG) system that answers ONLY using approved enterprise knowledge and never hallucinates.
 
-When a Pull Request is merged into the configured branch (main/master/develop), the Knowledge Base should automatically synchronize without requiring any manual import.
+The implementation should be modular, scalable, and support future MCP tools.
 
-Requirements
+==================================================
+GOALS
+==================================================
 
-## 1. GitHub Webhook
+The Knowledge Assistant should:
 
-Implement a secure GitHub webhook endpoint.
+✓ Answer questions from uploaded KB documents.
+✓ Answer questions from GitHub-imported documentation.
+✓ Answer questions from Markdown, PDF, DOCX, PPTX, XLSX, CSV, JSON, TXT.
+✓ Search all approved KB articles.
+✓ Search article metadata.
+✓ Search section hierarchy.
+✓ Return evidence and citations.
+✓ Never invent answers.
+✓ Say "I don't know" if evidence is insufficient.
+✓ Support future MCP tools.
 
-Supported events:
-- pull_request (closed)
-- push
-- workflow_run (optional)
+==================================================
+ARCHITECTURE
+==================================================
 
-Only process:
-- merged pull requests
-- successful pushes to tracked branches
+Implement:
 
-Validate:
-- X-Hub-Signature-256
-- Webhook secret
-- Repository
-- Branch
+User
+↓
 
-Reject unauthorized requests.
+Knowledge Assistant
 
---------------------------------------------------
+↓
 
-## 2. Detect Changed Files
+Query Processor
 
-For every merged PR:
+↓
 
-Retrieve all changed files.
+Embedding Search
 
-Supported file types:
+↓
 
-- .md
-- .mdx
-- .txt
-- .pdf
-- .docx
-- .pptx
-- .xlsx
-- .csv
-- .json
+Retriever
 
-Ignore:
-- node_modules
-- dist
-- build
-- .github
-- package-lock
-- yarn.lock
-- binaries
-- images unless configured
+↓
 
---------------------------------------------------
+Re-ranker
 
-## 3. Parse Documents
+↓
 
-Extract content from:
+Context Builder
+
+↓
+
+LLM (Anthropic)
+
+↓
+
+Grounded Answer
+
+==================================================
+RETRIEVAL PIPELINE
+==================================================
+
+Create independent services:
+
+- Query Processor
+- Embedding Service
+- Retrieval Service
+- Re-ranking Service
+- Context Builder
+- Citation Builder
+- Response Formatter
+
+Each service must be independently testable.
+
+==================================================
+DOCUMENT INDEXING
+==================================================
+
+Every uploaded/imported document should be split into chunks.
+
+Generate embeddings.
+
+Store:
+
+- chunk_id
+- article_id
+- section_id
+- knowledge_base
+- hierarchy_node
+- title
+- source
+- document type
+- file path
+- GitHub PR
+- repository
+- commit SHA
+- upload date
+
+==================================================
+SUPPORTED SOURCES
+==================================================
+
+Search across:
+
+KB Articles
+
+Uploaded Documents
+
+GitHub Imports
 
 Markdown
 
-Word
-
 PDF
+
+Word
 
 PowerPoint
 
@@ -80,350 +129,282 @@ CSV
 
 JSON
 
-Generate clean searchable text.
+TXT
 
-Preserve:
+Knowledge Metadata
 
-Title
+Future Confluence connector
 
-Headings
+Future SharePoint connector
 
-Tables
+Future Teams connector
 
-Code blocks
+==================================================
+HYBRID SEARCH
+==================================================
 
-Metadata
+Implement:
 
---------------------------------------------------
+Semantic Search
 
-## 4. Automatic KB Update
+Keyword Search
 
-For every changed document:
+Metadata Search
 
-If article exists
+Combine results.
 
-→ Update article
+Re-rank before sending to the LLM.
 
-If article doesn't exist
+==================================================
+MCP FOUNDATION
+==================================================
 
-→ Create draft article
+Design a tool registry.
 
-Store:
+Support future MCP tools.
 
-Repository
+Initial tools:
 
-Branch
+SearchKnowledge
 
-Commit SHA
+SearchDocuments
 
-PR Number
+SearchGitHub
 
-Author
+SearchHierarchy
 
-Merge Date
+GetArticle
 
-File Path
+GetSection
 
-Source URL
+GetMetadata
 
---------------------------------------------------
+ListCategories
 
-## 5. Knowledge Mapping
+ListKnowledgeBases
 
-Automatically determine destination node.
+Future tools can plug in without changing the chatbot.
 
-Priority:
+==================================================
+TOOL ROUTER
+==================================================
 
-1. Existing mapping table
+User asks:
 
-2. Folder path
+"Where is Mission?"
 
-3. User configured mapping
+↓
+
+SearchHierarchy
+
+--------------------------------
+
+User asks:
+
+"What changed in PR 482?"
+
+↓
+
+SearchGitHub
+
+--------------------------------
+
+User asks:
+
+"What is the Vision workflow?"
+
+↓
+
+SearchKnowledge
+
+==================================================
+PROMPT ORCHESTRATION
+==================================================
+
+Always retrieve evidence first.
+
+Only then call Anthropic.
+
+Never allow direct LLM answers without retrieval.
+
+==================================================
+HALLUCINATION PROTECTION
+==================================================
+
+If confidence < threshold
+
+Return:
+
+"I couldn't find enough approved knowledge to answer this."
+
+Never guess.
+
+Never fabricate.
+
+==================================================
+ANSWER FORMAT
+==================================================
+
+Every answer must include:
+
+Answer
+
+Evidence Used
+
+Source Documents
+
+Article Links
+
+Confidence
+
+Last Updated
+
+==================================================
+CITATIONS
+==================================================
+
+Every paragraph should reference:
+
+Article
+
+Section
+
+Uploaded document
+
+GitHub file
 
 Example
 
-/docs/ooo/mission.md
+Mission.md
 
-↓
+Section: Workflow
 
-TOW App
+PR #482
 
-↓
+==================================================
+CHAT MEMORY
+==================================================
 
-OOO Items
+Maintain conversation memory.
 
-↓
+Understand follow-up questions.
 
-Mission
+Resolve pronouns.
 
-Resolve hierarchy internally.
+Remember previous retrieved evidence.
 
---------------------------------------------------
+==================================================
+PERMISSIONS
+==================================================
 
-## 6. Version History
+Never retrieve data the current user cannot access.
 
-Keep every version.
+Respect:
 
-Store:
+Role permissions
 
-Version Number
+KB permissions
 
-Commit SHA
+Team permissions
 
-PR #
+Private documents
 
-Timestamp
+==================================================
+PERFORMANCE
+==================================================
 
-Author
+Target:
 
-Allow rollback.
+First answer < 2 seconds
 
---------------------------------------------------
+Streaming responses
 
-## 7. Approval Workflow
+Chunk cache
 
-Configurable.
+Embedding cache
 
-Option A
+Metadata cache
 
-Auto Publish
-
-Option B
-
-Create Draft
-
-Option C
-
-Needs Review
-
---------------------------------------------------
-
-## 8. Notifications
-
-Notify KB Admins when:
-
-Import starts
-
-Import succeeds
-
-Import fails
-
-Article updated
-
-New article created
-
---------------------------------------------------
-
-## 9. Incremental Sync
-
-Never re-import everything.
-
-Only process changed files.
-
-Support retries.
-
---------------------------------------------------
-
-## 10. Search Index
-
-Automatically re-index changed articles.
-
-Do not rebuild the complete search index.
-
---------------------------------------------------
-
-## 11. AI Metadata
-
-Automatically generate:
-
-Summary
-
-Keywords
-
-Suggested Tags
-
-Related Articles
-
-Do not modify article content automatically.
-
---------------------------------------------------
-
-## 12. Audit Trail
+==================================================
+OBSERVABILITY
+==================================================
 
 Log:
 
-Repository
+Question
 
-Commit
+Retrieved chunks
 
-PR
+Similarity score
 
-Webhook
+Tools invoked
 
-Imported By
+LLM latency
 
-Duration
+Confidence
 
-Status
+==================================================
+ADMIN PAGE
+==================================================
 
-Errors
+Create:
 
---------------------------------------------------
+Retrieval Dashboard
 
-## 13. Sync Dashboard
+Display:
 
-Create a Sync Status page showing:
+Indexed Articles
 
-Last Sync
+Indexed Chunks
 
-Current Sync
+Embedding Count
 
-Repository
+Average Retrieval Time
 
-Branch
+Top Queries
 
-Imported Files
+Failed Queries
 
-Skipped Files
+Embedding Status
 
-Failed Files
-
-Processing Time
-
-Webhook Status
-
---------------------------------------------------
-
-## 14. Import History
-
-Maintain complete history.
-
-Each row should include:
-
-Repository
-
-PR Number
-
-Commit
-
-Files Imported
-
-Created
-
-Updated
-
-Skipped
-
-Failed
-
-Rollback
-
-View Details
-
---------------------------------------------------
-
-## 15. Security
-
-Encrypt GitHub tokens.
-
-Never expose secrets.
-
-Use server-side authentication only.
-
-Validate webhook signatures.
-
---------------------------------------------------
-
-## 16. Error Handling
-
-Handle:
-
-Network failures
-
-GitHub rate limits
-
-Missing files
-
-Invalid documents
-
-Unsupported formats
-
-Partial imports
-
-Continue processing remaining files.
-
---------------------------------------------------
-
-## 17. Configuration
-
-Allow admins to configure:
-
-Repository
-
-Branch
-
-Auto Sync
-
-Auto Publish
-
-Webhook Secret
-
-Import Filters
-
-Excluded Paths
-
---------------------------------------------------
-
-## 18. UI
-
-GitHub Integration page should display:
-
-Connected Repository
-
-Webhook Status
-
-Auto Sync Enabled
-
-Last Sync
-
-Import History
-
-Sync Now button
-
-Webhook Health
-
---------------------------------------------------
-
-## 19. Testing
+==================================================
+TESTING
+==================================================
 
 Verify:
 
-✓ Merge PR creates KB article
+Questions about Mission
 
-✓ Existing article updates
+Questions about Goals
 
-✓ Deleted files archive KB article
+Questions about PRs
 
-✓ Unsupported files skipped
+Questions about uploaded PDFs
 
-✓ Webhook authentication works
+Questions about DOCX
 
-✓ Search index updates
+Questions about hierarchy
 
-✓ Version history created
+Questions about metadata
 
-✓ Audit logs recorded
+Permission filtering
 
-✓ Notifications sent
+Unknown question handling
 
---------------------------------------------------
+==================================================
+DELIVERABLES
+==================================================
 
-Deliverables
+Provide:
 
-1. Files modified
-2. New APIs created
-3. Database changes
-4. Webhook implementation
-5. CI/CD workflow
+1. Folder structure
+2. New services
+3. Database schema changes
+4. MCP tool registry
+5. Retrieval flow diagram
 6. Sequence diagram
-7. Testing instructions
+7. API endpoints
+8. How future connectors plug into MCP
+9. How hallucination prevention works
+10. How citations are generated
+11. Testing guide
