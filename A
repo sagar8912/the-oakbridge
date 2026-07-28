@@ -1,163 +1,97 @@
 
-Act as a Principal AI Architect.
+Act as a Principal AI + RAG + LangSmith Engineer.
 
-Objective:
-Establish the Knowledge Base as the governed enterprise knowledge source for all AI consumers, including:
-- Knowledge Assistant
-- Future AI Agents
-- Ticketing systems (ServiceNow/Jira/Zendesk/Freshservice)
-- MCP tools
-- LangSmith evaluation pipelines
-- Future enterprise copilots
+After the recent LangSmith integration, the Knowledge Assistant is no longer answering questions correctly.
 
-Design and implement an enterprise knowledge platform instead of a chatbot-only solution.
+Current issue:
+- Every question returns:
+  "I couldn't find information in the Knowledge Base."
+- This happened only after the LangSmith changes.
+- Anthropic API is configured and connected.
+- Retrieval Dashboard shows indexed articles and indexed chunks.
+- MCP tools are registered.
+- The chatbot was working correctly before the LangSmith changes.
 
-====================================
-Requirements
-====================================
+Your task is to find and fix the root cause instead of adding temporary workarounds.
 
-1. Single Source of Truth
-- All AI systems must retrieve knowledge only from the KB.
-- No duplicate knowledge stores.
-- Every answer must originate from approved KB content.
+Perform a complete end-to-end audit of the chatbot pipeline:
 
-2. Governed Knowledge
-Each article must support:
-- Draft
-- Review
-- Approved
-- Archived
-- Version history
-- Approval workflow
-- Owner
-- Reviewer
-- Last modified
-- Effective date
-- Expiration date
+1. User Query
+   - Verify the user question reaches the backend correctly.
 
-Only Approved articles may be retrieved by AI.
+2. Retrieval
+   - Verify SearchKnowledge executes.
+   - Verify SearchDocuments executes.
+   - Verify SearchHierarchy executes.
+   - Verify SearchGitHub executes when applicable.
+   - Verify retrieved chunks are not empty.
+   - Log retrieved article IDs and chunk count.
 
-3. Shared Retrieval Service
-Create one centralized Retrieval Service that is used by:
-- KB Assistant
-- MCP Server
-- GitHub Integration
-- Future Ticketing integrations
-- LangSmith evaluation
-- Future APIs
+3. MCP
+   - Ensure every MCP tool is executing successfully.
+   - If a tool throws an error, continue with remaining tools.
+   - Do not allow one MCP failure to stop the pipeline.
 
-Avoid duplicate retrieval logic.
+4. LangSmith
+   - Verify LangSmith tracing is NON-BLOCKING.
+   - If LangSmith is unavailable or throws an exception:
+       - Continue retrieval.
+       - Continue Anthropic response generation.
+       - Log the tracing error only.
+   - LangSmith must never prevent answers from being generated.
 
-4. MCP Integration
-Expose enterprise tools such as:
-- SearchKnowledge
-- SearchDocuments
-- SearchHierarchy
-- GetArticle
-- GetMetadata
-- SearchGitHub
-- SearchConfluence (future)
-- SearchSharePoint (future)
-- SearchTickets (future)
+5. Anthropic
+   - Verify retrieved context is actually passed to Claude.
+   - Verify the final prompt contains:
+       - System prompt
+       - Retrieved context
+       - User question
 
-All AI consumers must use these tools.
+6. Response Generation
+   - Only return
+     "I couldn't find information in the Knowledge Base."
+     if ALL retrieval sources return zero relevant documents.
+   - Otherwise generate an answer using retrieved evidence.
 
-5. Ticketing Integration
-Design APIs so ticket systems can:
-- Search KB before ticket creation
-- Recommend existing articles
-- Suggest troubleshooting steps
-- Generate draft responses using approved KB content
-- Link KB articles to tickets
-- Record article usage analytics
+7. Logging
+   Add detailed debug logs for:
+   - User question
+   - Retrieved article count
+   - Retrieved chunk count
+   - MCP tool results
+   - Final prompt size
+   - Anthropic request
+   - Anthropic response
+   - LangSmith trace status
+   - Any exception
 
-6. LangSmith Readiness
-Expose retrieval pipeline for LangSmith.
-Capture:
-- User question
-- Retrieved chunks
-- Source articles
-- Metadata
-- Confidence score
-- Citations
-- Latency
-- LLM response
-- User feedback
+8. Fail-safe
+   If LangSmith fails:
+   - Disable tracing automatically for that request.
+   - Continue normal chatbot execution.
+   - Never fail the request because of tracing.
 
-7. Grounded AI
-The assistant must:
-- Answer only from retrieved evidence.
-- Never hallucinate.
-- Say "I could not find information in the Knowledge Base" if evidence is insufficient.
-- Always include citations.
+9. Validation
+   Test these questions:
+   - What is Mission?
+   - Explain Goals.
+   - What is Vision?
+   - What is Workflow Test?
+   - What is Technical Documents?
+   - How do I create a Goal?
+   - What is GitHub Integration?
+   - What documents are uploaded?
+   - Explain TOW App.
+   - Explain KB Users.
 
-8. Knowledge APIs
-Provide reusable APIs:
+For every test show:
+- Retrieval succeeded? (Yes/No)
+- Number of retrieved chunks
+- MCP tools executed
+- LangSmith trace created? (Yes/No)
+- Anthropic request succeeded? (Yes/No)
+- Final answer generated? (Yes/No)
 
-GET /api/knowledge/search
-GET /api/knowledge/article/:id
-GET /api/knowledge/hierarchy
-GET /api/knowledge/documents
-GET /api/knowledge/metadata
-
-These APIs must be reusable by every application.
-
-9. Analytics
-Create dashboards showing:
-- Most searched topics
-- Failed searches
-- Article usage
-- AI answer success rate
-- Ticket deflection
-- Top referenced articles
-- Stale content
-- Articles needing review
-
-10. Security
-Respect existing RBAC.
-Users may retrieve only content they are authorized to access.
-Draft and restricted content must never be exposed.
-
-11. Architecture
-Refactor into:
-
-Knowledge Repository
-↓
-Embedding Index
-↓
-Retrieval Service
-↓
-MCP Layer
-↓
-AI Consumers
-   • Knowledge Assistant
-   • Ticket Systems
-   • LangSmith
-   • Future AI Agents
-
-12. Extensibility
-Support future integrations without changing retrieval logic:
-- Jira
-- ServiceNow
-- Zendesk
-- Freshservice
-- Slack
-- Microsoft Teams
-- SharePoint
-- Confluence
-- GitHub
-- Azure DevOps
-
-13. Deliverables
-- Architecture diagram
-- Database changes (if required)
-- API contracts
-- Retrieval flow
-- MCP tool definitions
-- Folder structure
-- Implementation plan
-- Unit tests
-- Integration tests
-- Documentation
-
-Do not break existing functionality. Extend the current KB Admin architecture using the existing Anthropic-based Retrieval and MCP implementation.
+Do not reduce chatbot functionality.
+Do not remove LangSmith.
+Fix the integration so Retrieval, MCP, Anthropic, and LangSmith all work together.
