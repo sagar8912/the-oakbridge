@@ -1,92 +1,98 @@
 
-Act as a Principal AI Engineer and Full-Stack Architect.
+Act as a Principal React/Next.js Engineer.
 
-We are migrating the KB Admin chatbot from OpenAI to Anthropic Claude.
+We need to reorganize the application navigation.
 
-The chatbot is currently implemented using OPENAI_API_KEY and the OpenAI SDK.
+CURRENT STRUCTURE
 
-I want you to refactor the implementation to use ANTHROPIC_API_KEY and the official Anthropic SDK while preserving all existing functionality.
+Dashboard
+Vision
+Knowledge
+Goals
+Standards
+Bulletin
+Meetings
+My Items
+Teams
+Shared
 
-Requirements:
+ADMIN
+Admin
 
-1. Remove all OpenAI-specific code.
-   - Remove OpenAI SDK imports.
-   - Remove OpenAI client initialization.
-   - Remove all ChatCompletion / Responses API calls.
-   - Remove OpenAI-specific request/response parsing.
+-----------------------------------------
 
-2. Replace with Anthropic.
-   - Use the official @anthropic-ai/sdk package.
-   - Initialize the client using:
-     process.env.ANTHROPIC_API_KEY
-   - Use Claude Messages API.
+REQUIRED STRUCTURE
 
-3. Keep the chatbot UI exactly the same.
-   - Do not change React components.
-   - Do not change styling.
-   - Do not change routing.
-   - Do not change chat history behavior.
+Dashboard
+Vision
+Goals
+Standards
+Bulletin
+Meetings
+My Items
+Teams
+Shared
 
-4. Preserve all chatbot capabilities.
-   - Streaming responses (if already implemented).
-   - Conversation history.
-   - Context injection.
-   - KB retrieval.
-   - RAG pipeline.
-   - Citations.
-   - Session handling.
-   - Error handling.
-   - Typing indicator.
-   - Retry logic.
+ADMIN
+Admin
+Knowledge
 
-5. Replace environment variables.
-   Remove:
-   OPENAI_API_KEY
+Knowledge must become a dedicated Admin navigation item.
 
-   Add:
-   ANTHROPIC_API_KEY
+Requirements
 
-6. Update backend API routes to call Claude instead of OpenAI.
+1. Remove Knowledge from the primary TOW navigation.
 
-7. If embeddings are currently generated using OpenAI:
-   - Do NOT silently replace them.
-   - Clearly identify every embedding dependency.
-   - Keep embeddings unchanged unless required.
-   - Explain which embedding provider is currently used.
+2. Add Knowledge under the ADMIN section directly below Admin.
 
-8. Update configuration files.
-   - package.json
-   - env validation
-   - docker
-   - deployment configs
-   - README
-   - setup documentation
+3. Clicking Knowledge should open the existing KB Admin module.
 
-9. Update all helper utilities that reference OpenAI.
+4. Do NOT change any existing Knowledge routes.
 
-10. Maintain the existing system prompt, RAG prompt, and prompt engineering exactly as before.
+5. Do NOT change URLs.
 
-11. Preserve hallucination protection.
-   The chatbot must:
-   - Answer only from KB Admin/TOW knowledge.
-   - Never fabricate information.
-   - If information is unavailable, respond:
-     "I couldn't find this information in the Knowledge Base."
-   - Never invent APIs, pages, workflows, or permissions.
+6. Do NOT change permissions.
 
-12. Preserve source attribution and citations if implemented.
+7. Preserve active navigation highlighting.
 
-13. Keep authentication, authorization, and permission checks unchanged.
+8. Preserve breadcrumbs.
 
-14. Use the latest supported Claude model through Anthropic.
+9. Preserve icons.
 
-15. Do not introduce any breaking changes.
+10. Preserve collapsible sidebar behavior.
 
-Deliverables:
-- List every file modified.
-- Show every OpenAI dependency removed.
-- Show every Anthropic dependency added.
-- Show the updated environment variables.
-- Show the exact npm/pnpm package to install.
-- Confirm that all chatbot features continue to work after migration.
-- Ensure the project builds successfully with no TypeScript or lint errors.
+11. Preserve mobile responsiveness.
+
+12. Preserve role-based visibility.
+   - Only users who currently have access to Knowledge should see it.
+   - Users without permission must not see it.
+
+13. Preserve all existing KB Admin functionality.
+
+14. Do not duplicate the Knowledge menu.
+
+15. There must be only one Knowledge navigation item in the entire sidebar.
+
+16. Update any navigation configuration/constants instead of hardcoding.
+
+17. Ensure keyboard navigation and accessibility continue to work.
+
+Verification Checklist
+
+✔ Knowledge removed from main navigation.
+
+✔ Knowledge appears under ADMIN.
+
+✔ Clicking Knowledge opens the existing KB Admin.
+
+✔ No route changes.
+
+✔ No permission regressions.
+
+✔ No duplicate menu items.
+
+At the end provide:
+1. Files modified.
+2. Components modified.
+3. Navigation config updated.
+4. Before vs After navigation structure.
