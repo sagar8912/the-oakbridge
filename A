@@ -1,203 +1,429 @@
 
 Act as a Principal Full-Stack Engineer.
 
-The current GitHub Integration UI asks administrators to manually enter:
+Implement a production-ready GitHub CI/CD integration for the KB Admin application so that Knowledge Base articles are automatically created and updated from GitHub repositories.
 
-- Knowledge Base ID (UUID)
-- Hierarchy Node ID (UUID)
+Objective
 
-This is not user friendly.
-
-Replace this implementation with a navigation-based selector that matches the existing Knowledge navigation tree.
+When a Pull Request is merged into the configured branch (main/master/develop), the Knowledge Base should automatically synchronize without requiring any manual import.
 
 Requirements
 
-1. Remove the manual UUID input fields from the UI.
+## 1. GitHub Webhook
 
-Remove:
-- Knowledge Base ID textbox
-- Hierarchy Node ID textbox
+Implement a secure GitHub webhook endpoint.
 
-These values should still exist internally but must never be manually entered.
+Supported events:
+- pull_request (closed)
+- push
+- workflow_run (optional)
+
+Only process:
+- merged pull requests
+- successful pushes to tracked branches
+
+Validate:
+- X-Hub-Signature-256
+- Webhook secret
+- Repository
+- Branch
+
+Reject unauthorized requests.
 
 --------------------------------------------------
 
-2. Build an "Import Into" selector.
+## 2. Detect Changed Files
 
-Use the same hierarchy already shown in the Knowledge sidebar.
+For every merged PR:
 
-Example:
+Retrieve all changed files.
 
-Client Lifecycle
-    Submission & Quoting
-    Sales
-    Claims
+Supported file types:
+
+- .md
+- .mdx
+- .txt
+- .pdf
+- .docx
+- .pptx
+- .xlsx
+- .csv
+- .json
+
+Ignore:
+- node_modules
+- dist
+- build
+- .github
+- package-lock
+- yarn.lock
+- binaries
+- images unless configured
+
+--------------------------------------------------
+
+## 3. Parse Documents
+
+Extract content from:
+
+Markdown
+
+Word
+
+PDF
+
+PowerPoint
+
+Excel
+
+CSV
+
+JSON
+
+Generate clean searchable text.
+
+Preserve:
+
+Title
+
+Headings
+
+Tables
+
+Code blocks
+
+Metadata
+
+--------------------------------------------------
+
+## 4. Automatic KB Update
+
+For every changed document:
+
+If article exists
+
+→ Update article
+
+If article doesn't exist
+
+→ Create draft article
+
+Store:
+
+Repository
+
+Branch
+
+Commit SHA
+
+PR Number
+
+Author
+
+Merge Date
+
+File Path
+
+Source URL
+
+--------------------------------------------------
+
+## 5. Knowledge Mapping
+
+Automatically determine destination node.
+
+Priority:
+
+1. Existing mapping table
+
+2. Folder path
+
+3. User configured mapping
+
+Example
+
+/docs/ooo/mission.md
+
+↓
 
 TOW App
-    OOO Items
-        Mission
-        Purpose
-        Vision
-        Goals
 
-Technical Documents
+↓
 
-Data & Analytics
+OOO Items
 
-The Oakbridge Way
-
---------------------------------------------------
-
-3. Allow selecting any destination node.
-
-Examples:
+↓
 
 Mission
 
-Purpose
-
-Vision
-
-Goals
-
-Getting Started
-
-Technical Documents
-
-etc.
+Resolve hierarchy internally.
 
 --------------------------------------------------
 
-4. When a node is selected:
+## 6. Version History
 
-Automatically resolve:
+Keep every version.
 
-- knowledge_base_id
-- hierarchy_node_id
+Store:
 
-These values should be looked up internally from the database.
+Version Number
 
-Do NOT require the admin to know UUIDs.
+Commit SHA
 
---------------------------------------------------
+PR #
 
-5. Existing GitHub Import logic must continue working.
+Timestamp
 
-The PR import API should receive exactly the same IDs it currently expects.
+Author
 
-Only the UI changes.
-
---------------------------------------------------
-
-6. Display selected destination.
-
-Example:
-
-Import Destination
-
-TOW App
-→ OOO Items
-→ Mission
-
-instead of UUIDs.
+Allow rollback.
 
 --------------------------------------------------
 
-7. Repository dropdown remains unchanged.
+## 7. Approval Workflow
 
-Repository selection continues to work exactly as today.
+Configurable.
 
---------------------------------------------------
+Option A
 
-8. Validation
+Auto Publish
 
-Disable Import until:
+Option B
 
-✓ Repository selected
+Create Draft
 
-✓ Destination node selected
+Option C
 
---------------------------------------------------
-
-9. Keep compatibility.
-
-Do not break:
-
-- Import History
-- Pull Requests
-- Sync Status
-- GitHub webhook
-- Existing backend APIs
+Needs Review
 
 --------------------------------------------------
 
-10. Backend
+## 8. Notifications
 
-If APIs currently require UUIDs:
+Notify KB Admins when:
 
-Create an internal resolver:
+Import starts
 
-navigation path
-↓
+Import succeeds
 
-hierarchy node
+Import fails
 
-↓
+Article updated
 
-knowledge_base_id
-
-↓
-
-hierarchy_node_id
-
-↓
-
-existing import API
-
-No API contract should change.
+New article created
 
 --------------------------------------------------
 
-11. UX improvements
+## 9. Incremental Sync
 
-Add:
+Never re-import everything.
 
-• Search node
+Only process changed files.
 
-• Expand/Collapse tree
-
-• Breadcrumb preview
-
-Example:
-
-Importing into
-
-TOW App
-→ OOO Items
-→ Mission
+Support retries.
 
 --------------------------------------------------
 
-12. Testing
+## 10. Search Index
+
+Automatically re-index changed articles.
+
+Do not rebuild the complete search index.
+
+--------------------------------------------------
+
+## 11. AI Metadata
+
+Automatically generate:
+
+Summary
+
+Keywords
+
+Suggested Tags
+
+Related Articles
+
+Do not modify article content automatically.
+
+--------------------------------------------------
+
+## 12. Audit Trail
+
+Log:
+
+Repository
+
+Commit
+
+PR
+
+Webhook
+
+Imported By
+
+Duration
+
+Status
+
+Errors
+
+--------------------------------------------------
+
+## 13. Sync Dashboard
+
+Create a Sync Status page showing:
+
+Last Sync
+
+Current Sync
+
+Repository
+
+Branch
+
+Imported Files
+
+Skipped Files
+
+Failed Files
+
+Processing Time
+
+Webhook Status
+
+--------------------------------------------------
+
+## 14. Import History
+
+Maintain complete history.
+
+Each row should include:
+
+Repository
+
+PR Number
+
+Commit
+
+Files Imported
+
+Created
+
+Updated
+
+Skipped
+
+Failed
+
+Rollback
+
+View Details
+
+--------------------------------------------------
+
+## 15. Security
+
+Encrypt GitHub tokens.
+
+Never expose secrets.
+
+Use server-side authentication only.
+
+Validate webhook signatures.
+
+--------------------------------------------------
+
+## 16. Error Handling
+
+Handle:
+
+Network failures
+
+GitHub rate limits
+
+Missing files
+
+Invalid documents
+
+Unsupported formats
+
+Partial imports
+
+Continue processing remaining files.
+
+--------------------------------------------------
+
+## 17. Configuration
+
+Allow admins to configure:
+
+Repository
+
+Branch
+
+Auto Sync
+
+Auto Publish
+
+Webhook Secret
+
+Import Filters
+
+Excluded Paths
+
+--------------------------------------------------
+
+## 18. UI
+
+GitHub Integration page should display:
+
+Connected Repository
+
+Webhook Status
+
+Auto Sync Enabled
+
+Last Sync
+
+Import History
+
+Sync Now button
+
+Webhook Health
+
+--------------------------------------------------
+
+## 19. Testing
 
 Verify:
 
-✓ No UUID input visible
+✓ Merge PR creates KB article
 
-✓ Tree matches Knowledge navigation
+✓ Existing article updates
 
-✓ Correct node selected
+✓ Deleted files archive KB article
 
-✓ Correct UUIDs resolved internally
+✓ Unsupported files skipped
 
-✓ Existing import still works
+✓ Webhook authentication works
 
-✓ Existing APIs unchanged
+✓ Search index updates
 
-At the end provide:
+✓ Version history created
+
+✓ Audit logs recorded
+
+✓ Notifications sent
+
+--------------------------------------------------
+
+Deliverables
 
 1. Files modified
-2. Components added
-3. APIs reused
-4. How UUIDs are resolved internally
-5. Before vs After UI screenshots/description
+2. New APIs created
+3. Database changes
+4. Webhook implementation
+5. CI/CD workflow
+6. Sequence diagram
+7. Testing instructions
