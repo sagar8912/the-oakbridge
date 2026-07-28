@@ -1,98 +1,203 @@
 
-Act as a Principal React/Next.js Engineer.
+Act as a Principal Full-Stack Engineer.
 
-We need to reorganize the application navigation.
+The current GitHub Integration UI asks administrators to manually enter:
 
-CURRENT STRUCTURE
+- Knowledge Base ID (UUID)
+- Hierarchy Node ID (UUID)
 
-Dashboard
-Vision
-Knowledge
-Goals
-Standards
-Bulletin
-Meetings
-My Items
-Teams
-Shared
+This is not user friendly.
 
-ADMIN
-Admin
-
------------------------------------------
-
-REQUIRED STRUCTURE
-
-Dashboard
-Vision
-Goals
-Standards
-Bulletin
-Meetings
-My Items
-Teams
-Shared
-
-ADMIN
-Admin
-Knowledge
-
-Knowledge must become a dedicated Admin navigation item.
+Replace this implementation with a navigation-based selector that matches the existing Knowledge navigation tree.
 
 Requirements
 
-1. Remove Knowledge from the primary TOW navigation.
+1. Remove the manual UUID input fields from the UI.
 
-2. Add Knowledge under the ADMIN section directly below Admin.
+Remove:
+- Knowledge Base ID textbox
+- Hierarchy Node ID textbox
 
-3. Clicking Knowledge should open the existing KB Admin module.
+These values should still exist internally but must never be manually entered.
 
-4. Do NOT change any existing Knowledge routes.
+--------------------------------------------------
 
-5. Do NOT change URLs.
+2. Build an "Import Into" selector.
 
-6. Do NOT change permissions.
+Use the same hierarchy already shown in the Knowledge sidebar.
 
-7. Preserve active navigation highlighting.
+Example:
 
-8. Preserve breadcrumbs.
+Client Lifecycle
+    Submission & Quoting
+    Sales
+    Claims
 
-9. Preserve icons.
+TOW App
+    OOO Items
+        Mission
+        Purpose
+        Vision
+        Goals
 
-10. Preserve collapsible sidebar behavior.
+Technical Documents
 
-11. Preserve mobile responsiveness.
+Data & Analytics
 
-12. Preserve role-based visibility.
-   - Only users who currently have access to Knowledge should see it.
-   - Users without permission must not see it.
+The Oakbridge Way
 
-13. Preserve all existing KB Admin functionality.
+--------------------------------------------------
 
-14. Do not duplicate the Knowledge menu.
+3. Allow selecting any destination node.
 
-15. There must be only one Knowledge navigation item in the entire sidebar.
+Examples:
 
-16. Update any navigation configuration/constants instead of hardcoding.
+Mission
 
-17. Ensure keyboard navigation and accessibility continue to work.
+Purpose
 
-Verification Checklist
+Vision
 
-✔ Knowledge removed from main navigation.
+Goals
 
-✔ Knowledge appears under ADMIN.
+Getting Started
 
-✔ Clicking Knowledge opens the existing KB Admin.
+Technical Documents
 
-✔ No route changes.
+etc.
 
-✔ No permission regressions.
+--------------------------------------------------
 
-✔ No duplicate menu items.
+4. When a node is selected:
+
+Automatically resolve:
+
+- knowledge_base_id
+- hierarchy_node_id
+
+These values should be looked up internally from the database.
+
+Do NOT require the admin to know UUIDs.
+
+--------------------------------------------------
+
+5. Existing GitHub Import logic must continue working.
+
+The PR import API should receive exactly the same IDs it currently expects.
+
+Only the UI changes.
+
+--------------------------------------------------
+
+6. Display selected destination.
+
+Example:
+
+Import Destination
+
+TOW App
+→ OOO Items
+→ Mission
+
+instead of UUIDs.
+
+--------------------------------------------------
+
+7. Repository dropdown remains unchanged.
+
+Repository selection continues to work exactly as today.
+
+--------------------------------------------------
+
+8. Validation
+
+Disable Import until:
+
+✓ Repository selected
+
+✓ Destination node selected
+
+--------------------------------------------------
+
+9. Keep compatibility.
+
+Do not break:
+
+- Import History
+- Pull Requests
+- Sync Status
+- GitHub webhook
+- Existing backend APIs
+
+--------------------------------------------------
+
+10. Backend
+
+If APIs currently require UUIDs:
+
+Create an internal resolver:
+
+navigation path
+↓
+
+hierarchy node
+
+↓
+
+knowledge_base_id
+
+↓
+
+hierarchy_node_id
+
+↓
+
+existing import API
+
+No API contract should change.
+
+--------------------------------------------------
+
+11. UX improvements
+
+Add:
+
+• Search node
+
+• Expand/Collapse tree
+
+• Breadcrumb preview
+
+Example:
+
+Importing into
+
+TOW App
+→ OOO Items
+→ Mission
+
+--------------------------------------------------
+
+12. Testing
+
+Verify:
+
+✓ No UUID input visible
+
+✓ Tree matches Knowledge navigation
+
+✓ Correct node selected
+
+✓ Correct UUIDs resolved internally
+
+✓ Existing import still works
+
+✓ Existing APIs unchanged
 
 At the end provide:
-1. Files modified.
-2. Components modified.
-3. Navigation config updated.
-4. Before vs After navigation structure.
+
+1. Files modified
+2. Components added
+3. APIs reused
+4. How UUIDs are resolved internally
+5. Before vs After UI screenshots/description
