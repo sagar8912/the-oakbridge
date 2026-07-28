@@ -1,47 +1,111 @@
 
 Act as a Principal AI + Full-Stack Engineer.
 
-Implement a production-ready Retrieval / MCP Foundation for the KB Admin application.
+The Retrieval / MCP Foundation currently depends on OpenAI.
 
-The objective is to transform the existing Knowledge Assistant into an enterprise-grade Retrieval-Augmented Generation (RAG) system that answers ONLY using approved enterprise knowledge and never hallucinates.
+Our project has migrated completely to Anthropic.
 
-The implementation should be modular, scalable, and support future MCP tools.
+Replace the Retrieval layer so that it uses Anthropic everywhere instead of OpenAI.
 
-==================================================
-GOALS
-==================================================
+Requirements
 
-The Knowledge Assistant should:
+1. Remove all OpenAI dependencies.
 
-✓ Answer questions from uploaded KB documents.
-✓ Answer questions from GitHub-imported documentation.
-✓ Answer questions from Markdown, PDF, DOCX, PPTX, XLSX, CSV, JSON, TXT.
-✓ Search all approved KB articles.
-✓ Search article metadata.
-✓ Search section hierarchy.
-✓ Return evidence and citations.
-✓ Never invent answers.
-✓ Say "I don't know" if evidence is insufficient.
-✓ Support future MCP tools.
+Search the entire repository for:
 
-==================================================
-ARCHITECTURE
-==================================================
+OPENAI_API_KEY
 
-Implement:
+openai_key_missing
+
+OpenAI
+
+openai
+
+gpt-
+
+text-embedding-3-small
+
+text-embedding-3-large
+
+text-embedding-ada
+
+openai client
+
+OpenAI SDK
+
+Replace every reference with the Anthropic implementation.
+
+--------------------------------------------------
+
+2. Environment Variables
+
+Replace:
+
+OPENAI_API_KEY
+
+with
+
+ANTHROPIC_API_KEY
+
+Update:
+
+.env.example
+
+README
+
+Configuration
+
+Validation
+
+Startup checks
+
+Health endpoints
+
+Admin dashboard
+
+Retrieval dashboard
+
+Error messages
+
+--------------------------------------------------
+
+3. Retrieval Dashboard
+
+Replace
+
+openai_key_missing
+
+with
+
+anthropic_key_missing
+
+When the key exists display
+
+Anthropic Connected
+
+When missing display
+
+Anthropic API Key Missing
+
+Do not mention OpenAI anywhere.
+
+--------------------------------------------------
+
+4. LLM Provider
+
+Replace the OpenAI client with the Anthropic SDK.
+
+Use the existing project configuration for Anthropic.
+
+Do not introduce a second provider.
+
+--------------------------------------------------
+
+5. Retrieval Pipeline
+
+Keep the existing flow:
 
 User
-↓
-
-Knowledge Assistant
-
-↓
-
-Query Processor
-
-↓
-
-Embedding Search
 
 ↓
 
@@ -57,113 +121,21 @@ Context Builder
 
 ↓
 
-LLM (Anthropic)
+Anthropic
 
 ↓
 
 Grounded Answer
 
-==================================================
-RETRIEVAL PIPELINE
-==================================================
+Only replace the LLM provider.
 
-Create independent services:
+--------------------------------------------------
 
-- Query Processor
-- Embedding Service
-- Retrieval Service
-- Re-ranking Service
-- Context Builder
-- Citation Builder
-- Response Formatter
+6. MCP Tools
 
-Each service must be independently testable.
+Ensure every MCP tool now invokes Anthropic.
 
-==================================================
-DOCUMENT INDEXING
-==================================================
-
-Every uploaded/imported document should be split into chunks.
-
-Generate embeddings.
-
-Store:
-
-- chunk_id
-- article_id
-- section_id
-- knowledge_base
-- hierarchy_node
-- title
-- source
-- document type
-- file path
-- GitHub PR
-- repository
-- commit SHA
-- upload date
-
-==================================================
-SUPPORTED SOURCES
-==================================================
-
-Search across:
-
-KB Articles
-
-Uploaded Documents
-
-GitHub Imports
-
-Markdown
-
-PDF
-
-Word
-
-PowerPoint
-
-Excel
-
-CSV
-
-JSON
-
-TXT
-
-Knowledge Metadata
-
-Future Confluence connector
-
-Future SharePoint connector
-
-Future Teams connector
-
-==================================================
-HYBRID SEARCH
-==================================================
-
-Implement:
-
-Semantic Search
-
-Keyword Search
-
-Metadata Search
-
-Combine results.
-
-Re-rank before sending to the LLM.
-
-==================================================
-MCP FOUNDATION
-==================================================
-
-Design a tool registry.
-
-Support future MCP tools.
-
-Initial tools:
+Examples:
 
 SearchKnowledge
 
@@ -179,232 +151,126 @@ GetSection
 
 GetMetadata
 
-ListCategories
-
 ListKnowledgeBases
 
-Future tools can plug in without changing the chatbot.
+--------------------------------------------------
 
-==================================================
-TOOL ROUTER
-==================================================
+7. Prompt Builder
 
-User asks:
+Reuse the existing prompt templates.
 
-"Where is Mission?"
+Only change the model invocation.
 
-↓
+--------------------------------------------------
 
-SearchHierarchy
+8. Streaming
 
---------------------------------
+Maintain streaming responses.
 
-User asks:
+No functionality regression.
 
-"What changed in PR 482?"
+--------------------------------------------------
 
-↓
+9. Error Handling
 
-SearchGitHub
+Replace all OpenAI errors with Anthropic errors.
 
---------------------------------
+Examples:
 
-User asks:
-
-"What is the Vision workflow?"
+openai_key_missing
 
 ↓
 
-SearchKnowledge
+anthropic_key_missing
 
-==================================================
-PROMPT ORCHESTRATION
-==================================================
+Invalid OpenAI key
 
-Always retrieve evidence first.
+↓
 
-Only then call Anthropic.
+Invalid Anthropic API key
 
-Never allow direct LLM answers without retrieval.
+OpenAI request failed
 
-==================================================
-HALLUCINATION PROTECTION
-==================================================
+↓
 
-If confidence < threshold
+Anthropic request failed
 
-Return:
+--------------------------------------------------
 
-"I couldn't find enough approved knowledge to answer this."
+10. Logging
 
-Never guess.
+Update logs:
 
-Never fabricate.
+Provider: Anthropic
 
-==================================================
-ANSWER FORMAT
-==================================================
+Model Name
 
-Every answer must include:
+Latency
 
-Answer
+Tokens
 
-Evidence Used
+Errors
 
-Source Documents
+--------------------------------------------------
 
-Article Links
+11. Health Check
 
-Confidence
+The Retrieval Dashboard should display:
 
-Last Updated
+LLM Provider
 
-==================================================
-CITATIONS
-==================================================
+Anthropic
 
-Every paragraph should reference:
+Status
 
-Article
+Connected
 
-Section
+Model
 
-Uploaded document
+(Current Anthropic model configured in the project)
 
-GitHub file
+API Key
 
-Example
+Configured / Missing
 
-Mission.md
+Last Successful Call
 
-Section: Workflow
+--------------------------------------------------
 
-PR #482
-
-==================================================
-CHAT MEMORY
-==================================================
-
-Maintain conversation memory.
-
-Understand follow-up questions.
-
-Resolve pronouns.
-
-Remember previous retrieved evidence.
-
-==================================================
-PERMISSIONS
-==================================================
-
-Never retrieve data the current user cannot access.
-
-Respect:
-
-Role permissions
-
-KB permissions
-
-Team permissions
-
-Private documents
-
-==================================================
-PERFORMANCE
-==================================================
-
-Target:
-
-First answer < 2 seconds
-
-Streaming responses
-
-Chunk cache
-
-Embedding cache
-
-Metadata cache
-
-==================================================
-OBSERVABILITY
-==================================================
-
-Log:
-
-Question
-
-Retrieved chunks
-
-Similarity score
-
-Tools invoked
-
-LLM latency
-
-Confidence
-
-==================================================
-ADMIN PAGE
-==================================================
-
-Create:
-
-Retrieval Dashboard
-
-Display:
-
-Indexed Articles
-
-Indexed Chunks
-
-Embedding Count
-
-Average Retrieval Time
-
-Top Queries
-
-Failed Queries
-
-Embedding Status
-
-==================================================
-TESTING
-==================================================
+12. Testing
 
 Verify:
 
-Questions about Mission
+✓ No OpenAI imports remain
 
-Questions about Goals
+✓ No OpenAI SDK remains
 
-Questions about PRs
+✓ No OPENAI_API_KEY references remain
 
-Questions about uploaded PDFs
+✓ Retrieval Dashboard shows Anthropic
 
-Questions about DOCX
+✓ Anthropic key validation works
 
-Questions about hierarchy
+✓ Chatbot retrieves KB articles correctly
 
-Questions about metadata
+✓ Citations still work
 
-Permission filtering
+✓ Streaming works
 
-Unknown question handling
+✓ MCP tools still work
 
-==================================================
-DELIVERABLES
-==================================================
+✓ Hallucination protection unchanged
+
+--------------------------------------------------
+
+Deliverables
 
 Provide:
 
-1. Folder structure
-2. New services
-3. Database schema changes
-4. MCP tool registry
-5. Retrieval flow diagram
-6. Sequence diagram
-7. API endpoints
-8. How future connectors plug into MCP
-9. How hallucination prevention works
-10. How citations are generated
-11. Testing guide
+1. Files modified
+2. OpenAI references removed
+3. Anthropic files added/updated
+4. Environment variables updated
+5. Retrieval Dashboard changes
+6. Health check changes
+7. Test results
