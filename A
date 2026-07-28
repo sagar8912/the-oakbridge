@@ -1,71 +1,307 @@
 
-Act as a Principal AI + RAG + Analytics Engineer.
+Act as a Principal Enterprise Architect and Senior Full Stack Engineer.
 
-BUG:
+The current "Link Ticket" feature is only an MVP.
 
-The Retrieval Dashboard analytics are incorrect.
+Redesign it into a production-ready Enterprise Ticket & Engineering Integration platform for KB Admin.
 
-Current behavior:
-- The Knowledge Assistant returns:
-  "I couldn't find information in the Knowledge Base."
-- However, "Failed Searches" remains 0.
-- AI Success Rate is still 100%.
+====================================================
+SUPPORTED SYSTEMS
+====================================================
 
-Expected behavior:
-Whenever Retrieval returns zero relevant documents or the assistant responds with:
-"I couldn't find information in the Knowledge Base."
-the system must:
+Implement pluggable connectors for:
 
-1. Record a Failed Search event.
-2. Increment Failed Searches.
-3. Recalculate AI Success Rate.
-4. Store:
-   - question
-   - user
-   - timestamp
-   - retrieval mode
-   - retrieval tools executed
-   - retrieved chunk count
-   - reason for failure
+• Jira Cloud
+• Jira Data Center
+• Azure DevOps
+• ServiceNow
+• GitHub Issues
+• GitHub Pull Requests
+• GitHub Actions
+• GitHub Releases
 
-Audit the entire analytics pipeline.
+The architecture must allow adding future connectors without modifying existing code.
 
-Verify:
-- SearchKnowledge
-- SearchDocuments
-- SearchHierarchy
-- SearchGitHub
-- Analytics event creation
-- Dashboard query
-- Database persistence
+====================================================
+LINK TICKET
+====================================================
 
-Fix any missing analytics writes.
+Replace the current modal with a production-quality dialog.
 
-AI Success Rate must be calculated as:
-Successful Answers / Total Questions × 100
+Fields:
 
-Example:
-Question 1 -> success
-Question 2 -> success
-Question 3 -> no evidence
+Ticket Provider
+Ticket Number
+Project
+Repository
+Issue / PR
+Priority
+Status
+Assignee
+Reporter
+Labels
+Sprint
+Release
+Environment
+Comments
 
-Dashboard should display:
-AI Success Rate = 66.7%
-Failed Searches = 1
+Auto-detect provider from ticket number when possible.
 
-Add logging to show:
-- Retrieved chunk count
-- Success/Failure
-- Analytics event written
-- Updated dashboard values
+Examples:
 
-After fixing, automatically run these tests:
+INC-10001 -> ServiceNow
+JIRA-245 -> Jira
+ADO-500 -> Azure DevOps
+#482 -> GitHub Issue
+PR-510 -> GitHub Pull Request
 
-1. "What is Mission?" (Expected: Success)
-2. "Generate PDF" (Expected: Failed Search)
-3. "Random Unknown Question" (Expected: Failed Search)
+====================================================
+GITHUB INTEGRATION
+====================================================
 
-Verify that:
-- Failed Searches increments correctly.
-- AI Success Rate updates correctly.
-- Dashboard reflects live analytics without refresh issues.
+Implement GitHub APIs.
+
+Allow linking:
+
+• Issues
+• Pull Requests
+• Commits
+• Releases
+• Branches
+
+Display:
+
+PR Number
+Title
+Author
+Review Status
+Merge Status
+Checks
+Workflow Status
+Commit Count
+Files Changed
+
+Automatically update when GitHub changes.
+
+====================================================
+BI-DIRECTIONAL SYNC
+====================================================
+
+Changes in GitHub
+
+↓
+
+Update KB
+
+Changes in KB
+
+↓
+
+Update linked ticket
+
+Support webhook synchronization.
+
+====================================================
+ARTICLE PAGE
+====================================================
+
+Create a dedicated "Linked Engineering" section.
+
+Display cards:
+
+GitHub Issue
+GitHub PR
+Jira Ticket
+ServiceNow Incident
+Azure Work Item
+
+Each card should display
+
+Status
+Priority
+Owner
+Last Updated
+Open in External System
+
+====================================================
+TIMELINE
+====================================================
+
+Add an engineering timeline.
+
+Example
+
+Created
+↓
+
+Issue Created
+
+↓
+
+PR Opened
+
+↓
+
+CI Passed
+
+↓
+
+Merged
+
+↓
+
+Deployed
+
+↓
+
+KB Updated
+
+====================================================
+CI/CD
+====================================================
+
+After merge:
+
+GitHub Actions
+
+↓
+
+Update KB Article
+
+↓
+
+Re-index Retrieval
+
+↓
+
+Refresh Embeddings
+
+↓
+
+Update Search Index
+
+↓
+
+Notify Subscribers
+
+====================================================
+AI FEATURES
+====================================================
+
+Claude should automatically suggest
+
+Related tickets
+
+Duplicate issues
+
+Related PRs
+
+Related KB articles
+
+Related workflows
+
+Missing documentation
+
+Missing approval
+
+Potential owner
+
+====================================================
+AUDIT
+====================================================
+
+Log every action
+
+Ticket linked
+
+Ticket removed
+
+PR linked
+
+PR merged
+
+Status changed
+
+User
+
+Timestamp
+
+Source System
+
+====================================================
+SECURITY
+====================================================
+
+OAuth support
+
+PAT support
+
+Encrypted credentials
+
+Role-based permissions
+
+Only Editors/Admins may link tickets.
+
+====================================================
+NOTIFICATIONS
+====================================================
+
+Notify when
+
+PR merged
+
+Issue closed
+
+Deployment failed
+
+Ticket reopened
+
+KB outdated
+
+====================================================
+ANALYTICS
+====================================================
+
+Enhance Retrieval Dashboard with
+
+Linked Tickets
+
+Linked PRs
+
+Linked Issues
+
+Deployment Success
+
+Open Incidents
+
+Average Resolution Time
+
+Most Linked Articles
+
+Engineering Activity
+
+====================================================
+TESTING
+====================================================
+
+Create end-to-end tests covering:
+
+1. Link Jira ticket
+2. Link GitHub Issue
+3. Link GitHub PR
+4. Merge PR
+5. Webhook sync
+6. Dashboard update
+7. KB article update
+8. AI retrieval from linked engineering metadata
+9. Permission validation
+10. Audit validation
+
+====================================================
+DELIVERABLE
+====================================================
+
+Use enterprise architecture, clean code, reusable services, typed APIs, background jobs, webhooks, retries, observability, and production-grade error handling.
+
+Do not implement mock behavior.
+Implement a real production-ready solution.
