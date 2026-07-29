@@ -1,307 +1,282 @@
 
-Act as a Principal Enterprise Architect and Senior Full Stack Engineer.
+Act as a Principal Solution Architect, Enterprise Business Analyst, and Technical Writer.
 
-The current "Link Ticket" feature is only an MVP.
+Create a professional Microsoft Word (.docx) document for a client presentation.
 
-Redesign it into a production-ready Enterprise Ticket & Engineering Integration platform for KB Admin.
+Title:
+"PDP / PEP Implementation in The Oakbridge Way (TOW) Application"
 
-====================================================
-SUPPORTED SYSTEMS
-====================================================
+Audience:
+John (Client), Product Owners, Business Stakeholders, Architects, and Developers.
 
-Implement pluggable connectors for:
+The document should be enterprise-grade, visually structured, and easy for both technical and non-technical stakeholders to understand.
 
-• Jira Cloud
-• Jira Data Center
-• Azure DevOps
-• ServiceNow
-• GitHub Issues
-• GitHub Pull Requests
-• GitHub Actions
-• GitHub Releases
+====================================================================
+DOCUMENT STRUCTURE
+====================================================================
 
-The architecture must allow adding future connectors without modifying existing code.
+1. Cover Page
+- Title
+- Version
+- Date
+- Prepared By
+- Project Name
+- Confidentiality Statement
 
-====================================================
-LINK TICKET
-====================================================
+2. Executive Summary
+- What is PDP?
+- What is PEP?
+- Why they are required in TOW.
+- Business objectives.
 
-Replace the current modal with a production-quality dialog.
+3. Current Workflow (Before PDP/PEP)
+Explain the current authorization process.
 
-Fields:
+Include:
+- User Login
+- Authentication
+- Role Validation
+- Manual Permission Checks
+- UI Access
+- API Access
+- Database Access
 
-Ticket Provider
-Ticket Number
-Project
-Repository
-Issue / PR
-Priority
-Status
-Assignee
-Reporter
-Labels
-Sprint
-Release
-Environment
-Comments
+Describe current pain points:
+- Duplicate permission logic
+- Difficult maintenance
+- Inconsistent authorization
+- Scalability issues
+- Audit challenges
 
-Auto-detect provider from ticket number when possible.
+Create a professional workflow diagram.
 
-Examples:
+4. Proposed Workflow (After PDP/PEP)
+Explain the new architecture.
 
-INC-10001 -> ServiceNow
-JIRA-245 -> Jira
-ADO-500 -> Azure DevOps
-#482 -> GitHub Issue
-PR-510 -> GitHub Pull Request
+Flow should include:
 
-====================================================
-GITHUB INTEGRATION
-====================================================
+User
+↓
 
-Implement GitHub APIs.
-
-Allow linking:
-
-• Issues
-• Pull Requests
-• Commits
-• Releases
-• Branches
-
-Display:
-
-PR Number
-Title
-Author
-Review Status
-Merge Status
-Checks
-Workflow Status
-Commit Count
-Files Changed
-
-Automatically update when GitHub changes.
-
-====================================================
-BI-DIRECTIONAL SYNC
-====================================================
-
-Changes in GitHub
+Authentication
 
 ↓
 
-Update KB
-
-Changes in KB
+Policy Enforcement Point (PEP)
 
 ↓
 
-Update linked ticket
-
-Support webhook synchronization.
-
-====================================================
-ARTICLE PAGE
-====================================================
-
-Create a dedicated "Linked Engineering" section.
-
-Display cards:
-
-GitHub Issue
-GitHub PR
-Jira Ticket
-ServiceNow Incident
-Azure Work Item
-
-Each card should display
-
-Status
-Priority
-Owner
-Last Updated
-Open in External System
-
-====================================================
-TIMELINE
-====================================================
-
-Add an engineering timeline.
-
-Example
-
-Created
-↓
-
-Issue Created
+Policy Decision Point (PDP)
 
 ↓
 
-PR Opened
+Permission Evaluation
 
 ↓
 
-CI Passed
+Decision (Allow/Deny)
 
 ↓
 
-Merged
+Application
 
 ↓
 
-Deployed
+Database
 
-↓
+Create a detailed architecture diagram.
 
-KB Updated
+5. PDP Responsibilities
+Explain:
+- Policy evaluation
+- Centralized authorization
+- Role evaluation
+- Attribute-based access
+- Decision generation
+- Audit logging
 
-====================================================
-CI/CD
-====================================================
+6. PEP Responsibilities
+Explain:
+- Intercepts requests
+- Calls PDP
+- Enforces Allow/Deny
+- Returns authorization response
+- Logging
 
-After merge:
+7. End-to-End Request Flow
+Describe every step from login to resource access.
 
-GitHub Actions
+Include sequence diagram.
 
-↓
+8. Before vs After Comparison
 
-Update KB Article
+Create comparison table including:
+- Security
+- Maintainability
+- Performance
+- Scalability
+- Reusability
+- Auditability
+- Developer Experience
+- User Experience
 
-↓
+9. Benefits
 
-Re-index Retrieval
+Business Benefits
+Technical Benefits
+Security Benefits
+Operational Benefits
 
-↓
+10. Architecture
 
-Refresh Embeddings
+Include diagrams for:
 
-↓
+Current Architecture
 
-Update Search Index
+Future Architecture
 
-↓
+PDP
 
-Notify Subscribers
+PEP
 
-====================================================
-AI FEATURES
-====================================================
+API Flow
 
-Claude should automatically suggest
+Authorization Flow
 
-Related tickets
+11. Example Use Cases
 
-Duplicate issues
+Example 1
+Admin edits Goal
 
-Related PRs
+Example 2
+Editor publishes Article
 
-Related KB articles
+Example 3
+Viewer opens Dashboard
 
-Related workflows
+Example 4
+Unauthorized User
 
-Missing documentation
+Show complete authorization flow.
 
-Missing approval
-
-Potential owner
-
-====================================================
-AUDIT
-====================================================
-
-Log every action
-
-Ticket linked
-
-Ticket removed
-
-PR linked
-
-PR merged
-
-Status changed
+12. Sequence Diagram
 
 User
 
-Timestamp
+↓
 
-Source System
+Frontend
 
-====================================================
-SECURITY
-====================================================
+↓
 
-OAuth support
+PEP
 
-PAT support
+↓
 
-Encrypted credentials
+PDP
 
-Role-based permissions
+↓
 
-Only Editors/Admins may link tickets.
+Policy Store
 
-====================================================
-NOTIFICATIONS
-====================================================
+↓
 
-Notify when
+Application
 
-PR merged
+↓
 
-Issue closed
+Database
 
-Deployment failed
+↓
 
-Ticket reopened
+Response
 
-KB outdated
+13. Component Responsibilities
 
-====================================================
-ANALYTICS
-====================================================
+Frontend
 
-Enhance Retrieval Dashboard with
+Backend
 
-Linked Tickets
+PEP
 
-Linked PRs
+PDP
 
-Linked Issues
+Policy Store
 
-Deployment Success
+Database
 
-Open Incidents
+14. Error Handling
 
-Average Resolution Time
+Unauthorized
 
-Most Linked Articles
+Forbidden
 
-Engineering Activity
+Policy Missing
 
-====================================================
-TESTING
-====================================================
+PDP Failure
 
-Create end-to-end tests covering:
+Network Failure
 
-1. Link Jira ticket
-2. Link GitHub Issue
-3. Link GitHub PR
-4. Merge PR
-5. Webhook sync
-6. Dashboard update
-7. KB article update
-8. AI retrieval from linked engineering metadata
-9. Permission validation
-10. Audit validation
+Fallback Behaviour
 
-====================================================
-DELIVERABLE
-====================================================
+15. Security Considerations
 
-Use enterprise architecture, clean code, reusable services, typed APIs, background jobs, webhooks, retries, observability, and production-grade error handling.
+Least Privilege
 
-Do not implement mock behavior.
-Implement a real production-ready solution.
+Role-Based Access Control
+
+Attribute-Based Access Control
+
+Audit Logging
+
+Secure Policy Storage
+
+16. Performance Considerations
+
+Caching
+
+Policy Optimization
+
+Latency
+
+Horizontal Scaling
+
+17. Future Enhancements
+
+Dynamic Policies
+
+Policy Versioning
+
+External Policy Engine (OPA)
+
+Multi-Tenant Authorization
+
+Fine-Grained Permissions
+
+AI-assisted Policy Recommendations
+
+18. Conclusion
+
+Summarize why PDP/PEP is a strategic improvement for TOW.
+
+====================================================================
+FORMATTING
+====================================================================
+
+- Create as a Microsoft Word (.docx) document.
+- Use professional heading styles.
+- Include automatic Table of Contents.
+- Add page numbers.
+- Add headers and footers.
+- Use enterprise color palette.
+- Include professional icons where appropriate.
+- Use SmartArt-style diagrams.
+- Create clean workflow diagrams using shapes.
+- Use tables for comparisons.
+- Use callout boxes for important concepts.
+- Ensure diagrams are editable.
+- Keep the document client-ready.
+- Avoid filler text.
+- Use clear and concise language.
+
+The final output should be a polished, presentation-quality .docx document that can be shared directly with John without requiring additional formatting.
