@@ -1,58 +1,26 @@
-Investigate and fix the password reset email issue end-to-end.
+Do not migrate to Resend or any other email provider.
 
-Current symptoms:
+Keep Microsoft 365 (Office 365) SMTP as the production email provider.
 
-- Forgot Password endpoint is called successfully.
-- Supabase Auth initially returns 504 (Context deadline exceeded) for 2–3 attempts.
-- After retries, Supabase returns HTTP 200 for POST /recover.
-- Supabase Auth log shows "user_recovery_requested".
-- No password reset email is ever received.
-- Custom SMTP is enabled.
+Investigate why password recovery emails are not delivered.
+
+Current state:
 - SMTP Host: smtp.office365.com
 - Port: 587
-- Username: copier@oakbridgeinsurance.com
-- Sender Email: copier@oakbridgeinsurance.com
-
-Do NOT assume the issue is fixed because HTTP 200 is returned.
-
-Perform a complete investigation.
+- Custom SMTP enabled in Supabase
+- Username and Sender are the same mailbox.
+- POST /recover sometimes returns 504 (Context deadline exceeded), then eventually returns 200.
+- Supabase Auth logs show user_recovery_requested.
+- No password reset email is received.
 
 Tasks:
-
-1. Verify Supabase SMTP configuration is loaded correctly.
-2. Verify every SMTP environment variable being used.
-3. Verify STARTTLS is negotiated correctly.
-4. Verify SMTP authentication succeeds.
-5. Verify Microsoft 365 accepts the message.
-6. Check whether sendMail() returns success or throws an exception.
-7. Add temporary diagnostic logging for:
-   - SMTP connection
-   - STARTTLS
-   - Authentication
-   - MAIL FROM
-   - RCPT TO
-   - DATA
-   - Final SMTP response
-8. Create a standalone SMTP diagnostic script using the same credentials and send a test email.
-9. Compare the standalone script result with Supabase behaviour.
-10. Verify the sender mailbox has permission to send.
-11. Check whether Exchange rejects, delays or silently drops the email.
-12. If the mailbox requires Send As or additional permissions, identify it.
-13. If Microsoft 365 returns any SMTP response codes (535, 550, 554, etc.), explain them.
-14. If authentication succeeds but delivery fails, identify whether the message reaches Exchange.
-15. Verify whether Supabase is timing out while waiting for the SMTP server.
-16. Check whether Conditional Access, Security Defaults, MFA or SMTP AUTH policies are blocking SMTP.
-17. Verify password reset templates are enabled and correctly configured.
-18. Verify SITE_URL and redirect URLs used in the recovery email.
-19. Verify no application code overrides the recovery email flow.
-20. If necessary, increase SMTP timeout settings.
-21. Produce the exact root cause with evidence instead of assumptions.
-22. Apply the fix.
-23. Test Forgot Password again.
-24. Confirm:
-    - Password reset email is delivered.
-    - Link opens correctly.
-    - User can reset password.
-25. Remove temporary debug logging after successful verification.
-
-Do not stop until the password reset email is successfully delivered or the exact root cause is identified with supporting logs.
+1. Verify SMTP authentication succeeds.
+2. Verify STARTTLS negotiation.
+3. Verify Exchange accepts the message.
+4. Check SMTP response codes.
+5. Check whether the SMTP server times out.
+6. Create a standalone SMTP diagnostic using the same credentials.
+7. Verify Send As permissions if required.
+8. Verify mailbox SMTP AUTH is enabled.
+9. Verify Conditional Access or Security Defaults are not blocking SMTP.
+10. Keep Microsoft 365 SMTP and identify the exact root cause with evidence instead of changing providers.
