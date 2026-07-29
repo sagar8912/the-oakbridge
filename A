@@ -1,21 +1,28 @@
 
-The password recovery endpoint (/recover) is returning HTTP 504 with "Context deadline exceeded".
+Investigate why Supabase password recovery emails are timing out with custom SMTP.
 
-Please debug the entire forgot password email flow.
+Current symptoms:
+- POST /recover returns 504
+- Supabase Auth log shows:
+  error: Context deadline exceeded
+  error_code: request_timeout
 
-Check:
-1. Whether the SMTP connection is actually established.
-2. Whether the mail transporter.verify() succeeds.
-3. Whether smtp.office365.com:587 is reachable.
-4. Whether STARTTLS is being used correctly.
-5. Whether the SMTP username and password are loaded from environment variables.
-6. Add detailed logs before and after every step:
-   - create transporter
-   - verify transporter
-   - sendMail()
-   - SMTP response
-   - full stack trace on failure
-7. Increase timeout values for SMTP connection and send operation.
-8. If sendMail hangs, identify why and fix it.
-9. Ensure the API returns the real SMTP error instead of only "Context deadline exceeded".
-10. Do not change business logic. Only diagnose and fix the email delivery path.
+SMTP configuration:
+Host: smtp.office365.com
+Port: 587
+Sender: copier@oakbridgeinsurance.com
+Username: copier@oakbridgeinsurance.com
+
+Tasks:
+1. Verify SMTP configuration used by Supabase.
+2. Create a standalone SMTP connectivity test (Node.js) using the same credentials.
+3. Test:
+   - TCP connection
+   - STARTTLS
+   - Authentication
+   - Send test email
+4. Print every SMTP response code.
+5. If authentication fails, print the exact reason.
+6. If sending times out, determine whether it is a network timeout or Exchange timeout.
+7. Do not modify application code.
+8. Provide the root cause and recommended fix.
