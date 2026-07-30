@@ -1,51 +1,175 @@
-Enhance the Knowledge Assistant to support User Information Retrieval in addition to Knowledge Base RAG.
+Meeting Minutes (MoM)
 
-Requirements:
+Project Review Meeting – John’s Requirements & Action Items
 
-1. Detect whether a query is about:
-   - User
-   - Employee
-   - Email
-   - Username
-   - Role
-   - Team
-   - Permission
-   - KB Admin
-   - Reader
-   - Editor
+Objective: Capture the key expectations, requests, and decisions made by John during the meeting.
 
-2. If the query is user-related, DO NOT use KB RAG.
+⸻
 
-3. Create a User Information Service that retrieves data from:
-   - users
-   - profiles
-   - kb_user_roles
-   - team_members
-   - permissions
-   - system_roles
+1. Knowledge Base & AI Workflow
 
-4. Support queries like:
-   - Who is <username>?
-   - Show all KB Admins.
-   - Who are the Readers?
-   - What is the email of <username>?
-   - What permissions does <username> have?
-   - Which teams is <username> a member of?
-   - List all Editors.
-   - Search users by name or email.
+Requirement
 
-5. Combine the existing KB RAG with User Information Retrieval using intent routing:
-   - Documentation → KB RAG
-   - User queries → User Service
+* Build an MCP Wrapper for the Knowledge Base so AI agents can automatically invoke it based on tool metadata.
+* Expose the Knowledge Base as an MCP tool with proper descriptions and metadata.
 
-6. Return structured responses including:
-   - Username
-   - Display Name
-   - Email
-   - System Role
-   - KB Role
-   - Team Membership
-   - Permissions
-   - Account Status
+Action
 
-7. Ensure authorization is enforced so users can only access profile information they are permitted to view. Audit all user information lookups.
+* Design and implement the MCP wrapper after evaluating whether it can be prioritized earlier.
+
+⸻
+
+2. Prioritize MCP Scaffolding
+
+Requirement
+
+John requested the team to scope the effort of creating the MCP scaffolding earlier instead of waiting until after Azure migration.
+
+Reason
+
+* Start building AI workflows sooner.
+* Enable early content creation.
+* Reduce future implementation effort.
+
+Action
+
+* Estimate the implementation effort and evaluate moving the MCP work ahead in the roadmap.
+
+⸻
+
+3. Authorization-Based Knowledge Updates
+
+Requirement
+
+Knowledge Base updates must follow PDP-based authorization.
+
+Expected Workflow
+
+* Document owners can directly update documents.
+* Unauthorized users can only submit suggested changes.
+* Suggestions should be routed to the document owner for approval.
+
+⸻
+
+4. GitHub Action + LangSmith Workflow
+
+Requirement
+
+Every Pull Request should automatically trigger an AI workflow.
+
+Expected Flow
+Pull Request
+→ GitHub Action
+→ LangSmith Workflow
+→ Compare code changes with Knowledge Base
+→ Generate documentation updates
+→ Owner approval
+→ Publish Knowledge Base
+
+⸻
+
+5. Faster Production Releases
+
+Requirement
+
+Since the Knowledge Base currently has very few users, John approved:
+
+* Faster production deployments.
+* Expedited hotfixes.
+* No need to wait for the regular release cycle for Knowledge Base fixes.
+
+Goal
+Increase adoption and collect user feedback faster.
+
+⸻
+
+6. LangSmith Integration
+
+Requirement
+
+Use LangSmith as the central platform for:
+
+* Tracing
+* Monitoring
+* Evaluations
+* AI Observability
+
+Avoid implementing duplicate monitoring logic inside the application repository.
+
+Action
+
+* Share the LangSmith project/workspace name with John.
+* Allow him to monitor chatbot execution.
+
+⸻
+
+7. TO App as the Ticketing Platform
+
+Requirement
+
+Instead of depending on Azure DevOps, Jira, or ServiceNow, John prefers the TO App to become the primary ticketing system.
+
+Expected Features
+
+* View assigned work.
+* Manage backlog.
+* Track tasks.
+* Work directly from the TO App.
+
+⸻
+
+8. Knowledge Base Enhancements
+
+Requirement
+
+Enhance the Markdown editor to support:
+
+* Images
+* Graphics
+* Diagrams
+* Rich Markdown content
+
+Goal
+Make Knowledge Base documentation more visual and easier to understand.
+
+⸻
+
+9. Future Meeting Participants
+
+Requirement
+
+Include Henry Mahler in all future recurring meetings along with John Sweet.
+
+Reason
+
+* Cross-project collaboration.
+* Reuse the AI infrastructure across other applications.
+
+⸻
+
+10. Chatbot Improvements
+
+Requirement
+
+Continue improving the Knowledge Base chatbot.
+
+John expects:
+
+* Better retrieval quality.
+* LangSmith observability.
+* AI performance monitoring.
+* Live tracing and evaluation.
+
+⸻
+
+11. Overall Vision
+
+John’s long-term vision is to build an enterprise AI-powered Knowledge Management Platform where:
+
+* TO App acts as the central hub.
+* Knowledge Base is AI-searchable.
+* MCP enables tool access.
+* LangSmith provides observability.
+* GitHub Actions automate documentation updates.
+* PDP enforces secure authorization.
+* AI agents assist users while respecting access controls.
