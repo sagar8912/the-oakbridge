@@ -1,175 +1,146 @@
-Meeting Minutes (MoM)
+Based on everything John discussed throughout the meeting, you should re-prioritize your backlog based on business value, not just the original implementation phases. John’s comments repeatedly emphasized early user adoption, AI infrastructure, and reusable architecture.
 
-Project Review Meeting – John’s Requirements & Action Items
+Priority 1 (Complete First – Highest Business Value)
 
-Objective: Capture the key expectations, requests, and decisions made by John during the meeting.
+1. MCP Wrapper Scaffolding
 
-⸻
+Why?
+John specifically asked whether this could be moved ahead of Azure migration because it unlocks future AI workflows.
 
-1. Knowledge Base & AI Workflow
+Deliverables
 
-Requirement
+* MCP wrapper for Knowledge Base
+* Tool metadata
+* Tool invocation
+* Basic API integration
 
-* Build an MCP Wrapper for the Knowledge Base so AI agents can automatically invoke it based on tool metadata.
-* Expose the Knowledge Base as an MCP tool with proper descriptions and metadata.
-
-Action
-
-* Design and implement the MCP wrapper after evaluating whether it can be prioritized earlier.
-
-⸻
-
-2. Prioritize MCP Scaffolding
-
-Requirement
-
-John requested the team to scope the effort of creating the MCP scaffolding earlier instead of waiting until after Azure migration.
-
-Reason
-
-* Start building AI workflows sooner.
-* Enable early content creation.
-* Reduce future implementation effort.
-
-Action
-
-* Estimate the implementation effort and evaluate moving the MCP work ahead in the roadmap.
+Status: 🔴 Highest Priority
 
 ⸻
 
-3. Authorization-Based Knowledge Updates
+2. LangSmith Integration & Observability
 
-Requirement
+John wants LangSmith to become the single source of truth for:
 
-Knowledge Base updates must follow PDP-based authorization.
-
-Expected Workflow
-
-* Document owners can directly update documents.
-* Unauthorized users can only submit suggested changes.
-* Suggestions should be routed to the document owner for approval.
-
-⸻
-
-4. GitHub Action + LangSmith Workflow
-
-Requirement
-
-Every Pull Request should automatically trigger an AI workflow.
-
-Expected Flow
-Pull Request
-→ GitHub Action
-→ LangSmith Workflow
-→ Compare code changes with Knowledge Base
-→ Generate documentation updates
-→ Owner approval
-→ Publish Knowledge Base
-
-⸻
-
-5. Faster Production Releases
-
-Requirement
-
-Since the Knowledge Base currently has very few users, John approved:
-
-* Faster production deployments.
-* Expedited hotfixes.
-* No need to wait for the regular release cycle for Knowledge Base fixes.
-
-Goal
-Increase adoption and collect user feedback faster.
-
-⸻
-
-6. LangSmith Integration
-
-Requirement
-
-Use LangSmith as the central platform for:
-
-* Tracing
+* Traces
 * Monitoring
 * Evaluations
-* AI Observability
+* AI metrics
 
-Avoid implementing duplicate monitoring logic inside the application repository.
+Deliverables
 
-Action
+* Proper LangSmith project
+* Complete tracing
+* Evaluation setup
+* Dashboard integration
+* Share project name with John
 
-* Share the LangSmith project/workspace name with John.
-* Allow him to monitor chatbot execution.
-
-⸻
-
-7. TO App as the Ticketing Platform
-
-Requirement
-
-Instead of depending on Azure DevOps, Jira, or ServiceNow, John prefers the TO App to become the primary ticketing system.
-
-Expected Features
-
-* View assigned work.
-* Manage backlog.
-* Track tasks.
-* Work directly from the TO App.
+Status: 🔴 High Priority
 
 ⸻
 
-8. Knowledge Base Enhancements
+3. Production Readiness (Knowledge Base)
 
-Requirement
+John explicitly approved faster production deployments.
 
-Enhance the Markdown editor to support:
+Focus on:
 
-* Images
-* Graphics
-* Diagrams
-* Rich Markdown content
+* Critical bug fixes
+* Chatbot stability
+* Faster releases
+* User onboarding
 
 Goal
-Make Knowledge Base documentation more visual and easier to understand.
+Get more users using the application so they generate backlog items.
+
+Status: 🔴 High Priority
 
 ⸻
 
-9. Future Meeting Participants
+Priority 2 (After Core AI Infrastructure)
 
-Requirement
+4. Chatbot Improvements
 
-Include Henry Mahler in all future recurring meetings along with John Sweet.
+Continue improving:
 
-Reason
+* Retrieval quality
+* Failed search handling
+* Need Review queue
+* Live monitoring
+* Success rate
+* Top queries
 
-* Cross-project collaboration.
-* Reuse the AI infrastructure across other applications.
-
-⸻
-
-10. Chatbot Improvements
-
-Requirement
-
-Continue improving the Knowledge Base chatbot.
-
-John expects:
-
-* Better retrieval quality.
-* LangSmith observability.
-* AI performance monitoring.
-* Live tracing and evaluation.
+These were all demonstrated to John and should continue to improve.
 
 ⸻
 
-11. Overall Vision
+5. Rich Markdown Support
 
-John’s long-term vision is to build an enterprise AI-powered Knowledge Management Platform where:
+John specifically requested support for:
 
-* TO App acts as the central hub.
-* Knowledge Base is AI-searchable.
-* MCP enables tool access.
-* LangSmith provides observability.
-* GitHub Actions automate documentation updates.
-* PDP enforces secure authorization.
-* AI agents assist users while respecting access controls.
+* Images
+* Diagrams
+* Graphics
+* Better documentation experience
+
+This will significantly improve Knowledge Base quality.
+
+⸻
+
+6. Ticketing inside TO App
+
+This was one of John’s biggest product vision items.
+
+Instead of relying on:
+
+* Jira
+* Azure DevOp
+
+he wants:
+Login TO App
+      ↓
+See assigned tickets
+      ↓
+Open backlog
+      ↓
+Complete work
+      ↓
+Update status
+Priority 3 (Strategic Enhancements)
+
+7. GitHub Action → LangSmith → Knowledge Base Automation
+
+John’s desired workflow:
+Developer creates PR
+        ↓
+GitHub Action
+        ↓
+LangSmith Workflow
+        ↓
+Analyze changed files
+        ↓
+Compare with KB
+        ↓
+Generate documentation
+        ↓
+Owner Approval
+        ↓
+Publish KB
+8. PDP Authorization Workflow
+
+Implement permission-aware editing:
+
+* Document owner → Can edit directly
+* Other users → Submit suggested changes
+* Owner → Reviews and approves
+
+This supports secure collaboration as the Knowledge Base grows.
+
+⸻
+
+Priority 4 (Operational)
+
+* Add Henry Mahler to recurring meetings.
+* Continue onboarding new team members.
+* Refine dashboards and analytics.
+
