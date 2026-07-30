@@ -1,26 +1,51 @@
-Do not migrate to Resend or any other email provider.
+Enhance the Knowledge Assistant to support User Information Retrieval in addition to Knowledge Base RAG.
 
-Keep Microsoft 365 (Office 365) SMTP as the production email provider.
+Requirements:
 
-Investigate why password recovery emails are not delivered.
+1. Detect whether a query is about:
+   - User
+   - Employee
+   - Email
+   - Username
+   - Role
+   - Team
+   - Permission
+   - KB Admin
+   - Reader
+   - Editor
 
-Current state:
-- SMTP Host: smtp.office365.com
-- Port: 587
-- Custom SMTP enabled in Supabase
-- Username and Sender are the same mailbox.
-- POST /recover sometimes returns 504 (Context deadline exceeded), then eventually returns 200.
-- Supabase Auth logs show user_recovery_requested.
-- No password reset email is received.
+2. If the query is user-related, DO NOT use KB RAG.
 
-Tasks:
-1. Verify SMTP authentication succeeds.
-2. Verify STARTTLS negotiation.
-3. Verify Exchange accepts the message.
-4. Check SMTP response codes.
-5. Check whether the SMTP server times out.
-6. Create a standalone SMTP diagnostic using the same credentials.
-7. Verify Send As permissions if required.
-8. Verify mailbox SMTP AUTH is enabled.
-9. Verify Conditional Access or Security Defaults are not blocking SMTP.
-10. Keep Microsoft 365 SMTP and identify the exact root cause with evidence instead of changing providers.
+3. Create a User Information Service that retrieves data from:
+   - users
+   - profiles
+   - kb_user_roles
+   - team_members
+   - permissions
+   - system_roles
+
+4. Support queries like:
+   - Who is <username>?
+   - Show all KB Admins.
+   - Who are the Readers?
+   - What is the email of <username>?
+   - What permissions does <username> have?
+   - Which teams is <username> a member of?
+   - List all Editors.
+   - Search users by name or email.
+
+5. Combine the existing KB RAG with User Information Retrieval using intent routing:
+   - Documentation → KB RAG
+   - User queries → User Service
+
+6. Return structured responses including:
+   - Username
+   - Display Name
+   - Email
+   - System Role
+   - KB Role
+   - Team Membership
+   - Permissions
+   - Account Status
+
+7. Ensure authorization is enforced so users can only access profile information they are permitted to view. Audit all user information lookups.
