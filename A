@@ -1,40 +1,52 @@
-Proceed with Phase 2.
+
+Proceed with Phase 3.
 
 Do not change the existing architecture.
 
 Goal:
-Upgrade the existing MCP tools to return structured JSON responses while remaining fully backward compatible.
+Implement the missing MCP tool kb_list_categories.
 
 Requirements:
 
-1. Modify the existing tools:
-   - kb_search
-   - kb_article_get
-   - kb_hierarchy
-   - kb_query
-   - kb_tools_list
-   - kb_tool_invoke
+1. Create a new MCP tool named:
+   kb_list_categories
 
-2. Reuse the existing formatting utilities from packages/mcp-shared wherever possible.
+2. Do not create any new backend API.
 
-3. Every tool should return:
-   {
-     success: boolean,
-     tool: string,
-     timestamp: ISO8601,
-     data: ...,
-     metadata: ...
-   }
+3. Reuse the existing endpoint:
+   GET /api/retrieval/hierarchy
 
-4. Preserve the current human-readable output if required by existing clients, but expose the structured JSON for MCP consumers.
+4. Transform the hierarchy response into a flat category list.
 
-5. Do not modify any backend APIs.
+Example output:
 
-6. Do not create duplicate logic.
+{
+  "success": true,
+  "tool": "kb_list_categories",
+  "categories": [
+    {
+      "id": "...",
+      "name": "...",
+      "kb_code": "..."
+    }
+  ]
+}
 
-7. Update tests if needed.
+5. Add:
+   - tool description
+   - examples
+   - Zod input/output schema
+   - MCP annotations
 
-After implementation, summarize:
+6. Register the tool in the existing registry.
+
+7. Keep backward compatibility.
+
+8. Do not modify existing APIs.
+
+9. Add unit tests.
+
+After implementation provide:
 - Files changed
-- JSON response format
-- Backward compatibility considerations
+- Registration changes
+- Example MCP response
