@@ -1,85 +1,296 @@
 
-Implement Phase 4: Chatbot Improvements.
+Implement Phase 5: Rich Markdown Support for the KB Admin Knowledge Assistant.
 
-IMPORTANT:
-- Do NOT change the existing architecture.
-- Do NOT rewrite the chatbot or RAG pipeline.
-- Reuse the existing Knowledge Assistant, retrieval pipeline, LangSmith integration, APIs, and database.
-- Make incremental, production-ready improvements only.
+IMPORTANT
 
-Objectives:
+- Do NOT rewrite the existing architecture.
+- Do NOT replace the current chat system.
+- Extend the existing Knowledge Assistant rendering pipeline only.
+- Reuse the existing APIs, retrieval pipeline, LangSmith integration and KB articles.
+- Backward compatibility is mandatory.
 
-1. Improve Retrieval Quality
-- Review the current retrieval pipeline.
-- Improve ranking and relevance using the existing retrieval mechanism.
-- Reduce irrelevant document retrieval.
-- Preserve existing API contracts.
-- Explain every improvement made.
+====================================================
+OBJECTIVE
+====================================================
 
-2. Failed Search Handling
-When the chatbot cannot find a confident answer:
-- Detect low-confidence retrieval.
-- Return a helpful fallback instead of "I could not find information."
-- Suggest related documents or similar questions.
-- Log the failed query.
-- Mark it for future review.
+Upgrade the KB Admin chatbot so documentation is rendered as rich interactive content instead of plain text.
 
-3. Review Queue
-Create a lightweight review mechanism for unanswered/low-confidence queries.
-Each entry should include:
-- User query
-- Timestamp
-- Confidence score
-- Retrieval results
-- Failure reason
-- User/session identifier if available
+The assistant should support professional technical documentation similar to GitHub, Notion and Microsoft Learn.
 
-The implementation should integrate with the existing architecture and require minimal changes.
+====================================================
+FEATURES TO IMPLEMENT
+====================================================
 
-4. Live Monitoring
-Extend the existing LangSmith observability to expose chatbot metrics:
-- Total queries
-- Successful answers
-- Failed searches
-- Average latency
-- Retrieval confidence
-- Tool usage
-- Error count
+1. Rich Markdown Rendering
 
-Do not introduce duplicate monitoring systems.
+Support full Markdown including:
 
-5. Success Rate Metrics
-Track:
-- Total chatbot requests
-- Successful responses
-- Failed responses
-- Success %
-- Average response time
-- Retrieval confidence distribution
+- headings
+- bold
+- italic
+- underline (if existing renderer supports it)
+- block quotes
+- ordered lists
+- unordered lists
+- nested lists
+- checklists
+- horizontal rules
+- hyperlinks
+- inline code
+- fenced code blocks
+- tables
 
-Use existing telemetry where possible.
+Ensure formatting is preserved from KB articles.
 
-6. Top Queries
-Track the most frequently asked questions.
-Store:
-- Query text
-- Frequency
-- Last asked time
-- Success/failure count
+----------------------------------------------------
 
-Support future analytics without changing existing APIs.
+2. Syntax Highlighting
 
-Requirements:
-- Keep backward compatibility.
-- No breaking API changes.
-- Reuse current services and utilities.
-- Follow the existing coding style.
-- Add tests where appropriate.
-- Document every file modified.
+Support syntax highlighting for:
 
-At the end provide:
-1. Architecture overview.
-2. Files changed.
-3. Features implemented.
-4. Verification steps.
-5. Remaining production tasks.
+- TypeScript
+- JavaScript
+- Python
+- JSON
+- YAML
+- SQL
+- Bash
+- HTML
+- CSS
+
+Provide copy-to-clipboard for every code block.
+
+----------------------------------------------------
+
+3. Images
+
+Render images embedded in markdown.
+
+Support:
+
+- local KB assets
+- hosted images
+- responsive sizing
+- captions
+- click to enlarge
+- lazy loading
+- loading placeholders
+
+Gracefully handle broken images.
+
+----------------------------------------------------
+
+4. Diagrams
+
+Render Mermaid diagrams directly inside chat.
+
+Support:
+
+- Flowcharts
+- Sequence diagrams
+- Class diagrams
+- State diagrams
+- Entity Relationship diagrams
+- Journey diagrams
+- Gantt charts
+- Pie charts
+
+If diagram rendering fails,
+show the original markdown instead of breaking the page.
+
+----------------------------------------------------
+
+5. Graphics
+
+Support rendering for:
+
+SVG
+
+PNG
+
+JPEG
+
+GIF
+
+WebP
+
+Maintain responsive scaling.
+
+----------------------------------------------------
+
+6. Documentation Experience
+
+Improve article readability.
+
+Implement:
+
+Table of contents
+
+Section anchors
+
+Collapsible sections
+
+Expandable code examples
+
+Copy buttons
+
+Sticky headings where appropriate
+
+Smooth scrolling
+
+Readable spacing
+
+Dark mode compatibility
+
+----------------------------------------------------
+
+7. Technical Callouts
+
+Support styled blocks such as:
+
+Info
+
+Warning
+
+Success
+
+Error
+
+Tip
+
+Important
+
+Notes
+
+If KB articles already use markdown callouts,
+render them correctly.
+
+----------------------------------------------------
+
+8. Mathematical Expressions
+
+If markdown contains LaTeX,
+
+support:
+
+Inline math
+
+Block math
+
+without affecting existing rendering.
+
+----------------------------------------------------
+
+9. Embedded Media
+
+Support embedded:
+
+YouTube links
+
+Documentation links
+
+GitHub links
+
+PDF links
+
+Open safely in a new tab.
+
+----------------------------------------------------
+
+10. Performance
+
+Do not negatively impact chatbot performance.
+
+Implement:
+
+lazy rendering
+
+memoization where appropriate
+
+virtualization if large documents
+
+avoid unnecessary rerenders
+
+----------------------------------------------------
+
+11. Security
+
+Sanitize all HTML.
+
+Prevent XSS.
+
+Disallow unsafe scripts.
+
+Validate external links.
+
+====================================================
+USER EXPERIENCE
+====================================================
+
+The Knowledge Assistant should feel similar to:
+
+GitHub Documentation
+
+Notion
+
+Microsoft Learn
+
+Confluence
+
+GitBook
+
+====================================================
+TESTING
+====================================================
+
+Verify rendering for:
+
+Markdown
+
+Images
+
+Mermaid diagrams
+
+Tables
+
+Large code blocks
+
+Mixed content
+
+Broken images
+
+Invalid markdown
+
+Dark mode
+
+Mobile responsiveness
+
+====================================================
+OUTPUT
+====================================================
+
+At completion provide:
+
+1. Architecture overview
+
+2. Files modified
+
+3. Rendering libraries added
+
+4. New dependencies
+
+5. Example markdown supported
+
+6. Example Mermaid diagram
+
+7. Example image rendering
+
+8. Performance impact
+
+9. Security considerations
+
+10. Remaining improvements before production
+
+Do not change APIs.
+Do not rewrite the application.
+Only extend the existing KB Admin documentation rendering system.
