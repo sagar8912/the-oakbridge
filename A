@@ -1,271 +1,295 @@
 
-Implement Priority 3 – Point 8:
-PDP Authorization Workflow
+Implement Priority 2 – Point 6:
+Ticketing Inside TOW Application
 
 IMPORTANT
 
 - Do NOT rewrite the existing architecture.
-- Reuse the existing authentication, authorization, roles, approval workflow, and Knowledge Base APIs.
-- Do NOT introduce breaking API changes.
+- Reuse the existing authentication, user management, roles, and UI components.
 - Maintain backward compatibility.
-- Follow the existing project structure and coding standards.
+- Follow the current coding standards.
+- Do not introduce breaking API changes.
 
 ====================================================
 OBJECTIVE
 ====================================================
 
-Implement a permission-aware Knowledge Base editing workflow.
+Implement an integrated Ticket Management module inside the TOW application so users can manage their work without switching to Jira or Azure DevOps.
 
-The goal is to support secure collaboration where document owners have full edit rights while other users can only submit suggested changes for review.
-
-====================================================
-ROLES
-====================================================
-
-Support existing roles where available.
-
-Primary permissions:
-
-Document Owner
-- Can edit article directly.
-- Can publish.
-- Can approve/reject suggestions.
-- Can delete own drafts.
-- Can view suggestion history.
-
-Contributor / Other User
-- Cannot edit published content directly.
-- Can create suggested edits.
-- Can submit changes for review.
-- Can view status of their suggestions.
-
-Reviewer (if existing)
-- Can review suggestions.
-- Can comment.
-- Can approve/reject if permitted.
-
-====================================================
-WORKFLOW
-====================================================
-
-Owner creates article
-        ↓
-Article published
-        ↓
-Another user wants to modify it
-        ↓
-User clicks "Suggest Changes"
-        ↓
-Suggested draft created
-        ↓
-Owner receives notification
-        ↓
-Owner reviews differences
-        ↓
-Approve
-or
-Reject
-or
-Request Changes
-        ↓
-If approved
-Merge suggestion into article
-        ↓
-Create audit entry
-        ↓
-Update KB version
+The goal is to provide a lightweight project/task management system tightly integrated with the Knowledge Base and existing workflows.
 
 ====================================================
 FEATURES
 ====================================================
 
-1. Ownership
+1. Dashboard
 
-Every KB article should maintain:
+Create a Ticket Dashboard showing:
 
-Owner
+- My Assigned Tickets
+- Open Tickets
+- In Progress
+- Pending Review
+- Completed
+- Blocked
+- Recently Updated
 
-Created By
-
-Last Modified By
-
-Reviewer
-
-Approval Status
-
-Version
+Provide counters and filters.
 
 ====================================================
 
-2. Permission Checks
+2. Ticket Model
 
-Prevent unauthorized editing.
+Each ticket should contain:
 
-Only owners (or existing admins if supported) should edit live articles.
-
-Everyone else must use "Suggest Changes".
-
-====================================================
-
-3. Suggested Changes
-
-Create a draft instead of modifying the live article.
-
-Each suggestion should include:
-
-Original Article
-
-Suggested Content
-
-Author
-
-Timestamp
-
-Reason
-
-Status
+- Ticket ID
+- Title
+- Description
+- Priority
+- Status
+- Assignee
+- Reporter
+- Due Date
+- Labels
+- Sprint
+- Related KB Article
+- Attachments
+- Created Date
+- Updated Date
 
 ====================================================
 
-4. Review Screen
+3. Ticket Lifecycle
 
-Owner should see:
+Support statuses:
 
-Original Content
+Backlog
 
-Suggested Content
+To Do
 
-Side-by-side diff
+In Progress
 
-Markdown preview
+Blocked
 
-Approve
+Pending Review
 
-Reject
+Completed
 
-Request Changes
+Closed
 
-Comment
-
-====================================================
-
-5. Version History
-
-Maintain article versions.
-
-Track:
-
-Editor
-
-Date
-
-Changes
-
-Approval
-
-Reason
-
-Rollback support
+Users should be able to move tickets between statuses according to permissions.
 
 ====================================================
 
-6. Audit Trail
+4. Backlog
 
-Log:
+Provide a Backlog page.
 
-Suggestion Created
+Allow:
 
-Approved
+Create Ticket
 
-Rejected
+Edit Ticket
 
-Published
+Assign Ticket
 
-Owner Changed
+Search
 
-Permission Denied
+Filter
+
+Sort
+
+Bulk Update
 
 ====================================================
 
-7. Notifications
+5. My Work
 
-Notify owner when:
+Provide a "My Work" page.
 
-Suggestion submitted
+Display:
+
+Assigned Tickets
+
+Due Today
+
+Overdue
+
+Recently Updated
+
+Completed Today
+
+====================================================
+
+6. Ticket Details
+
+Each ticket should have:
+
+Description
+
+Comments
+
+Activity Timeline
+
+Attachments
+
+Related Knowledge Base Articles
+
+History
+
+====================================================
+
+7. Knowledge Base Integration
+
+Allow linking tickets with KB articles.
+
+Examples:
+
+Related Documentation
+
+Create KB from Ticket
+
+Open Existing KB
+
+View linked KB articles
+
+====================================================
+
+8. Notifications
+
+Notify users when:
+
+Assigned
+
+Mentioned
+
+Status changed
 
 Comment added
 
-Approval pending
-
-Reminder if pending too long
-
-Reuse existing notification system if available.
+Review requested
 
 ====================================================
 
-8. Security
+9. Search
 
-Validate permissions server-side.
+Support searching by:
 
-Never rely only on frontend authorization.
+Ticket ID
 
-Prevent unauthorized API access.
+Title
+
+Description
+
+Assignee
+
+Status
+
+Priority
 
 ====================================================
 
-9. LangSmith Observability
+10. Permissions
 
-Extend existing LangSmith integration.
+Reuse existing authentication.
 
-Trace:
+Support:
 
-Suggestion creation
+Admin
 
-Review
+Manager
 
-Approval
+Contributor
 
-Rejection
+Viewer
 
-Publish
+Only authorized users may:
+
+Edit
+
+Assign
+
+Close
+
+Delete
+
+====================================================
+
+11. Activity Timeline
+
+Maintain complete history.
+
+Track:
+
+Created
+
+Assigned
+
+Status Changed
+
+Comment Added
+
+KB Linked
+
+Closed
+
+====================================================
+
+12. LangSmith Observability
+
+Reuse existing LangSmith integration.
+
+Generate traces for:
+
+Ticket Creation
+
+Ticket Update
+
+Assignment
+
+Status Change
+
+KB Linking
+
+Failures
 
 Capture:
 
-User Role
-
-Article ID
+User
 
 Action
 
 Latency
 
-Status
-
 Errors
 
 ====================================================
 
-10. UI
+13. UI
 
-Reuse existing KB Admin UI.
+Reuse the existing TOW design.
 
-Add only where required:
+Add:
 
-Suggest Changes button
+Dashboard
 
-Pending Review badge
+Backlog
 
-Approval queue
+Kanban View (if supported)
 
-Review history
+Ticket Details
 
-Diff viewer
+My Work
 
-Version history
+Activity Timeline
 
-Owner badge
+Filters
 
-Do not redesign existing screens.
+Search
+
+Responsive layout
+
+Do NOT redesign the application.
 
 ====================================================
 
@@ -273,25 +297,25 @@ TESTING
 
 Verify:
 
-Owner edits article.
+Create Ticket
 
-Non-owner cannot edit directly.
+Assign Ticket
 
-Non-owner submits suggestion.
+Update Status
 
-Owner approves suggestion.
+Move Ticket
 
-Owner rejects suggestion.
+Add Comment
 
-Version history updates.
+Link KB Article
 
-Audit logs created.
+Search Ticket
 
-Permissions enforced.
+Permission Checks
 
-Notifications sent.
+Notifications
 
-LangSmith traces generated.
+LangSmith Traces
 
 ====================================================
 
@@ -299,23 +323,24 @@ OUTPUT
 
 After implementation provide:
 
-1. Architecture overview.
+1. Architecture overview
 
-2. Files modified.
+2. Files modified
 
-3. Permission model.
+3. Database changes (if any)
 
-4. API changes (if any).
+4. API changes
 
-5. Database changes (if any).
+5. UI changes
 
-6. UI changes.
+6. Permission model
 
-7. LangSmith integration points.
+7. LangSmith integration points
 
-8. Test scenarios.
+8. Test scenarios
 
-9. Production readiness checklist.
+9. Production readiness checklist
 
-Do not rewrite the existing KB Admin architecture.
-Only extend the current authorization and approval workflow.
+Do not rewrite the existing TOW application.
+
+Only extend it with an integrated ticket management system while preserving the current architecture.
