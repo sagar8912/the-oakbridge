@@ -1,17 +1,305 @@
 
-```mermaid
-flowchart TD
-    Start([Start])
-    Draft[Create Article]
-    Review[Submit for Review]
-    Approve{Approved?}
-    Publish[Publish]
-    Reject[Send Back]
+Implement Priority 3 – Point 7:
+GitHub Action → LangSmith → Knowledge Base Automation
 
-    Start --> Draft
-    Draft --> Review
-    Review --> Approve
-    Approve -->|Yes| Publish
-    Approve -->|No| Reject
-    Reject --> Draft
-```
+IMPORTANT
+
+- Do NOT rewrite the existing KB Admin architecture.
+- Reuse the existing LangSmith integration.
+- Reuse the existing Knowledge Base APIs.
+- Reuse the existing GitHub integration if available.
+- Do not introduce breaking API changes.
+- Follow the current project architecture and coding standards.
+
+====================================================
+OBJECTIVE
+====================================================
+
+Create an automated Knowledge Base documentation pipeline.
+
+Whenever a developer creates or updates a Pull Request, the system should automatically analyze code changes, determine whether KB documentation requires updates, generate draft documentation, and route it through the existing approval workflow before publishing.
+
+====================================================
+WORKFLOW
+====================================================
+
+Developer creates Pull Request
+        ↓
+GitHub Action triggers
+        ↓
+Collect changed files
+        ↓
+LangSmith workflow starts
+        ↓
+Analyze code changes
+        ↓
+Compare with existing Knowledge Base
+        ↓
+Detect documentation gaps
+        ↓
+Generate draft KB article
+        ↓
+Create Draft in KB Admin
+        ↓
+Owner Review
+        ↓
+Approve / Reject
+        ↓
+Publish Knowledge Base
+
+====================================================
+FEATURES
+====================================================
+
+1. GitHub Action
+
+Create a GitHub Action that runs on:
+
+- Pull Request Open
+- Pull Request Update
+- Pull Request Merge
+
+The workflow should:
+
+- collect changed files
+- commit messages
+- PR description
+- repository metadata
+
+====================================================
+
+2. Change Analyzer
+
+Analyze
+
+- Added files
+- Deleted files
+- Modified files
+- Renamed files
+
+Detect
+
+- API changes
+- New endpoints
+- New services
+- Configuration changes
+- Database changes
+- Workflow changes
+- Documentation changes
+
+====================================================
+
+3. LangSmith Workflow
+
+Use the existing LangSmith integration.
+
+Create traces for
+
+- PR analysis
+- File analysis
+- Documentation generation
+- Approval
+- Publish
+
+Capture
+
+- execution time
+- confidence
+- tokens
+- model
+- failures
+- generated draft
+
+====================================================
+
+4. Compare with Knowledge Base
+
+Automatically compare code changes against existing KB articles.
+
+Detect
+
+Missing documentation
+
+Outdated documentation
+
+Duplicate articles
+
+Documentation requiring updates
+
+Produce a comparison report.
+
+====================================================
+
+5. Documentation Generation
+
+Automatically generate draft KB documentation.
+
+Generate
+
+Title
+
+Summary
+
+Affected Components
+
+Prerequisites
+
+Implementation
+
+Configuration
+
+Examples
+
+Breaking Changes
+
+Testing Steps
+
+Rollback Steps
+
+References
+
+Output should be markdown compatible with the existing KB editor.
+
+====================================================
+
+6. Draft Creation
+
+Instead of publishing immediately
+
+Create
+
+Draft Article
+
+Status = Pending Review
+
+Author
+
+PR Reference
+
+Repository
+
+Branch
+
+Commit Hash
+
+Timestamp
+
+====================================================
+
+7. Approval Workflow
+
+Reuse the existing approval process.
+
+Owner should be able to
+
+Approve
+
+Reject
+
+Request Changes
+
+Add comments
+
+Track review history.
+
+====================================================
+
+8. Publishing
+
+After approval
+
+Automatically publish
+
+Update KB indexes
+
+Refresh retrieval if required
+
+Log success in LangSmith
+
+====================================================
+
+9. Monitoring
+
+Track
+
+Total PRs analyzed
+
+Drafts created
+
+Approved drafts
+
+Rejected drafts
+
+Published articles
+
+Average generation time
+
+Failures
+
+====================================================
+
+10. Security
+
+Never expose
+
+Secrets
+
+Tokens
+
+Environment variables
+
+Credentials
+
+Private source code
+
+Ensure generated documentation excludes sensitive information.
+
+====================================================
+
+TESTING
+
+Provide test scenarios for
+
+New feature
+
+Bug fix
+
+Configuration change
+
+API change
+
+Database migration
+
+Rejected approval
+
+Publish success
+
+Publish failure
+
+====================================================
+
+DELIVERABLES
+
+After implementation provide
+
+1. Architecture diagram
+
+2. Files modified
+
+3. GitHub workflow files
+
+4. LangSmith integration points
+
+5. KB integration points
+
+6. Example generated documentation
+
+7. Example approval flow
+
+8. Verification steps
+
+9. Production readiness checklist
+
+Do not replace existing functionality.
+
+Only extend the current GitHub + LangSmith + KB Admin architecture.
