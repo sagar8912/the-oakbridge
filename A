@@ -1,28 +1,24 @@
 
-Perform a final implementation audit for the MCP enhancement.
+Perform a final code review of the MCP enhancement.
 
-Review everything implemented across Phases 1–4.
+Check for:
 
-Validate:
+1. Any duplicate code.
+2. Any breaking changes.
+3. Any unused imports or files.
+4. TypeScript build warnings.
+5. Lint issues.
+6. Backward compatibility with existing MCP clients.
+7. SOLID principle violations.
+8. Performance concerns.
+9. Security concerns.
+10. Whether this implementation fully satisfies John's MCP and LangSmith requirements.
 
-1. No duplicate business logic exists.
-2. No backend API contracts changed.
-3. No existing MCP tools were broken.
-4. All MCP tools have metadata.
-5. All tools return structured JSON.
-6. kb_list_categories is registered and working.
-7. LangSmith tracing is active for every MCP tool.
-8. LangSmith failures never break tool execution.
-9. Build passes.
-10. Tests pass.
+If any issue exists, fix it before creating the PR.
 
-Generate a final report containing:
-
-- Files modified
-- New files added
-- Backward compatibility assessment
+Otherwise generate:
+- PR title
+- PR description
+- Testing checklist
 - Risks
-- Remaining improvements
-- PR summary suitable for code review
-
-Do not modify code unless a critical issue is found.
+- Rollback plan
