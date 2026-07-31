@@ -1,32 +1,31 @@
-Do not create a new Python MCP server.
+Proceed with Phase 1 implementation only.
 
-After reviewing the repository, I understand we already have an MCP implementation using the official TypeScript MCP SDK inside packages/mcp-kb-admin.
+Enhance the existing TypeScript MCP package without changing its architecture.
 
-I want to extend the existing MCP implementation instead of creating a parallel stack.
+Tasks:
 
-Please do the following:
+1. Improve all existing MCP tool definitions.
 
-1. Analyze the existing MCP package.
-2. Explain the current architecture.
-3. List every MCP tool already registered.
-4. Compare them against John's requirements.
+2. Add complete metadata:
+   - description
+   - parameter descriptions
+   - examples
+   - Zod input schema
+   - output schema
+   - annotations
 
-John's expectations are:
+3. Keep tool names unchanged:
+   - kb_search
+   - kb_article_get
+   - kb_hierarchy
+   - kb_query
+   - kb_tools_list
+   - kb_tool_invoke
 
-- Knowledge Base exposed through MCP
-- Rich tool metadata
-- AI agent discoverability
-- LangSmith tracing
-- Structured JSON outputs
-- Production-ready tool registration
+4. Do not modify backend APIs.
 
-Then identify:
+5. Do not create new services.
 
-- What is already implemented.
-- What is missing.
-- What files need modification.
-- What should be added without breaking the current architecture.
+6. Do not implement LangSmith yet.
 
-Do not generate code yet.
-
-Generate an implementation plan first
+Generate clean production-ready code.
