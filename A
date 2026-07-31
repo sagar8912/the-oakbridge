@@ -1,28 +1,12 @@
 
-Start Phase 2: LangSmith Integration & Observability.
+The requirement is that LangSmith traces must also be generated when using the KB Admin UI (Knowledge Assistant), not only when invoking MCP tools.
 
-Do not change the existing architecture.
+Please investigate the complete request flow for the KB Admin Knowledge Assistant.
 
-Objectives:
-1. Reuse the existing LangSmith integration if one already exists.
-2. Configure a proper LangSmith project.
-3. Instrument all MCP tool executions with LangSmith tracing.
-4. Capture:
-   - Tool name
-   - Input
-   - Output
-   - Latency
-   - Success/Failure
-   - Errors
-5. Ensure tracing is non-blocking. If LangSmith is unavailable, MCP tools must continue to work.
-6. Add evaluation hooks if supported by the existing project.
-7. Integrate with the LangSmith dashboard using the existing configuration.
-8. Do not modify backend APIs or change MCP tool behavior.
-9. Add or update tests for the tracing implementation.
-
-After implementation provide:
-- Files changed
-- LangSmith project configuration
-- How traces are generated
-- Example trace
-- Any remaining work before production
+Identify:
+1. Which API endpoint handles UI chat requests.
+2. Whether LangSmith tracing is already integrated there.
+3. Why UI requests are not appearing in the LangSmith dashboard.
+4. Implement LangSmith tracing for the UI request flow without changing the existing architecture.
+5. Ensure both successful and failed UI requests generate traces.
+6. After implementation, explain how to verify the traces from the KB Admin UI.
