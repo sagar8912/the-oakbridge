@@ -1,49 +1,19 @@
-I want to implement an MCP (Model Context Protocol) Wrapper for our Knowledge Base application.
-
-Current Stack:
-- FastAPI backend
-- React frontend
-- PostgreSQL database
-- LangSmith for observability
-- Anthropic Claude model
-
-Goal:
-Expose the Knowledge Base as MCP tools so any AI agent can automatically invoke them.
+Now integrate the MCP Wrapper with the existing Knowledge Base APIs.
 
 Requirements:
 
-1. Create a new folder
+- search_knowledge_base() should call the existing search endpoint.
+- get_article() should call the existing article endpoint.
+- list_categories() should call the category service.
 
-src/
-   mcp/
-       server.py
-       tools.py
-       schemas.py
-       config.py
+Do not duplicate business logic.
 
-2. Use the official MCP Python SDK.
+Use dependency injection so the MCP layer only delegates requests to the existing services.
 
-3. Create an MCP server exposing these tools:
+Implement robust exception handling.
 
-- search_knowledge_base(query)
-- get_article(article_id)
-- list_categories()
+Return standard MCP responses.
 
-4. Each tool should internally call the existing Knowledge Base service instead of duplicating business logic.
+Create unit tests.
 
-5. Return structured JSON responses.
-
-6. Include metadata:
-- tool name
-- description
-- input schema
-- output schema
-
-7. Make the implementation modular and production ready.
-
-Do NOT change any existing APIs.
-
-Only build the MCP wrapper around existing services.
-
-Generate clean code with proper typing and comments.
-
+Ensure everything follows SOLID principles.
