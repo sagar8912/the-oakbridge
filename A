@@ -1,12 +1,85 @@
 
-The requirement is that LangSmith traces must also be generated when using the KB Admin UI (Knowledge Assistant), not only when invoking MCP tools.
+Implement Phase 4: Chatbot Improvements.
 
-Please investigate the complete request flow for the KB Admin Knowledge Assistant.
+IMPORTANT:
+- Do NOT change the existing architecture.
+- Do NOT rewrite the chatbot or RAG pipeline.
+- Reuse the existing Knowledge Assistant, retrieval pipeline, LangSmith integration, APIs, and database.
+- Make incremental, production-ready improvements only.
 
-Identify:
-1. Which API endpoint handles UI chat requests.
-2. Whether LangSmith tracing is already integrated there.
-3. Why UI requests are not appearing in the LangSmith dashboard.
-4. Implement LangSmith tracing for the UI request flow without changing the existing architecture.
-5. Ensure both successful and failed UI requests generate traces.
-6. After implementation, explain how to verify the traces from the KB Admin UI.
+Objectives:
+
+1. Improve Retrieval Quality
+- Review the current retrieval pipeline.
+- Improve ranking and relevance using the existing retrieval mechanism.
+- Reduce irrelevant document retrieval.
+- Preserve existing API contracts.
+- Explain every improvement made.
+
+2. Failed Search Handling
+When the chatbot cannot find a confident answer:
+- Detect low-confidence retrieval.
+- Return a helpful fallback instead of "I could not find information."
+- Suggest related documents or similar questions.
+- Log the failed query.
+- Mark it for future review.
+
+3. Review Queue
+Create a lightweight review mechanism for unanswered/low-confidence queries.
+Each entry should include:
+- User query
+- Timestamp
+- Confidence score
+- Retrieval results
+- Failure reason
+- User/session identifier if available
+
+The implementation should integrate with the existing architecture and require minimal changes.
+
+4. Live Monitoring
+Extend the existing LangSmith observability to expose chatbot metrics:
+- Total queries
+- Successful answers
+- Failed searches
+- Average latency
+- Retrieval confidence
+- Tool usage
+- Error count
+
+Do not introduce duplicate monitoring systems.
+
+5. Success Rate Metrics
+Track:
+- Total chatbot requests
+- Successful responses
+- Failed responses
+- Success %
+- Average response time
+- Retrieval confidence distribution
+
+Use existing telemetry where possible.
+
+6. Top Queries
+Track the most frequently asked questions.
+Store:
+- Query text
+- Frequency
+- Last asked time
+- Success/failure count
+
+Support future analytics without changing existing APIs.
+
+Requirements:
+- Keep backward compatibility.
+- No breaking API changes.
+- Reuse current services and utilities.
+- Follow the existing coding style.
+- Add tests where appropriate.
+- Document every file modified.
+
+At the end provide:
+1. Architecture overview.
+2. Files changed.
+3. Features implemented.
+4. Verification steps.
+5. Remaining production tasks.
