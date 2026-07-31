@@ -1,52 +1,44 @@
 
-Proceed with Phase 3.
+Proceed with Phase 4.
 
 Do not change the existing architecture.
 
 Goal:
-Implement the missing MCP tool kb_list_categories.
+Integrate LangSmith tracing into the existing TypeScript MCP package so every MCP tool invocation is observable.
 
 Requirements:
 
-1. Create a new MCP tool named:
-   kb_list_categories
+1. Do not modify backend APIs.
 
-2. Do not create any new backend API.
+2. Do not change any MCP tool names.
 
-3. Reuse the existing endpoint:
-   GET /api/retrieval/hierarchy
+3. Instrument every registered MCP tool:
+   - kb_search
+   - kb_article_get
+   - kb_hierarchy
+   - kb_list_categories
+   - kb_query
+   - kb_tools_list
+   - kb_tool_invoke
 
-4. Transform the hierarchy response into a flat category list.
+4. Create a reusable tracing wrapper/helper so every tool automatically records:
+   - Tool name
+   - Input parameters
+   - Output summary
+   - Execution time
+   - Success/Failure
+   - Error details (if any)
 
-Example output:
+5. If LangSmith configuration is missing or unavailable, tracing must fail gracefully without affecting the tool execution.
 
-{
-  "success": true,
-  "tool": "kb_list_categories",
-  "categories": [
-    {
-      "id": "...",
-      "name": "...",
-      "kb_code": "..."
-    }
-  ]
-}
+6. Reuse any existing LangSmith utilities already present in the repository. Do not introduce duplicate tracing implementations.
 
-5. Add:
-   - tool description
-   - examples
-   - Zod input/output schema
-   - MCP annotations
+7. Keep the implementation modular and production-ready.
 
-6. Register the tool in the existing registry.
-
-7. Keep backward compatibility.
-
-8. Do not modify existing APIs.
-
-9. Add unit tests.
+8. Add unit tests for the tracing wrapper where appropriate.
 
 After implementation provide:
-- Files changed
-- Registration changes
-- Example MCP response
+- Files modified
+- Existing LangSmith utilities reused
+- How each MCP tool is traced
+- Example trace flow
