@@ -1,146 +1,49 @@
-Based on everything John discussed throughout the meeting, you should re-prioritize your backlog based on business value, not just the original implementation phases. John’s comments repeatedly emphasized early user adoption, AI infrastructure, and reusable architecture.
+I want to implement an MCP (Model Context Protocol) Wrapper for our Knowledge Base application.
 
-Priority 1 (Complete First – Highest Business Value)
+Current Stack:
+- FastAPI backend
+- React frontend
+- PostgreSQL database
+- LangSmith for observability
+- Anthropic Claude model
 
-1. MCP Wrapper Scaffolding
+Goal:
+Expose the Knowledge Base as MCP tools so any AI agent can automatically invoke them.
 
-Why?
-John specifically asked whether this could be moved ahead of Azure migration because it unlocks future AI workflows.
+Requirements:
 
-Deliverables
+1. Create a new folder
 
-* MCP wrapper for Knowledge Base
-* Tool metadata
-* Tool invocation
-* Basic API integration
+src/
+   mcp/
+       server.py
+       tools.py
+       schemas.py
+       config.py
 
-Status: 🔴 Highest Priority
+2. Use the official MCP Python SDK.
 
-⸻
+3. Create an MCP server exposing these tools:
 
-2. LangSmith Integration & Observability
+- search_knowledge_base(query)
+- get_article(article_id)
+- list_categories()
 
-John wants LangSmith to become the single source of truth for:
+4. Each tool should internally call the existing Knowledge Base service instead of duplicating business logic.
 
-* Traces
-* Monitoring
-* Evaluations
-* AI metrics
+5. Return structured JSON responses.
 
-Deliverables
+6. Include metadata:
+- tool name
+- description
+- input schema
+- output schema
 
-* Proper LangSmith project
-* Complete tracing
-* Evaluation setup
-* Dashboard integration
-* Share project name with John
+7. Make the implementation modular and production ready.
 
-Status: 🔴 High Priority
+Do NOT change any existing APIs.
 
-⸻
+Only build the MCP wrapper around existing services.
 
-3. Production Readiness (Knowledge Base)
-
-John explicitly approved faster production deployments.
-
-Focus on:
-
-* Critical bug fixes
-* Chatbot stability
-* Faster releases
-* User onboarding
-
-Goal
-Get more users using the application so they generate backlog items.
-
-Status: 🔴 High Priority
-
-⸻
-
-Priority 2 (After Core AI Infrastructure)
-
-4. Chatbot Improvements
-
-Continue improving:
-
-* Retrieval quality
-* Failed search handling
-* Need Review queue
-* Live monitoring
-* Success rate
-* Top queries
-
-These were all demonstrated to John and should continue to improve.
-
-⸻
-
-5. Rich Markdown Support
-
-John specifically requested support for:
-
-* Images
-* Diagrams
-* Graphics
-* Better documentation experience
-
-This will significantly improve Knowledge Base quality.
-
-⸻
-
-6. Ticketing inside TO App
-
-This was one of John’s biggest product vision items.
-
-Instead of relying on:
-
-* Jira
-* Azure DevOp
-
-he wants:
-Login TO App
-      ↓
-See assigned tickets
-      ↓
-Open backlog
-      ↓
-Complete work
-      ↓
-Update status
-Priority 3 (Strategic Enhancements)
-
-7. GitHub Action → LangSmith → Knowledge Base Automation
-
-John’s desired workflow:
-Developer creates PR
-        ↓
-GitHub Action
-        ↓
-LangSmith Workflow
-        ↓
-Analyze changed files
-        ↓
-Compare with KB
-        ↓
-Generate documentation
-        ↓
-Owner Approval
-        ↓
-Publish KB
-8. PDP Authorization Workflow
-
-Implement permission-aware editing:
-
-* Document owner → Can edit directly
-* Other users → Submit suggested changes
-* Owner → Reviews and approves
-
-This supports secure collaboration as the Knowledge Base grows.
-
-⸻
-
-Priority 4 (Operational)
-
-* Add Henry Mahler to recurring meetings.
-* Continue onboarding new team members.
-* Refine dashboards and analytics.
+Generate clean code with proper typing and comments.
 
