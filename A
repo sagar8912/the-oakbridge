@@ -1,31 +1,28 @@
 
-Perform a root cause analysis for why kb_list_categories returns:
+Start Phase 2: LangSmith Integration & Observability.
 
-"I could not find information in the Knowledge Base... it does not contain a list of Knowledge Base categories."
+Do not change the existing architecture.
 
-Do NOT rewrite the implementation immediately.
+Objectives:
+1. Reuse the existing LangSmith integration if one already exists.
+2. Configure a proper LangSmith project.
+3. Instrument all MCP tool executions with LangSmith tracing.
+4. Capture:
+   - Tool name
+   - Input
+   - Output
+   - Latency
+   - Success/Failure
+   - Errors
+5. Ensure tracing is non-blocking. If LangSmith is unavailable, MCP tools must continue to work.
+6. Add evaluation hooks if supported by the existing project.
+7. Integrate with the LangSmith dashboard using the existing configuration.
+8. Do not modify backend APIs or change MCP tool behavior.
+9. Add or update tests for the tracing implementation.
 
-Investigate the entire flow step by step.
-
-1. Verify the MCP server is invoking kb_list_categories.
-2. Verify kb_list_categories is calling the correct endpoint (/api/retrieval/hierarchy).
-3. Log the raw HTTP response from the endpoint.
-4. Check whether the endpoint actually returns category data.
-5. Verify the flattening/transformation logic maps the response correctly.
-6. Verify the JSON envelope contains:
-   - success
-   - tool
-   - timestamp
-   - data.categories
-   - metadata
-7. Check whether the Knowledge Assistant ignores or filters the returned categories.
-8. Compare the raw API response with the final tool response and identify where data is lost.
-9. If the endpoint itself returns no categories, identify why (empty database, wrong URL, missing auth, incorrect environment, etc.).
-10. If code changes are required, make only the minimal fix required. Do not change the architecture or backend APIs.
-
-Finally provide:
-- Root cause
-- Files inspected
-- Files modified (if any)
-- Before vs After behavior
-- Example successful kb_list_categories response
+After implementation provide:
+- Files changed
+- LangSmith project configuration
+- How traces are generated
+- Example trace
+- Any remaining work before production
