@@ -1,196 +1,143 @@
 
-Implement Priority 3 – Point 7:
-GitHub Action → LangSmith → Knowledge Base Automation
+Implement Priority 3 – Point 8:
+PDP Authorization Workflow
 
 IMPORTANT
 
-- Do NOT rewrite the existing KB Admin architecture.
-- Reuse the existing LangSmith integration.
-- Reuse the existing Knowledge Base APIs.
-- Reuse the existing GitHub integration if available.
-- Do not introduce breaking API changes.
-- Follow the current project architecture and coding standards.
+- Do NOT rewrite the existing architecture.
+- Reuse the existing authentication, authorization, roles, approval workflow, and Knowledge Base APIs.
+- Do NOT introduce breaking API changes.
+- Maintain backward compatibility.
+- Follow the existing project structure and coding standards.
 
 ====================================================
 OBJECTIVE
 ====================================================
 
-Create an automated Knowledge Base documentation pipeline.
+Implement a permission-aware Knowledge Base editing workflow.
 
-Whenever a developer creates or updates a Pull Request, the system should automatically analyze code changes, determine whether KB documentation requires updates, generate draft documentation, and route it through the existing approval workflow before publishing.
+The goal is to support secure collaboration where document owners have full edit rights while other users can only submit suggested changes for review.
+
+====================================================
+ROLES
+====================================================
+
+Support existing roles where available.
+
+Primary permissions:
+
+Document Owner
+- Can edit article directly.
+- Can publish.
+- Can approve/reject suggestions.
+- Can delete own drafts.
+- Can view suggestion history.
+
+Contributor / Other User
+- Cannot edit published content directly.
+- Can create suggested edits.
+- Can submit changes for review.
+- Can view status of their suggestions.
+
+Reviewer (if existing)
+- Can review suggestions.
+- Can comment.
+- Can approve/reject if permitted.
 
 ====================================================
 WORKFLOW
 ====================================================
 
-Developer creates Pull Request
+Owner creates article
         ↓
-GitHub Action triggers
+Article published
         ↓
-Collect changed files
+Another user wants to modify it
         ↓
-LangSmith workflow starts
+User clicks "Suggest Changes"
         ↓
-Analyze code changes
+Suggested draft created
         ↓
-Compare with existing Knowledge Base
+Owner receives notification
         ↓
-Detect documentation gaps
+Owner reviews differences
         ↓
-Generate draft KB article
+Approve
+or
+Reject
+or
+Request Changes
         ↓
-Create Draft in KB Admin
+If approved
+Merge suggestion into article
         ↓
-Owner Review
+Create audit entry
         ↓
-Approve / Reject
-        ↓
-Publish Knowledge Base
+Update KB version
 
 ====================================================
 FEATURES
 ====================================================
 
-1. GitHub Action
+1. Ownership
 
-Create a GitHub Action that runs on:
+Every KB article should maintain:
 
-- Pull Request Open
-- Pull Request Update
-- Pull Request Merge
+Owner
 
-The workflow should:
+Created By
 
-- collect changed files
-- commit messages
-- PR description
-- repository metadata
+Last Modified By
 
-====================================================
+Reviewer
 
-2. Change Analyzer
+Approval Status
 
-Analyze
-
-- Added files
-- Deleted files
-- Modified files
-- Renamed files
-
-Detect
-
-- API changes
-- New endpoints
-- New services
-- Configuration changes
-- Database changes
-- Workflow changes
-- Documentation changes
+Version
 
 ====================================================
 
-3. LangSmith Workflow
+2. Permission Checks
 
-Use the existing LangSmith integration.
+Prevent unauthorized editing.
 
-Create traces for
+Only owners (or existing admins if supported) should edit live articles.
 
-- PR analysis
-- File analysis
-- Documentation generation
-- Approval
-- Publish
-
-Capture
-
-- execution time
-- confidence
-- tokens
-- model
-- failures
-- generated draft
+Everyone else must use "Suggest Changes".
 
 ====================================================
 
-4. Compare with Knowledge Base
+3. Suggested Changes
 
-Automatically compare code changes against existing KB articles.
+Create a draft instead of modifying the live article.
 
-Detect
+Each suggestion should include:
 
-Missing documentation
+Original Article
 
-Outdated documentation
-
-Duplicate articles
-
-Documentation requiring updates
-
-Produce a comparison report.
-
-====================================================
-
-5. Documentation Generation
-
-Automatically generate draft KB documentation.
-
-Generate
-
-Title
-
-Summary
-
-Affected Components
-
-Prerequisites
-
-Implementation
-
-Configuration
-
-Examples
-
-Breaking Changes
-
-Testing Steps
-
-Rollback Steps
-
-References
-
-Output should be markdown compatible with the existing KB editor.
-
-====================================================
-
-6. Draft Creation
-
-Instead of publishing immediately
-
-Create
-
-Draft Article
-
-Status = Pending Review
+Suggested Content
 
 Author
 
-PR Reference
-
-Repository
-
-Branch
-
-Commit Hash
-
 Timestamp
+
+Reason
+
+Status
 
 ====================================================
 
-7. Approval Workflow
+4. Review Screen
 
-Reuse the existing approval process.
+Owner should see:
 
-Owner should be able to
+Original Content
+
+Suggested Content
+
+Side-by-side diff
+
+Markdown preview
 
 Approve
 
@@ -198,108 +145,177 @@ Reject
 
 Request Changes
 
-Add comments
-
-Track review history.
+Comment
 
 ====================================================
 
-8. Publishing
+5. Version History
 
-After approval
+Maintain article versions.
 
-Automatically publish
+Track:
 
-Update KB indexes
+Editor
 
-Refresh retrieval if required
+Date
 
-Log success in LangSmith
+Changes
 
-====================================================
+Approval
 
-9. Monitoring
+Reason
 
-Track
-
-Total PRs analyzed
-
-Drafts created
-
-Approved drafts
-
-Rejected drafts
-
-Published articles
-
-Average generation time
-
-Failures
+Rollback support
 
 ====================================================
 
-10. Security
+6. Audit Trail
 
-Never expose
+Log:
 
-Secrets
+Suggestion Created
 
-Tokens
+Approved
 
-Environment variables
+Rejected
 
-Credentials
+Published
 
-Private source code
+Owner Changed
 
-Ensure generated documentation excludes sensitive information.
+Permission Denied
+
+====================================================
+
+7. Notifications
+
+Notify owner when:
+
+Suggestion submitted
+
+Comment added
+
+Approval pending
+
+Reminder if pending too long
+
+Reuse existing notification system if available.
+
+====================================================
+
+8. Security
+
+Validate permissions server-side.
+
+Never rely only on frontend authorization.
+
+Prevent unauthorized API access.
+
+====================================================
+
+9. LangSmith Observability
+
+Extend existing LangSmith integration.
+
+Trace:
+
+Suggestion creation
+
+Review
+
+Approval
+
+Rejection
+
+Publish
+
+Capture:
+
+User Role
+
+Article ID
+
+Action
+
+Latency
+
+Status
+
+Errors
+
+====================================================
+
+10. UI
+
+Reuse existing KB Admin UI.
+
+Add only where required:
+
+Suggest Changes button
+
+Pending Review badge
+
+Approval queue
+
+Review history
+
+Diff viewer
+
+Version history
+
+Owner badge
+
+Do not redesign existing screens.
 
 ====================================================
 
 TESTING
 
-Provide test scenarios for
+Verify:
 
-New feature
+Owner edits article.
 
-Bug fix
+Non-owner cannot edit directly.
 
-Configuration change
+Non-owner submits suggestion.
 
-API change
+Owner approves suggestion.
 
-Database migration
+Owner rejects suggestion.
 
-Rejected approval
+Version history updates.
 
-Publish success
+Audit logs created.
 
-Publish failure
+Permissions enforced.
+
+Notifications sent.
+
+LangSmith traces generated.
 
 ====================================================
 
-DELIVERABLES
+OUTPUT
 
-After implementation provide
+After implementation provide:
 
-1. Architecture diagram
+1. Architecture overview.
 
-2. Files modified
+2. Files modified.
 
-3. GitHub workflow files
+3. Permission model.
 
-4. LangSmith integration points
+4. API changes (if any).
 
-5. KB integration points
+5. Database changes (if any).
 
-6. Example generated documentation
+6. UI changes.
 
-7. Example approval flow
+7. LangSmith integration points.
 
-8. Verification steps
+8. Test scenarios.
 
-9. Production readiness checklist
+9. Production readiness checklist.
 
-Do not replace existing functionality.
-
-Only extend the current GitHub + LangSmith + KB Admin architecture.
+Do not rewrite the existing KB Admin architecture.
+Only extend the current authorization and approval workflow.
