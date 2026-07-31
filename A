@@ -1,19 +1,32 @@
-Now integrate the MCP Wrapper with the existing Knowledge Base APIs.
+Do not create a new Python MCP server.
 
-Requirements:
+After reviewing the repository, I understand we already have an MCP implementation using the official TypeScript MCP SDK inside packages/mcp-kb-admin.
 
-- search_knowledge_base() should call the existing search endpoint.
-- get_article() should call the existing article endpoint.
-- list_categories() should call the category service.
+I want to extend the existing MCP implementation instead of creating a parallel stack.
 
-Do not duplicate business logic.
+Please do the following:
 
-Use dependency injection so the MCP layer only delegates requests to the existing services.
+1. Analyze the existing MCP package.
+2. Explain the current architecture.
+3. List every MCP tool already registered.
+4. Compare them against John's requirements.
 
-Implement robust exception handling.
+John's expectations are:
 
-Return standard MCP responses.
+- Knowledge Base exposed through MCP
+- Rich tool metadata
+- AI agent discoverability
+- LangSmith tracing
+- Structured JSON outputs
+- Production-ready tool registration
 
-Create unit tests.
+Then identify:
 
-Ensure everything follows SOLID principles.
+- What is already implemented.
+- What is missing.
+- What files need modification.
+- What should be added without breaking the current architecture.
+
+Do not generate code yet.
+
+Generate an implementation plan first
