@@ -1,44 +1,28 @@
 
-Proceed with Phase 4.
+Perform a final implementation audit for the MCP enhancement.
 
-Do not change the existing architecture.
+Review everything implemented across Phases 1–4.
 
-Goal:
-Integrate LangSmith tracing into the existing TypeScript MCP package so every MCP tool invocation is observable.
+Validate:
 
-Requirements:
+1. No duplicate business logic exists.
+2. No backend API contracts changed.
+3. No existing MCP tools were broken.
+4. All MCP tools have metadata.
+5. All tools return structured JSON.
+6. kb_list_categories is registered and working.
+7. LangSmith tracing is active for every MCP tool.
+8. LangSmith failures never break tool execution.
+9. Build passes.
+10. Tests pass.
 
-1. Do not modify backend APIs.
+Generate a final report containing:
 
-2. Do not change any MCP tool names.
-
-3. Instrument every registered MCP tool:
-   - kb_search
-   - kb_article_get
-   - kb_hierarchy
-   - kb_list_categories
-   - kb_query
-   - kb_tools_list
-   - kb_tool_invoke
-
-4. Create a reusable tracing wrapper/helper so every tool automatically records:
-   - Tool name
-   - Input parameters
-   - Output summary
-   - Execution time
-   - Success/Failure
-   - Error details (if any)
-
-5. If LangSmith configuration is missing or unavailable, tracing must fail gracefully without affecting the tool execution.
-
-6. Reuse any existing LangSmith utilities already present in the repository. Do not introduce duplicate tracing implementations.
-
-7. Keep the implementation modular and production-ready.
-
-8. Add unit tests for the tracing wrapper where appropriate.
-
-After implementation provide:
 - Files modified
-- Existing LangSmith utilities reused
-- How each MCP tool is traced
-- Example trace flow
+- New files added
+- Backward compatibility assessment
+- Risks
+- Remaining improvements
+- PR summary suitable for code review
+
+Do not modify code unless a critical issue is found.
