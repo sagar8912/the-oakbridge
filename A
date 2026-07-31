@@ -1,20 +1,13 @@
-Proceed with Phase 1 implementation only.
+Proceed with Phase 2.
 
-Enhance the existing TypeScript MCP package without changing its architecture.
+Do not change the existing architecture.
 
-Tasks:
+Goal:
+Upgrade the existing MCP tools to return structured JSON responses while remaining fully backward compatible.
 
-1. Improve all existing MCP tool definitions.
+Requirements:
 
-2. Add complete metadata:
-   - description
-   - parameter descriptions
-   - examples
-   - Zod input schema
-   - output schema
-   - annotations
-
-3. Keep tool names unchanged:
+1. Modify the existing tools:
    - kb_search
    - kb_article_get
    - kb_hierarchy
@@ -22,10 +15,26 @@ Tasks:
    - kb_tools_list
    - kb_tool_invoke
 
-4. Do not modify backend APIs.
+2. Reuse the existing formatting utilities from packages/mcp-shared wherever possible.
 
-5. Do not create new services.
+3. Every tool should return:
+   {
+     success: boolean,
+     tool: string,
+     timestamp: ISO8601,
+     data: ...,
+     metadata: ...
+   }
 
-6. Do not implement LangSmith yet.
+4. Preserve the current human-readable output if required by existing clients, but expose the structured JSON for MCP consumers.
 
-Generate clean production-ready code.
+5. Do not modify any backend APIs.
+
+6. Do not create duplicate logic.
+
+7. Update tests if needed.
+
+After implementation, summarize:
+- Files changed
+- JSON response format
+- Backward compatibility considerations
