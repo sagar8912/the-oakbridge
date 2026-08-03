@@ -1,182 +1,250 @@
 
-Implement Azure App Service deployment for the KB Admin application.
+Prepare the KB Admin application for full production deployment on Microsoft Azure, including database migration.
 
-IMPORTANT
+IMPORTANT REQUIREMENTS
 
 - Do NOT change the existing application architecture.
-- Do NOT break the current local development workflow.
-- Reuse the existing build process.
-- Follow Azure App Service best practices.
-- Ensure the application is production-ready.
+- Do NOT break any existing functionality.
+- Preserve all APIs, routes, authentication, permissions, MCP tools, LangSmith integration, Knowledge Base features, Ticketing module, Markdown editor, Workflow engine and existing UI.
+- Only make the application production-ready for Azure.
 
-====================================================
-OBJECTIVE
-====================================================
+========================================
+PHASE 1 - PROJECT ANALYSIS
+========================================
 
-Deploy the KB Admin application to Azure App Service with CI/CD support.
+Analyze the complete project and identify:
 
-====================================================
-TASKS
-====================================================
+- Framework (Next.js)
+- Database technology currently used
+- ORM (Prisma/Drizzle/TypeORM/etc.)
+- Current database connection
+- Environment variables
+- Authentication
+- Storage requirements
+- Static assets
+- Existing GitHub Actions
+- Build process
+- Startup process
 
-1. Analyze the project
+Generate a deployment report before making changes.
 
-- Detect whether the project is Next.js, React, Node.js, Express, or another framework.
-- Identify the build command.
-- Identify the startup command.
-- Identify all required environment variables.
+========================================
+PHASE 2 - AZURE DATABASE MIGRATION
+========================================
 
-====================================================
+Migrate the existing database to Azure.
 
-2. Azure Configuration
+If PostgreSQL:
+→ Azure Database for PostgreSQL Flexible Server
 
-Create the required Azure deployment files.
+If MySQL:
+→ Azure Database for MySQL Flexible Server
 
-If needed:
+If SQL Server:
+→ Azure SQL Database
 
-- web.config
-- startup command
-- Azure App Service configuration
-- deployment scripts
+Requirements:
 
-====================================================
+- Generate migration scripts
+- Preserve existing schema
+- Preserve relationships
+- Preserve indexes
+- Preserve constraints
+- Preserve foreign keys
+- Preserve triggers if any
+- Preserve seed data
+- Preserve production compatibility
 
-3. Environment Variables
+Create:
 
-Move all secrets into Azure App Service Configuration.
+database/
+    migrate.sql
+    seed.sql
+    backup.sql
+    rollback.sql
 
-Never hardcode:
+Update environment variables to support Azure database connection.
 
-- API Keys
-- Database URLs
-- JWT Secrets
-- LangSmith API Key
-- GitHub Tokens
-- Azure Keys
+========================================
+PHASE 3 - DATA MIGRATION
+========================================
 
-Provide a list of all required App Settings.
+Create safe migration utilities.
 
-====================================================
+Requirements:
 
-4. Build Pipeline
+- Export current data
+- Import into Azure
+- Validate row counts
+- Validate foreign keys
+- Verify integrity
+- Log migration progress
+- Rollback support
+- Retry failed operations
 
-Ensure the deployment performs:
+Generate migration documentation.
 
-- Install dependencies
-- Build application
-- Run migrations if required
-- Start production server
+========================================
+PHASE 4 - APPLICATION CONFIGURATION
+========================================
 
-====================================================
-
-5. GitHub Actions
-
-Create a production-ready GitHub Actions workflow that deploys to Azure App Service.
-
-Workflow should:
-
-- Trigger on push to main
-- Install dependencies
-- Run lint
-- Run tests
-- Build application
-- Deploy to Azure App Service
-
-====================================================
-
-6. Health Check
-
-Create a health endpoint such as:
-
-/health
-
-Return
-
-{
-  "status": "healthy"
-}
-
-Configure Azure Health Check to use this endpoint.
-
-====================================================
-
-7. Logging
-
-Enable:
-
-- Azure App Service Logs
-- Application Logs
-- Startup Logs
-- Error Logs
-
-Ensure unhandled exceptions are logged.
-
-====================================================
-
-8. Security
+Update the application for Azure.
 
 Configure:
 
-HTTPS Only
+- Production environment
+- Database connection pooling
+- Secure secrets
+- Health endpoint
+- Logging
+- Error handling
+- Production caching
+- Compression
+- Static assets
 
-Secure headers
+========================================
+PHASE 5 - AZURE APP SERVICE
+========================================
 
-CORS
+Prepare deployment for Azure App Service.
 
-Environment variables
+Configure:
 
-Never expose secrets in client-side code.
+- Production build
+- Startup command
+- Health checks
+- Environment variables
+- Application Insights integration
+- HTTPS
+- Logging
+- Scaling compatibility
 
-====================================================
+Do NOT deploy automatically.
 
-9. Production Optimizations
+========================================
+PHASE 6 - GITHUB ACTIONS
+========================================
 
-Enable:
+Update the existing GitHub Actions pipeline.
 
-Compression
+Pipeline should:
 
-Caching
+Build application
 
-Static asset optimization
+Run tests
 
-Graceful shutdown
+Run lint
 
-====================================================
+Run database migrations
 
-10. Verification
+Deploy to Azure App Service
 
-Provide deployment verification steps.
+Verify deployment
 
-Verify:
+Health check
 
-Application loads
+Rollback on failure
 
-Authentication works
+Do NOT create duplicate workflows.
 
-Knowledge Assistant works
+========================================
+PHASE 7 - AZURE RESOURCES
+========================================
 
-MCP integration works
+Generate deployment documentation for:
 
-LangSmith tracing works
+Azure Resource Group
 
-Database connectivity
+Azure App Service
 
-Health endpoint
+Azure Database
 
-====================================================
+Azure Storage Account (if needed)
 
-OUTPUT
+Application Insights
 
-Provide:
+Azure Key Vault (recommended)
 
-1. Files created
+Networking requirements
+
+Firewall rules
+
+Connection strings
+
+========================================
+PHASE 8 - SECURITY
+========================================
+
+Move all secrets to Azure App Settings / Azure Key Vault.
+
+Never commit secrets.
+
+Support:
+
+DATABASE_URL
+
+NEXTAUTH_SECRET
+
+JWT_SECRET
+
+LangSmith keys
+
+API keys
+
+Storage keys
+
+========================================
+PHASE 9 - VALIDATION
+========================================
+
+After implementation verify:
+
+✓ Database connected
+
+✓ All APIs working
+
+✓ Authentication working
+
+✓ Knowledge Base working
+
+✓ Ticketing working
+
+✓ Markdown editor working
+
+✓ LangSmith tracing working
+
+✓ MCP tools working
+
+✓ GitHub Actions passing
+
+✓ Azure deployment ready
+
+========================================
+DELIVERABLES
+========================================
+
+Generate:
+
+1. Azure architecture diagram
+
 2. Files modified
-3. Azure resources required
-4. GitHub Secrets required
-5. Azure App Settings required
-6. Deployment commands
-7. Rollback strategy
-8. Troubleshooting guide
 
-Do not change existing functionality.
-Only add Azure deployment support.
+3. Files created
+
+4. Database migration scripts
+
+5. Azure deployment checklist
+
+6. Required Azure resources
+
+7. Required GitHub Secrets
+
+8. Required Azure App Settings
+
+9. Rollback procedure
+
+10. Production deployment guide
+
+Do NOT deploy anything automatically.
+
+Only prepare the project so it is production-ready for Azure deployment with database migration.
