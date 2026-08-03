@@ -1,12 +1,16 @@
 
-lChoose option B.
+Hi John,
 
-Prepare the application for Azure App Service deployment while preserving the existing architecture.
+We’re preparing to deploy the KB Admin application to Azure. Before we proceed, could you please confirm that the required Azure resources and permissions are available on the client side?
 
-Generate all Azure database migration artifacts (migrate.sql, backup.sql, rollback.sql, seed.sql), migration utilities, deployment scripts, documentation, and GitHub Actions.
+Specifically, we need:
 
-Keep the current Supabase connection for now so the application continues to work.
+* An Azure App Service Plan (Linux, Node.js)
+* An Azure App Service (Web App)
+* Application Insights (for monitoring)
+* Access to the existing Azure Key Vault (or permission to add application secrets)
+* Deployment permissions (or a Publish Profile/Service Principal) for the Web App
+* GitHub deployment access (if GitHub Actions will be used)
+* Any required networking/firewall allow-listing if applicable
 
-Do not rewrite the application to remove Supabase.
-
-The goal is to be Azure deployment ready while preparing a safe future migration to Azure PostgreSQL.
+Please let us know if these resources already exist or if they need to be provisioned before we deploy.
