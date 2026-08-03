@@ -1,346 +1,182 @@
 
-Implement Priority 2 – Point 6:
-Ticketing Inside TOW Application
+Implement Azure App Service deployment for the KB Admin application.
 
 IMPORTANT
 
-- Do NOT rewrite the existing architecture.
-- Reuse the existing authentication, user management, roles, and UI components.
-- Maintain backward compatibility.
-- Follow the current coding standards.
-- Do not introduce breaking API changes.
+- Do NOT change the existing application architecture.
+- Do NOT break the current local development workflow.
+- Reuse the existing build process.
+- Follow Azure App Service best practices.
+- Ensure the application is production-ready.
 
 ====================================================
 OBJECTIVE
 ====================================================
 
-Implement an integrated Ticket Management module inside the TOW application so users can manage their work without switching to Jira or Azure DevOps.
-
-The goal is to provide a lightweight project/task management system tightly integrated with the Knowledge Base and existing workflows.
+Deploy the KB Admin application to Azure App Service with CI/CD support.
 
 ====================================================
-FEATURES
+TASKS
 ====================================================
 
-1. Dashboard
+1. Analyze the project
 
-Create a Ticket Dashboard showing:
-
-- My Assigned Tickets
-- Open Tickets
-- In Progress
-- Pending Review
-- Completed
-- Blocked
-- Recently Updated
-
-Provide counters and filters.
+- Detect whether the project is Next.js, React, Node.js, Express, or another framework.
+- Identify the build command.
+- Identify the startup command.
+- Identify all required environment variables.
 
 ====================================================
 
-2. Ticket Model
+2. Azure Configuration
 
-Each ticket should contain:
+Create the required Azure deployment files.
 
-- Ticket ID
-- Title
-- Description
-- Priority
-- Status
-- Assignee
-- Reporter
-- Due Date
-- Labels
-- Sprint
-- Related KB Article
-- Attachments
-- Created Date
-- Updated Date
+If needed:
+
+- web.config
+- startup command
+- Azure App Service configuration
+- deployment scripts
 
 ====================================================
 
-3. Ticket Lifecycle
+3. Environment Variables
 
-Support statuses:
+Move all secrets into Azure App Service Configuration.
 
-Backlog
+Never hardcode:
 
-To Do
+- API Keys
+- Database URLs
+- JWT Secrets
+- LangSmith API Key
+- GitHub Tokens
+- Azure Keys
 
-In Progress
-
-Blocked
-
-Pending Review
-
-Completed
-
-Closed
-
-Users should be able to move tickets between statuses according to permissions.
+Provide a list of all required App Settings.
 
 ====================================================
 
-4. Backlog
+4. Build Pipeline
 
-Provide a Backlog page.
+Ensure the deployment performs:
 
-Allow:
-
-Create Ticket
-
-Edit Ticket
-
-Assign Ticket
-
-Search
-
-Filter
-
-Sort
-
-Bulk Update
+- Install dependencies
+- Build application
+- Run migrations if required
+- Start production server
 
 ====================================================
 
-5. My Work
+5. GitHub Actions
 
-Provide a "My Work" page.
+Create a production-ready GitHub Actions workflow that deploys to Azure App Service.
 
-Display:
+Workflow should:
 
-Assigned Tickets
-
-Due Today
-
-Overdue
-
-Recently Updated
-
-Completed Today
+- Trigger on push to main
+- Install dependencies
+- Run lint
+- Run tests
+- Build application
+- Deploy to Azure App Service
 
 ====================================================
 
-6. Ticket Details
+6. Health Check
 
-Each ticket should have:
+Create a health endpoint such as:
 
-Description
+/health
 
-Comments
+Return
 
-Activity Timeline
+{
+  "status": "healthy"
+}
 
-Attachments
-
-Related Knowledge Base Articles
-
-History
+Configure Azure Health Check to use this endpoint.
 
 ====================================================
 
-7. Knowledge Base Integration
+7. Logging
 
-Allow linking tickets with KB articles.
+Enable:
 
-Examples:
+- Azure App Service Logs
+- Application Logs
+- Startup Logs
+- Error Logs
 
-Related Documentation
-
-Create KB from Ticket
-
-Open Existing KB
-
-View linked KB articles
+Ensure unhandled exceptions are logged.
 
 ====================================================
 
-8. Notifications
+8. Security
 
-Notify users when:
+Configure:
 
-Assigned
+HTTPS Only
 
-Mentioned
+Secure headers
 
-Status changed
+CORS
 
-Comment added
+Environment variables
 
-Review requested
-
-====================================================
-
-9. Search
-
-Support searching by:
-
-Ticket ID
-
-Title
-
-Description
-
-Assignee
-
-Status
-
-Priority
+Never expose secrets in client-side code.
 
 ====================================================
 
-10. Permissions
+9. Production Optimizations
 
-Reuse existing authentication.
+Enable:
 
-Support:
+Compression
 
-Admin
+Caching
 
-Manager
+Static asset optimization
 
-Contributor
-
-Viewer
-
-Only authorized users may:
-
-Edit
-
-Assign
-
-Close
-
-Delete
+Graceful shutdown
 
 ====================================================
 
-11. Activity Timeline
+10. Verification
 
-Maintain complete history.
-
-Track:
-
-Created
-
-Assigned
-
-Status Changed
-
-Comment Added
-
-KB Linked
-
-Closed
-
-====================================================
-
-12. LangSmith Observability
-
-Reuse existing LangSmith integration.
-
-Generate traces for:
-
-Ticket Creation
-
-Ticket Update
-
-Assignment
-
-Status Change
-
-KB Linking
-
-Failures
-
-Capture:
-
-User
-
-Action
-
-Latency
-
-Errors
-
-====================================================
-
-13. UI
-
-Reuse the existing TOW design.
-
-Add:
-
-Dashboard
-
-Backlog
-
-Kanban View (if supported)
-
-Ticket Details
-
-My Work
-
-Activity Timeline
-
-Filters
-
-Search
-
-Responsive layout
-
-Do NOT redesign the application.
-
-====================================================
-
-TESTING
+Provide deployment verification steps.
 
 Verify:
 
-Create Ticket
+Application loads
 
-Assign Ticket
+Authentication works
 
-Update Status
+Knowledge Assistant works
 
-Move Ticket
+MCP integration works
 
-Add Comment
+LangSmith tracing works
 
-Link KB Article
+Database connectivity
 
-Search Ticket
-
-Permission Checks
-
-Notifications
-
-LangSmith Traces
+Health endpoint
 
 ====================================================
 
 OUTPUT
 
-After implementation provide:
+Provide:
 
-1. Architecture overview
-
+1. Files created
 2. Files modified
+3. Azure resources required
+4. GitHub Secrets required
+5. Azure App Settings required
+6. Deployment commands
+7. Rollback strategy
+8. Troubleshooting guide
 
-3. Database changes (if any)
-
-4. API changes
-
-5. UI changes
-
-6. Permission model
-
-7. LangSmith integration points
-
-8. Test scenarios
-
-9. Production readiness checklist
-
-Do not rewrite the existing TOW application.
-
-Only extend it with an integrated ticket management system while preserving the current architecture.
+Do not change existing functionality.
+Only add Azure deployment support.
