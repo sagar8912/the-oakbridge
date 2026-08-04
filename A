@@ -1,16 +1,85 @@
 
-Hi John,
+You are working in the Oakbridge monorepo.
 
-We’re preparing to deploy the KB Admin application to Azure. Before we proceed, could you please confirm that the required Azure resources and permissions are available on the client side?
+Objective:
+Create the initial backend scaffolding for a NEW application that uses Supabase as its backend. This is only the foundation and should not affect any existing applications (TOW App or KB Admin).
 
-Specifically, we need:
+Requirements:
 
-* An Azure App Service Plan (Linux, Node.js)
-* An Azure App Service (Web App)
-* Application Insights (for monitoring)
-* Access to the existing Azure Key Vault (or permission to add application secrets)
-* Deployment permissions (or a Publish Profile/Service Principal) for the Web App
-* GitHub deployment access (if GitHub Actions will be used)
-* Any required networking/firewall allow-listing if applicable
+1. Create a new feature branch (do not modify main or existing applications).
 
-Please let us know if these resources already exist or if they need to be provisioned before we deploy.
+2. Create a new application/module with its own folder structure following the existing project architecture and conventions.
+
+3. Configure a separate Supabase backend scaffold:
+   - Supabase client initialization
+   - Environment variable support
+   - Authentication configuration
+   - Database access layer
+   - Storage support (if applicable)
+   - Realtime configuration placeholder
+   - Row Level Security (RLS) ready structure
+
+4. Add:
+   - README.md explaining setup
+   - .env.example
+   - Database migration folder
+   - Seed folder
+   - SQL scaffold
+   - Utility/helper functions
+   - Types/interfaces
+   - API/service layer
+   - Repository layer
+   - Error handling
+   - Logging
+   - Validation
+
+5. Create an initial database schema containing example tables:
+   - users
+   - roles
+   - permissions
+   - audit_logs
+
+Generate migrations using Supabase best practices.
+
+6. Configure:
+   - Supabase CLI
+   - Local development
+   - Migration commands
+   - Seed commands
+
+7. Add npm/pnpm scripts:
+   - dev
+   - migrate
+   - reset-db
+   - seed
+   - generate-types
+
+8. Do NOT modify:
+   - KB Admin
+   - TOW App
+   - Existing Supabase project
+   - Existing environment variables
+   - Existing GitHub Actions
+   - Existing production configuration
+
+9. Ensure the scaffold is production-ready:
+   - TypeScript strict mode
+   - Proper folder organization
+   - Clean architecture
+   - Dependency injection where appropriate
+   - Reusable services
+   - Security best practices
+   - Environment validation
+
+10. At completion provide:
+   - Folder tree
+   - Files created
+   - Database schema
+   - Migration list
+   - Environment variables required
+   - Commands to run locally
+   - Commands to deploy
+   - Any manual steps required
+
+Important:
+This task should ONLY scaffold the new application. Do not change any existing functionality. The result should be ready for future feature development and code review.
