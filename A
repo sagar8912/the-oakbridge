@@ -1,85 +1,493 @@
 
-You are working in the Oakbridge monorepo.
+You are a Senior Software Architect and Technical Documentation Engineer working in the Oakbridge monorepo.
 
-Objective:
-Create the initial backend scaffolding for a NEW application that uses Supabase as its backend. This is only the foundation and should not affect any existing applications (TOW App or KB Admin).
+## Objective
 
-Requirements:
+Create a new markdown document:
 
-1. Create a new feature branch (do not modify main or existing applications).
+docs/Knowledge-Base-Enhancements-Implementation.md
 
-2. Create a new application/module with its own folder structure following the existing project architecture and conventions.
+This document should explain, in technical detail, every enhancement implemented for the Knowledge Base (KB Admin), TO App integration, PDP/PEP authorization model, database changes, and related infrastructure improvements.
 
-3. Configure a separate Supabase backend scaffold:
-   - Supabase client initialization
-   - Environment variable support
-   - Authentication configuration
-   - Database access layer
-   - Storage support (if applicable)
-   - Realtime configuration placeholder
-   - Row Level Security (RLS) ready structure
+The document is intended for John Ledyard, project stakeholders, and future developers.
 
-4. Add:
-   - README.md explaining setup
-   - .env.example
-   - Database migration folder
-   - Seed folder
-   - SQL scaffold
-   - Utility/helper functions
-   - Types/interfaces
-   - API/service layer
-   - Repository layer
-   - Error handling
-   - Logging
-   - Validation
+DO NOT make assumptions.
+Only document features, code, migrations, APIs, database tables, policies, components, workflows, and integrations that actually exist in the repository.
 
-5. Create an initial database schema containing example tables:
-   - users
-   - roles
-   - permissions
-   - audit_logs
+-------------------------------------------------------
+SECTION 1
+Executive Summary
+-------------------------------------------------------
 
-Generate migrations using Supabase best practices.
+Explain:
 
-6. Configure:
-   - Supabase CLI
-   - Local development
-   - Migration commands
-   - Seed commands
+• What problem the enhancement solves.
+• Why KB Admin was redesigned.
+• Why Knowledge Base was integrated into the TO App.
+• Overall architecture.
 
-7. Add npm/pnpm scripts:
-   - dev
-   - migrate
-   - reset-db
-   - seed
-   - generate-types
+-------------------------------------------------------
+SECTION 2
+Implemented Features
+-------------------------------------------------------
 
-8. Do NOT modify:
-   - KB Admin
-   - TOW App
-   - Existing Supabase project
-   - Existing environment variables
-   - Existing GitHub Actions
-   - Existing production configuration
+Create a table with:
 
-9. Ensure the scaffold is production-ready:
-   - TypeScript strict mode
-   - Proper folder organization
-   - Clean architecture
-   - Dependency injection where appropriate
-   - Reusable services
-   - Security best practices
-   - Environment validation
+Feature
+Description
+Status
+Files Modified
 
-10. At completion provide:
-   - Folder tree
-   - Files created
-   - Database schema
-   - Migration list
-   - Environment variables required
-   - Commands to run locally
-   - Commands to deploy
-   - Any manual steps required
+Include every implemented enhancement such as:
 
-Important:
-This task should ONLY scaffold the new application. Do not change any existing functionality. The result should be ready for future feature development and code review.
+• Knowledge Base integration into TO App
+• Rich Markdown editor
+• Images
+• Tables
+• Lists
+• Checkboxes
+• Code blocks
+• Syntax highlighting
+• Mermaid diagrams
+• Flowcharts
+• Sequence diagrams
+• Entity diagrams
+• Pie charts
+• YouTube embedding
+• Text colors
+• Highlights
+• Font controls
+• Alignment
+• Draft/Publish workflow
+• Collections
+• Categories
+• Search
+• Navigation
+• Approval flow
+• Any other implemented feature
+
+-------------------------------------------------------
+SECTION 3
+TO App Integration
+-------------------------------------------------------
+
+Describe:
+
+How KB was integrated inside TO App.
+
+Include:
+
+Navigation
+
+Routing
+
+Shared authentication
+
+Shared layout
+
+Admin menu
+
+Knowledge page
+
+Article rendering
+
+Content synchronization
+
+Relevant components
+
+API flow
+
+Architecture diagram using Mermaid.
+
+-------------------------------------------------------
+SECTION 4
+Authorization (PDP / PEP)
+-------------------------------------------------------
+
+Analyze the codebase.
+
+Document:
+
+Purpose of PDP
+
+Purpose of PEP
+
+How authorization decisions are made
+
+Policy evaluation flow
+
+Current permission model
+
+Roles
+
+Claims
+
+Middleware
+
+Route protection
+
+API protection
+
+UI protection
+
+Permission checks
+
+Describe request flow:
+
+User
+↓
+
+PEP
+
+↓
+
+PDP
+
+↓
+
+Decision
+
+↓
+
+Resource
+
+Include Mermaid diagram.
+
+List every file involved.
+
+-------------------------------------------------------
+SECTION 5
+Database Changes
+-------------------------------------------------------
+
+Inspect all migrations.
+
+Document:
+
+New tables
+
+Modified tables
+
+Columns added
+
+Indexes
+
+Constraints
+
+Foreign keys
+
+Policies
+
+Triggers
+
+Views
+
+Functions
+
+Stored procedures
+
+Explain why every change was introduced.
+
+Generate ER Diagram.
+
+-------------------------------------------------------
+SECTION 6
+Supabase Changes
+-------------------------------------------------------
+
+Explain:
+
+New project structure
+
+Schema
+
+Migrations
+
+Seed data
+
+Policies
+
+Storage
+
+Authentication
+
+Functions
+
+RPCs
+
+Environment variables
+
+CLI usage
+
+Branch strategy
+
+-------------------------------------------------------
+SECTION 7
+API Changes
+-------------------------------------------------------
+
+Document every new endpoint.
+
+For each endpoint provide:
+
+Method
+
+Route
+
+Purpose
+
+Authentication
+
+Input
+
+Output
+
+Files
+
+Example request
+
+Example response
+
+-------------------------------------------------------
+SECTION 8
+GitHub Workflow
+-------------------------------------------------------
+
+Explain:
+
+Feature branch workflow
+
+PR process
+
+Review process
+
+Deployment flow
+
+Development
+
+Staging
+
+Production
+
+Vercel deployment
+
+CI/CD
+
+-------------------------------------------------------
+SECTION 9
+Knowledge Base Publishing Workflow
+-------------------------------------------------------
+
+Explain complete lifecycle:
+
+Create article
+
+↓
+
+Save draft
+
+↓
+
+Review
+
+↓
+
+Approve
+
+↓
+
+Publish
+
+↓
+
+Visible in TO App
+
+↓
+
+Searchable
+
+Include Mermaid diagram.
+
+-------------------------------------------------------
+SECTION 10
+Markdown Editor Enhancements
+-------------------------------------------------------
+
+Document every enhancement.
+
+Explain implementation.
+
+Mention libraries.
+
+Toolbar buttons.
+
+Supported markdown.
+
+Images
+
+Code
+
+Videos
+
+Mermaid
+
+Formatting
+
+Rendering pipeline.
+
+-------------------------------------------------------
+SECTION 11
+AI / MCP Readiness
+-------------------------------------------------------
+
+Describe how current implementation prepares for future MCP integration.
+
+Explain:
+
+Knowledge retrieval
+
+Structured content
+
+Metadata
+
+Collections
+
+Searchability
+
+Future MCP wrapper
+
+Future AI agents
+
+Mention current limitations.
+
+-------------------------------------------------------
+SECTION 12
+Architecture
+-------------------------------------------------------
+
+Generate Mermaid diagrams for:
+
+Overall Architecture
+
+KB Admin
+
+TO App
+
+Supabase
+
+Authentication
+
+Authorization
+
+Publishing Flow
+
+Database
+
+-------------------------------------------------------
+SECTION 13
+Folder Structure
+-------------------------------------------------------
+
+Generate current folder structure.
+
+Highlight:
+
+apps/
+
+components/
+
+api/
+
+database/
+
+supabase/
+
+docs/
+
+-------------------------------------------------------
+SECTION 14
+Files Changed
+-------------------------------------------------------
+
+Automatically inspect git.
+
+Generate table:
+
+File
+
+Purpose
+
+Summary of changes
+
+-------------------------------------------------------
+SECTION 15
+Migrations
+-------------------------------------------------------
+
+Explain every migration individually.
+
+Purpose
+
+Tables
+
+Indexes
+
+Policies
+
+Triggers
+
+-------------------------------------------------------
+SECTION 16
+Testing
+-------------------------------------------------------
+
+Document:
+
+Manual testing
+
+Edge cases
+
+Authorization tests
+
+Rendering tests
+
+Editor tests
+
+Database tests
+
+-------------------------------------------------------
+SECTION 17
+Future Enhancements
+-------------------------------------------------------
+
+Include John's roadmap items from the MOM:
+
+• MCP wrapper
+• AI integration
+• LangSmith observability
+• GitHub AI automation
+• Documentation automation
+• Faster releases
+• Knowledge search improvements
+• Additional authorization policies
+• Enterprise governance
+
+Clearly separate:
+✔ Completed
+🚧 In Progress
+📌 Planned
+
+-------------------------------------------------------
+Requirements
+-------------------------------------------------------
+
+• Use Markdown.
+• Use Mermaid diagrams.
+• Use professional documentation style.
+• Reference actual source files.
+• Do not invent features.
+• Only include implemented functionality.
+• Cross-reference database migrations with APIs.
+• Cross-reference APIs with UI.
+• Mention every modified component.
+• Produce a document suitable for project documentation and stakeholder review.
