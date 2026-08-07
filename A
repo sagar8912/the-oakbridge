@@ -1,493 +1,278 @@
 
-You are a Senior Software Architect and Technical Documentation Engineer working in the Oakbridge monorepo.
+Minutes of Meeting (MoM)
 
-## Objective
+Project: The Oakbridge Way (TOW) & Knowledge Base (KB Admin)
+Meeting Type: Architecture Review & Roadmap Discussion
+Date: (Meeting Date)
+Attendees: John Ledyard, John Sweet, Paul, Sachin, Kunal, Development Team
 
-Create a new markdown document:
+⸻
 
-docs/Knowledge-Base-Enhancements-Implementation.md
+Agenda
 
-This document should explain, in technical detail, every enhancement implemented for the Knowledge Base (KB Admin), TO App integration, PDP/PEP authorization model, database changes, and related infrastructure improvements.
+1. Knowledge Base Image Upload
+2. LangSmith Integration & Observability
+3. Knowledge Base Architecture
+4. Reusability of Existing Data Models
+5. Development & Deployment Strategy
+6. LangGraph Scaffolding
+7. Knowledge Base Permission Model
+8. Future Development Priorities
 
-The document is intended for John Ledyard, project stakeholders, and future developers.
+⸻
 
-DO NOT make assumptions.
-Only document features, code, migrations, APIs, database tables, policies, components, workflows, and integrations that actually exist in the repository.
+1. Knowledge Base Image Upload
 
--------------------------------------------------------
-SECTION 1
-Executive Summary
--------------------------------------------------------
+Discussion
 
-Explain:
-
-• What problem the enhancement solves.
-• Why KB Admin was redesigned.
-• Why Knowledge Base was integrated into the TO App.
-• Overall architecture.
-
--------------------------------------------------------
-SECTION 2
-Implemented Features
--------------------------------------------------------
-
-Create a table with:
-
-Feature
-Description
-Status
-Files Modified
-
-Include every implemented enhancement such as:
-
-• Knowledge Base integration into TO App
-• Rich Markdown editor
-• Images
-• Tables
-• Lists
-• Checkboxes
-• Code blocks
-• Syntax highlighting
-• Mermaid diagrams
-• Flowcharts
-• Sequence diagrams
-• Entity diagrams
-• Pie charts
-• YouTube embedding
-• Text colors
-• Highlights
-• Font controls
-• Alignment
-• Draft/Publish workflow
-• Collections
-• Categories
-• Search
-• Navigation
-• Approval flow
-• Any other implemented feature
-
--------------------------------------------------------
-SECTION 3
-TO App Integration
--------------------------------------------------------
-
-Describe:
-
-How KB was integrated inside TO App.
-
-Include:
-
-Navigation
-
-Routing
-
-Shared authentication
-
-Shared layout
-
-Admin menu
-
-Knowledge page
-
-Article rendering
-
-Content synchronization
-
-Relevant components
-
-API flow
-
-Architecture diagram using Mermaid.
-
--------------------------------------------------------
-SECTION 4
-Authorization (PDP / PEP)
--------------------------------------------------------
-
-Analyze the codebase.
-
-Document:
-
-Purpose of PDP
-
-Purpose of PEP
-
-How authorization decisions are made
-
-Policy evaluation flow
-
-Current permission model
-
-Roles
-
-Claims
-
-Middleware
-
-Route protection
-
-API protection
-
-UI protection
-
-Permission checks
-
-Describe request flow:
-
-User
-↓
-
-PEP
-
-↓
-
-PDP
-
-↓
+The client asked how users should upload images that are created locally instead of providing image URLs.
 
 Decision
 
-↓
+* Current implementation primarily supports URL-based image references.
+* The team will evaluate the best approach for supporting direct image uploads within Knowledge Base articles.
 
-Resource
+Action Item
 
-Include Mermaid diagram.
+* Evaluate native image upload capability for Knowledge Base articles.
 
-List every file involved.
+⸻
 
--------------------------------------------------------
-SECTION 5
-Database Changes
--------------------------------------------------------
+2. LangSmith Integration
 
-Inspect all migrations.
+Discussion
 
-Document:
+John clarified that LangSmith should become the central platform for:
 
-New tables
+* AI observability
+* Evaluation datasets
+* Knowledge gap identification
+* LLM monitoring
 
-Modified tables
+The Knowledge Base should primarily:
 
-Columns added
+* Create knowledge
+* Consume flagged knowledge gaps
 
-Indexes
+instead of becoming the observability platform itself.
 
-Constraints
+Team Update
 
-Foreign keys
+The development team demonstrated that:
 
-Policies
+* KB Admin is already integrated with LangSmith.
+* LLM traces are visible in the development environment.
+* The staging deployment has not yet been completed.
 
-Triggers
+Decision
 
-Views
+After KB Admin is deployed to staging and approved, LangSmith traces will be available for client verification.
 
-Functions
+⸻
 
-Stored procedures
+3. Ticketing Architecture
 
-Explain why every change was introduced.
+John discussed the future architecture for support tickets.
 
-Generate ER Diagram.
+Design Direction
 
--------------------------------------------------------
-SECTION 6
-Supabase Changes
--------------------------------------------------------
+Support tickets should not become a separate application.
 
-Explain:
+List
+   +
+Item
+=
+Support Ticket
 
-New project structure
+The existing List and Item model should be reused.
 
-Schema
+Only workflow-specific fields should be added when necessary.
 
-Migrations
+Future Enhancement
 
-Seed data
+Introduce List Templates, allowing different business processes (e.g., Knowledge Support, Oakbridge Way) to share the same backend while presenting different UI configurations.
 
-Policies
+⸻
 
-Storage
+4. Architecture Principle – Reuse Existing Tables
 
-Authentication
+John emphasized the project’s primary architectural principle:
 
-Functions
+Always extend existing tables before creating new ones.
 
-RPCs
+If a feature shares approximately 70–80% of the functionality of an existing module:
 
-Environment variables
+* Extend the existing table.
+* Avoid duplicate entities.
 
-CLI usage
+Objective
 
-Branch strategy
+Maintain:
 
--------------------------------------------------------
-SECTION 7
-API Changes
--------------------------------------------------------
+* Common database structure
+* Shared business logic
+* Shared UI components
+* Shared APIs
 
-Document every new endpoint.
+This supports the long-term monorepo strategy.
 
-For each endpoint provide:
+⸻
 
-Method
+5. Development Pipeline
 
-Route
+John proposed a standardized development lifecycle.
 
-Purpose
+Target Workflow
 
-Authentication
-
-Input
-
-Output
-
-Files
-
-Example request
-
-Example response
-
--------------------------------------------------------
-SECTION 8
-GitHub Workflow
--------------------------------------------------------
-
-Explain:
-
-Feature branch workflow
-
-PR process
-
-Review process
-
-Deployment flow
-
-Development
-
-Staging
-
+Local Development
+        ↓
+Shared Remote Development
+        ↓
+Shared Database
+        ↓
+Demo Environment
+        ↓
+Master Staging
+        ↓
 Production
-
-Vercel deployment
-
-CI/CD
-
--------------------------------------------------------
-SECTION 9
-Knowledge Base Publishing Workflow
--------------------------------------------------------
-
-Explain complete lifecycle:
-
-Create article
-
-↓
-
-Save draft
-
-↓
-
-Review
-
-↓
-
-Approve
-
-↓
-
-Publish
-
-↓
-
-Visible in TO App
-
-↓
-
-Searchable
-
-Include Mermaid diagram.
-
--------------------------------------------------------
-SECTION 10
-Markdown Editor Enhancements
--------------------------------------------------------
-
-Document every enhancement.
-
-Explain implementation.
-
-Mention libraries.
-
-Toolbar buttons.
-
-Supported markdown.
-
-Images
-
-Code
-
-Videos
-
-Mermaid
-
-Formatting
-
-Rendering pipeline.
-
--------------------------------------------------------
-SECTION 11
-AI / MCP Readiness
--------------------------------------------------------
-
-Describe how current implementation prepares for future MCP integration.
-
-Explain:
-
-Knowledge retrieval
-
-Structured content
-
-Metadata
-
-Collections
-
-Searchability
-
-Future MCP wrapper
-
-Future AI agents
-
-Mention current limitations.
-
--------------------------------------------------------
-SECTION 12
-Architecture
--------------------------------------------------------
-
-Generate Mermaid diagrams for:
-
-Overall Architecture
-
-KB Admin
-
-TO App
-
-Supabase
-
-Authentication
-
-Authorization
-
-Publishing Flow
-
-Database
-
--------------------------------------------------------
-SECTION 13
-Folder Structure
--------------------------------------------------------
-
-Generate current folder structure.
-
-Highlight:
-
-apps/
-
-components/
-
-api/
-
-database/
-
-supabase/
-
-docs/
-
--------------------------------------------------------
-SECTION 14
-Files Changed
--------------------------------------------------------
-
-Automatically inspect git.
-
-Generate table:
-
-File
-
-Purpose
-
-Summary of changes
-
--------------------------------------------------------
-SECTION 15
-Migrations
--------------------------------------------------------
-
-Explain every migration individually.
-
-Purpose
-
-Tables
-
-Indexes
-
-Policies
-
-Triggers
-
--------------------------------------------------------
-SECTION 16
-Testing
--------------------------------------------------------
-
-Document:
-
-Manual testing
-
-Edge cases
-
-Authorization tests
-
-Rendering tests
-
-Editor tests
-
-Database tests
-
--------------------------------------------------------
-SECTION 17
-Future Enhancements
--------------------------------------------------------
-
-Include John's roadmap items from the MOM:
-
-• MCP wrapper
-• AI integration
-• LangSmith observability
-• GitHub AI automation
-• Documentation automation
-• Faster releases
-• Knowledge search improvements
-• Additional authorization policies
-• Enterprise governance
-
-Clearly separate:
-✔ Completed
-🚧 In Progress
-📌 Planned
-
--------------------------------------------------------
 Requirements
--------------------------------------------------------
 
-• Use Markdown.
-• Use Mermaid diagrams.
-• Use professional documentation style.
-• Reference actual source files.
-• Do not invent features.
-• Only include implemented functionality.
-• Cross-reference database migrations with APIs.
-• Cross-reference APIs with UI.
-• Mention every modified component.
-• Produce a document suitable for project documentation and stakeholder review.
+* Human approval gates
+* Automated GitHub Actions
+* Automated testing
+* Controlled production promotion
+
+⸻
+
+6. LangGraph Scaffolding
+
+John requested the team begin implementing the foundational AI infrastructure.
+
+Required Components
+
+* LangGraph Graphs
+* Subgraphs
+* Nodes
+* Graph execution
+* AI workflow orchestration
+
+AI Registry
+
+Create a centralized registry containing:
+
+* Graphs
+* Agents
+* LangSmith references
+* Execution history
+* Application relationships
+
+This will become the foundation for future AI-powered workflows.
+
+⸻
+
+7. Human-in-the-Loop AI Vision
+
+John described the long-term workflow:
+User
+      ↓
+AI Agent
+      ↓
+Knowledge Generation
+      ↓
+PDP Validation
+      ↓
+Knowledge Base
+      ↓
+Human Review
+      ↓
+Publication
+
+8. Knowledge Base Permissioning
+
+Knowledge Base permissioning was identified as a high-priority feature.
+
+Permission Hierarchy
+
+Knowledge Base
+        ↓
+Hierarchy Node
+        ↓
+Knowledge Article
+
+Permissions should support inheritance while allowing overrides at each level.
+
+⸻
+
+Permission Assignment
+
+Users should be assignable directly from the relevant UI.
+
+Examples:
+
+Knowledge Base
+
+Assign:
+
+* Stefan → Editor
+
+All child nodes inherit.
+
+⸻
+
+Hierarchy Node
+
+Assign:
+
+* Sean → Editor
+
+Child articles inherit.
+
+⸻
+
+Knowledge Article
+
+Assign:
+
+* Stefan → Author
+* John → Reviewer
+
+Only that article receives the assignment.
+
+⸻
+
+Permission Types
+
+Support configurable permissions including:
+
+* View
+* Create
+* Edit
+* Delete
+* Publish
+* Archive
+
+⸻
+
+Technical Design
+
+Introduce a junction table relating:
+
+* Users
+* Knowledge Bases
+* Hierarchy Nodes
+* Knowledge Articles
+
+to support record-level permission management.
+
+⸻
+
+9. UI Expectations
+
+Permission management should be performed directly from:
+
+* Knowledge Base pages
+* Hierarchy Node pages
+* Knowledge Article pages
+
+instead of only from a centralized administration page.
+
