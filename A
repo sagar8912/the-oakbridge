@@ -1,26 +1,139 @@
 
-Principle 1 – Reuse Before Creating
+Minutes of Meeting (MoM)
 
-* Reuse existing tables and business models whenever practical.
-* Avoid duplicate entities representing similar business concepts.
+Project: TOW (The Oakbridge Way) & KB Admin
+Meeting Type: Architecture & Product Roadmap Discussion
 
-Principle 2 – Unified Platform
+Agenda
 
-* Build features that integrate into a single, cohesive platform.
-* Leverage the monorepo to maximize reuse of components, APIs, and data structures.
+* KB Admin enhancements
+* LangSmith & AI architecture
+* TOW architecture
+* Knowledge Base permissions
+* Future roadmap
 
-Principle 3 – AI-First Future
+⸻
 
-* LangSmith as the observability layer.
-* LangGraph as the orchestration layer.
-* Knowledge Base as the content layer.
-* Human-in-the-loop approval before publication.
+Discussion Summary
 
-Principle 4 – Hierarchical Security
+1. LangSmith Integration
 
-* Permissions should be assignable at:
-    * Knowledge Base
-    * Hierarchy Node
-    * Knowledge Article
-* Support inheritance with record-level overrides.
-* Manage permissions directly from the application’s UI.
+* LangSmith will be the central observability and evaluation platform.
+* Knowledge Base should focus on creating and consuming knowledge, while LangSmith identifies knowledge gaps and monitors AI executions.
+* Current LangSmith integration is available in the development environment and will be validated after staging deployment.
+
+⸻
+
+2. Knowledge Base Enhancements
+
+Current enhancements demonstrated:
+
+* Rich Markdown editor
+* Image support
+* YouTube embedding
+* Mermaid diagrams (Flowchart, Sequence, ER, State, Pie, etc.)
+* Code blocks with syntax highlighting
+* Advanced text formatting
+* Knowledge Base integration with TOW
+
+⸻
+
+3. TOW Ticketing Architecture
+
+* Do not create a separate ticketing module.
+* Reuse the existing List + Item architecture.
+* Introduce List Templates for different workflows while keeping the same backend data model.
+
+⸻
+
+Architectural Principles (John)
+
+Principle 1 – Reuse Before Create
+
+* Reuse existing tables, APIs, and components wherever possible.
+* If a new feature shares 70–80% of an existing model, extend the current implementation instead of creating new tables.
+
+Principle 2 – Monorepo First
+
+* Keep all applications aligned within the monorepo.
+* Avoid duplicate functionality across applications.
+* Build reusable components and shared business logic.
+
+Principle 3 – AI-First Platform
+
+* LangSmith → Observability
+* LangGraph → AI orchestration
+* Knowledge Base → Content management
+* PDP/PEP → Authorization
+* Human-in-the-loop approval before publishing AI-generated content.
+
+⸻
+
+Future Enhancements Requested by John
+
+AI Infrastructure
+
+* Scaffold LangGraph (Graphs, Subgraphs, Nodes).
+* Create an AI Agent Registry.
+* Store graph execution history.
+* Integrate AI execution with LangSmith.
+
+Development Pipeline
+
+Define a standard workflow:
+
+* Local Development
+* Shared Development Environment
+* Shared Database
+* Staging
+* Production
+
+Add:
+
+* GitHub Actions
+* Automated testing
+* Human approval gates before production deployment.
+
+⸻
+
+Knowledge Base Permissioning (High Priority)
+
+Implement hierarchical permissions:
+
+* Knowledge Base
+* Hierarchy Node
+* Knowledge Article
+
+Support:
+
+* View
+* Create
+* Edit
+* Delete
+* Publish
+* Archive
+
+Requirements:
+
+* Permission inheritance from parent to child.
+* Ability to override permissions at lower levels.
+* Manage permissions directly from the Knowledge Base UI.
+
+⸻
+
+PR / Release Discussion
+
+* Continue using Staging for feature validation.
+* Only approved PRs should move to Production.
+* Establish a cleaner release process for promoting selected PRs instead of merging the entire staging branch.
+
+⸻
+
+Decisions
+
+* LangSmith will be the central AI monitoring platform.
+* Reuse existing architecture instead of creating duplicate tables.
+* Build LangGraph scaffolding.
+* Implement hierarchical Knowledge Base permissions.
+* Continue monorepo-first architecture.
+* Introduce GitHub quality gates and deployment approvals.
