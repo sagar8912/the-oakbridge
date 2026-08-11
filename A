@@ -1,139 +1,175 @@
 
-Minutes of Meeting (MoM)
+I have an Excel file in this project that was previously created with the help of Cursor.
 
-Project: TOW (The Oakbridge Way) & KB Admin
-Meeting Type: Architecture & Product Roadmap Discussion
+I want you to perform a COMPLETE and INDEPENDENT verification/audit of this Excel file.
 
-Agenda
+IMPORTANT:
+- Do NOT assume the existing Excel file is correct just because it was previously generated.
+- Do NOT modify the original Excel file during the audit.
+- First inspect and understand the existing Excel file completely.
+- Then verify it against the actual project implementation, source code, database/schema, business logic, configuration, and relevant documentation available in this repository.
+- Do not invent or assume requirements that are not supported by the project.
 
-* KB Admin enhancements
-* LangSmith & AI architecture
-* TOW architecture
-* Knowledge Base permissions
-* Future roadmap
+STEP 1 — FIND THE EXCEL FILE
+1. Locate the Excel file that was previously created.
+2. Identify its exact file name and location.
+3. Understand the purpose of the Excel file and what it is supposed to represent.
 
-⸻
+STEP 2 — AUDIT THE EXCEL STRUCTURE
+Check:
+- Sheet names
+- Column names
+- Row structure
+- Data types
+- Required fields
+- Missing fields
+- Duplicate fields
+- Duplicate rows
+- Incorrect values
+- Incorrect formulas
+- Incorrect references
+- Formatting
+- Dropdowns/data validation
+- Required relationships between columns
+- Any inconsistent or contradictory information
+- Whether the workbook structure matches the expected business requirement.
 
-Discussion Summary
+STEP 3 — VERIFY AGAINST THE ACTUAL CODE
+Search the repository and identify the code that implements the functionality represented by this Excel file.
 
-1. LangSmith Integration
+Verify:
+- Backend models
+- Database tables/schema
+- API models
+- Business logic
+- Validation logic
+- Constants/enums
+- Configuration
+- Frontend usage, if applicable
+- Any existing documentation or implementation plans
 
-* LangSmith will be the central observability and evaluation platform.
-* Knowledge Base should focus on creating and consuming knowledge, while LangSmith identifies knowledge gaps and monitors AI executions.
-* Current LangSmith integration is available in the development environment and will be validated after staging deployment.
+Compare the Excel file against the actual implementation.
 
-⸻
+For every mismatch, clearly explain:
+1. Excel value/structure
+2. Actual implementation
+3. Why it is incorrect
+4. What the correct value/structure should be
+5. Source file/path and relevant code section
 
-2. Knowledge Base Enhancements
+STEP 4 — VERIFY DATABASE ALIGNMENT
+If the Excel represents database-related information, verify it against the current database/schema/migrations available in the repository.
 
-Current enhancements demonstrated:
+Check:
+- Table names
+- Column names
+- Data types
+- Relationships
+- Foreign keys
+- Required/nullable fields
+- Enum values
+- Constraints
+- Existing migrations
+- Any recently added or modified database fields
 
-* Rich Markdown editor
-* Image support
-* YouTube embedding
-* Mermaid diagrams (Flowchart, Sequence, ER, State, Pie, etc.)
-* Code blocks with syntax highlighting
-* Advanced text formatting
-* Knowledge Base integration with TOW
+Do NOT assume that an old Excel definition is still valid.
 
-⸻
+STEP 5 — VERIFY BUSINESS LOGIC
+Check whether the Excel correctly represents the actual business rules and workflow.
 
-3. TOW Ticketing Architecture
+Pay special attention to:
+- Required vs optional fields
+- Default values
+- Status values
+- Permissions
+- Roles
+- Relationships
+- Workflow states
+- Calculations
+- Any formulas or scoring logic
+- Any fields that are no longer used
+- Any newly introduced fields that are missing from Excel
 
-* Do not create a separate ticketing module.
-* Reuse the existing List + Item architecture.
-* Introduce List Templates for different workflows while keeping the same backend data model.
+STEP 6 — CREATE AN AUDIT REPORT
+Before changing anything, provide a concise audit report with:
 
-⸻
+A. PASS
+Items that are completely correct.
 
-Architectural Principles (John)
+B. ISSUES FOUND
+For every issue:
+- Severity: Critical / High / Medium / Low
+- Excel location
+- Current value
+- Expected value
+- Reason
+- Source/code evidence
 
-Principle 1 – Reuse Before Create
+C. MISSING ITEMS
+Anything required by the current implementation but missing from Excel.
 
-* Reuse existing tables, APIs, and components wherever possible.
-* If a new feature shares 70–80% of an existing model, extend the current implementation instead of creating new tables.
+D. OBSOLETE ITEMS
+Anything present in Excel but no longer supported/used by the current implementation.
 
-Principle 2 – Monorepo First
+E. RECOMMENDED CHANGES
+Give a final list of changes required.
 
-* Keep all applications aligned within the monorepo.
-* Avoid duplicate functionality across applications.
-* Build reusable components and shared business logic.
+STEP 7 — RECREATE THE EXCEL FILE
+If ANY changes are required:
 
-Principle 3 – AI-First Platform
+1. Do NOT overwrite the original Excel file.
+2. Create a NEW corrected Excel file.
+3. Preserve all valid information from the original.
+4. Apply only changes supported by the actual code/database/business requirements.
+5. Make the workbook professional and production-ready.
+6. Preserve useful formatting while correcting the structure.
+7. Ensure formulas, references, validations, and data types are correct.
+8. Use clear and consistent sheet names and column headers.
+9. Add a "Validation/Audit Notes" sheet if useful, documenting what was changed and why.
+10. Make sure the final workbook can be opened successfully in Microsoft Excel.
 
-* LangSmith → Observability
-* LangGraph → AI orchestration
-* Knowledge Base → Content management
-* PDP/PEP → Authorization
-* Human-in-the-loop approval before publishing AI-generated content.
+If the original file is already completely correct:
+- Do NOT create unnecessary changes.
+- Report that the file passed validation.
+- If useful, create a validated copy rather than changing the original.
 
-⸻
+STEP 8 — FINAL VALIDATION
+After creating the corrected Excel file:
 
-Future Enhancements Requested by John
+- Re-open/read the generated workbook.
+- Verify every worksheet.
+- Verify headers and data.
+- Verify formulas.
+- Verify formatting/data validation where applicable.
+- Confirm there are no broken references.
+- Compare the corrected workbook against the source implementation one final time.
+- Make sure the generated file is actually usable.
 
-AI Infrastructure
+FINAL RESPONSE FORMAT:
 
-* Scaffold LangGraph (Graphs, Subgraphs, Nodes).
-* Create an AI Agent Registry.
-* Store graph execution history.
-* Integrate AI execution with LangSmith.
+1. Original Excel file:
+   <path>
 
-Development Pipeline
+2. Overall result:
+   PASS / PASS WITH CHANGES / FAIL
 
-Define a standard workflow:
+3. Issues found:
+   <number>
 
-* Local Development
-* Shared Development Environment
-* Shared Database
-* Staging
-* Production
+4. Critical/High issues:
+   <list>
 
-Add:
+5. Changes made:
+   <list>
 
-* GitHub Actions
-* Automated testing
-* Human approval gates before production deployment.
+6. Corrected Excel file:
+   <path>
 
-⸻
+7. Final verification:
+   <short confirmation>
 
-Knowledge Base Permissioning (High Priority)
-
-Implement hierarchical permissions:
-
-* Knowledge Base
-* Hierarchy Node
-* Knowledge Article
-
-Support:
-
-* View
-* Create
-* Edit
-* Delete
-* Publish
-* Archive
-
-Requirements:
-
-* Permission inheritance from parent to child.
-* Ability to override permissions at lower levels.
-* Manage permissions directly from the Knowledge Base UI.
-
-⸻
-
-PR / Release Discussion
-
-* Continue using Staging for feature validation.
-* Only approved PRs should move to Production.
-* Establish a cleaner release process for promoting selected PRs instead of merging the entire staging branch.
-
-⸻
-
-Decisions
-
-* LangSmith will be the central AI monitoring platform.
-* Reuse existing architecture instead of creating duplicate tables.
-* Build LangGraph scaffolding.
-* Implement hierarchical Knowledge Base permissions.
-* Continue monorepo-first architecture.
-* Introduce GitHub quality gates and deployment approvals.
+IMPORTANT:
+Do not make assumptions.
+Do not silently change business logic.
+Do not delete information unless the repository clearly shows that it is obsolete.
+If you cannot verify something from the repository, explicitly mark it as "Unable to verify" and explain what information is missing.
