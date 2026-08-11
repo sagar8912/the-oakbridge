@@ -1,175 +1,51 @@
 
-I have an Excel file in this project that was previously created with the help of Cursor.
+MoM – John’s Key Discussion & Action Items
 
-I want you to perform a COMPLETE and INDEPENDENT verification/audit of this Excel file.
+Key Architectural Principles
 
-IMPORTANT:
-- Do NOT assume the existing Excel file is correct just because it was previously generated.
-- Do NOT modify the original Excel file during the audit.
-- First inspect and understand the existing Excel file completely.
-- Then verify it against the actual project implementation, source code, database/schema, business logic, configuration, and relevant documentation available in this repository.
-- Do not invent or assume requirements that are not supported by the project.
+* Reuse before creating: If a feature has significant overlap with existing functionality, enhance/reuse the existing shared table, entity, or UI component instead of creating a new one.
+* Avoid table/junction sprawl: Consolidate relationships (Goal–Team, Vendor–Tag, Item–Goal, etc.) into a common entity/relationship model where appropriate.
+* Establish governance to decide whether a feature should become a first-class entity or use an existing shared entity.
+* Shared UI/UX components, notifications, permissions, comments, notes, history, approvals, QA runs, reactions, etc. should be reusable across entities.
 
-STEP 1 — FIND THE EXCEL FILE
-1. Locate the Excel file that was previously created.
-2. Identify its exact file name and location.
-3. Understand the purpose of the Excel file and what it is supposed to represent.
+Knowledge Base & Permissions
 
-STEP 2 — AUDIT THE EXCEL STRUCTURE
-Check:
-- Sheet names
-- Column names
-- Row structure
-- Data types
-- Required fields
-- Missing fields
-- Duplicate fields
-- Duplicate rows
-- Incorrect values
-- Incorrect formulas
-- Incorrect references
-- Formatting
-- Dropdowns/data validation
-- Required relationships between columns
-- Any inconsistent or contradictory information
-- Whether the workbook structure matches the expected business requirement.
+* Implement granular knowledge-base permissions at:
+    * Knowledge Base level
+    * Hierarchy-node level
+    * Individual article level
+* Permissions should support actions such as view, create, edit, delete, publish and archive.
+* Higher-level permissions should flow down unless overridden at a more specific level.
 
-STEP 3 — VERIFY AGAINST THE ACTUAL CODE
-Search the repository and identify the code that implements the functionality represented by this Excel file.
+LangSmith / LangGraph
 
-Verify:
-- Backend models
-- Database tables/schema
-- API models
-- Business logic
-- Validation logic
-- Constants/enums
-- Configuration
-- Frontend usage, if applicable
-- Any existing documentation or implementation plans
+* LangSmith should be the technical operating/observability layer for LLM calls and evaluation data.
+* Start scaffolding LangGraph graphs, subgraphs and nodes.
+* Create the relationship between application records and deployed agents/graphs so users can see and execute agent workflows against records.
+* Knowledge gaps identified through evaluation should feed the knowledge-content workflow.
 
-Compare the Excel file against the actual implementation.
+Environment & PR/Release Process
 
-For every mismatch, clearly explain:
-1. Excel value/structure
-2. Actual implementation
-3. Why it is incorrect
-4. What the correct value/structure should be
-5. Source file/path and relevant code section
+* Establish a clear flow: Local Dev → Remote Dev/shared DB → Staging → Production.
+* Define both human stage gates and automated GitHub PR tests/checks.
+* Production should contain only explicitly approved changes; PRs/features need clear scope and validation before promotion.
 
-STEP 4 — VERIFY DATABASE ALIGNMENT
-If the Excel represents database-related information, verify it against the current database/schema/migrations available in the repository.
+Asset & File Management
 
-Check:
-- Table names
-- Column names
-- Data types
-- Relationships
-- Foreign keys
-- Required/nullable fields
-- Enum values
-- Constraints
-- Existing migrations
-- Any recently added or modified database fields
+* Create a common Asset → Files → File Versions model across the monorepo.
+* Assets should be polymorphic/reusable, allowing one uploaded document to relate to multiple entities without duplicate uploads.
+* Support file versioning (V1, V2, V3…) and consistent underlying storage integration.
+* Review how the Knowledge Base currently handles attachments and align it with the common model.
 
-Do NOT assume that an old Excel definition is still valid.
+Migration & Cleanup
 
-STEP 5 — VERIFY BUSINESS LOGIC
-Check whether the Excel correctly represents the actual business rules and workflow.
+* During migration, identify and remove dead code, unused tables and obsolete POC functionality.
+* Review tables such as LLM Settings and determine whether they are still required or should be replaced by existing LangSmith configuration.
+* Where tables have overlapping functionality, collapse/consolidate them rather than maintaining duplicates.
+* The goal is to reduce technical debt, simplify the architecture and eliminate potential sources of bugs.
 
-Pay special attention to:
-- Required vs optional fields
-- Default values
-- Status values
-- Permissions
-- Roles
-- Relationships
-- Workflow states
-- Calculations
-- Any formulas or scoring logic
-- Any fields that are no longer used
-- Any newly introduced fields that are missing from Excel
+Next Steps
 
-STEP 6 — CREATE AN AUDIT REPORT
-Before changing anything, provide a concise audit report with:
-
-A. PASS
-Items that are completely correct.
-
-B. ISSUES FOUND
-For every issue:
-- Severity: Critical / High / Medium / Low
-- Excel location
-- Current value
-- Expected value
-- Reason
-- Source/code evidence
-
-C. MISSING ITEMS
-Anything required by the current implementation but missing from Excel.
-
-D. OBSOLETE ITEMS
-Anything present in Excel but no longer supported/used by the current implementation.
-
-E. RECOMMENDED CHANGES
-Give a final list of changes required.
-
-STEP 7 — RECREATE THE EXCEL FILE
-If ANY changes are required:
-
-1. Do NOT overwrite the original Excel file.
-2. Create a NEW corrected Excel file.
-3. Preserve all valid information from the original.
-4. Apply only changes supported by the actual code/database/business requirements.
-5. Make the workbook professional and production-ready.
-6. Preserve useful formatting while correcting the structure.
-7. Ensure formulas, references, validations, and data types are correct.
-8. Use clear and consistent sheet names and column headers.
-9. Add a "Validation/Audit Notes" sheet if useful, documenting what was changed and why.
-10. Make sure the final workbook can be opened successfully in Microsoft Excel.
-
-If the original file is already completely correct:
-- Do NOT create unnecessary changes.
-- Report that the file passed validation.
-- If useful, create a validated copy rather than changing the original.
-
-STEP 8 — FINAL VALIDATION
-After creating the corrected Excel file:
-
-- Re-open/read the generated workbook.
-- Verify every worksheet.
-- Verify headers and data.
-- Verify formulas.
-- Verify formatting/data validation where applicable.
-- Confirm there are no broken references.
-- Compare the corrected workbook against the source implementation one final time.
-- Make sure the generated file is actually usable.
-
-FINAL RESPONSE FORMAT:
-
-1. Original Excel file:
-   <path>
-
-2. Overall result:
-   PASS / PASS WITH CHANGES / FAIL
-
-3. Issues found:
-   <number>
-
-4. Critical/High issues:
-   <list>
-
-5. Changes made:
-   <list>
-
-6. Corrected Excel file:
-   <path>
-
-7. Final verification:
-   <short confirmation>
-
-IMPORTANT:
-Do not make assumptions.
-Do not silently change business logic.
-Do not delete information unless the repository clearly shows that it is obsolete.
-If you cannot verify something from the repository, explicitly mark it as "Unable to verify" and explain what information is missing.
+* Team to review John’s architecture documents/deck and current implementation.
+* Deep-dive into existing tables, entities, permissions, file management and edge cases.
+* Come back with the team’s understanding, proposed approach and areas requiring clarification before implementation.
