@@ -1,49 +1,20 @@
 
-MoM – Oakbridge Application & Architecture Discussion
+MoM – Today’s Client Meeting
 
 Key Discussion Points
 
-1. Architecture Principles
-    * Prioritize reusability of existing tables, components and functionality instead of creating new tables for similar business needs.
-    * Maintain a common/monorepo architecture to avoid duplicated functionality and isolated applications.
-    * Use proper architecture governance to decide whether a feature should extend an existing first-class entity or require a new entity.
-2. ToE / Ticket Functionality
-    * Use the existing ToE List + Item model for support tickets and similar workflows.
-    * Explore per-list templates so different workflows can have different UI while sharing the same underlying data structure.
-3. PR, Environments & Testing
-    * Define clear local → remote development → staging → production flow.
-    * Establish both human stage gates and automated GitHub PR tests/actions before promotion.
-    * Ensure features are properly validated in staging before production.
-4. LangSmith / LangGraph
-    * LangSmith should be the main technical/observability platform for LLM evaluation and knowledge-gap identification.
-    * Start scaffolding LangGraph graphs, subgraphs and nodes.
-    * Create a common relationship/junction between applications, agents and LangSmith executions to support human-in-the-loop workflows.
-5. Knowledge Base & Permissions
-    * Implement hierarchical permissions at Knowledge Base → Hierarchy Node → Article levels.
-    * Support user-specific View/Create/Edit/Delete/Publish/Archive permissions.
-    * Permissions should inherit from higher levels but allow more granular overrides at lower levels.
-6. Shared Entities & Components
-    * Reduce junction-table sprawl by creating a shared entity/relationship model where appropriate.
-    * Common components such as notes, comments, history, QA runs, suggestions, approvals, reactions, notifications, etc. should be reusable across first-class entities.
-    * Maintain consistent UI/UX for these shared components across applications.
-7. Assets & File Management
-    * Define a common Asset → File → File Version structure.
-    * Assets should be polymorphic and reusable across goals, knowledge articles and other entities.
-    * Establish consistent file/version management and storage architecture across the monorepo.
-8. Database & Code Cleanup
-    * During migration, identify and remove dead code, unused tables and obsolete proof-of-concept functionality.
-    * Consolidate tables where functionality significantly overlaps.
-    * Review whether configuration tables such as LLM settings are still required or should be managed through LangSmith.
-9. GitHub / Repository Consolidation
-    * Multiple GitHub organizations/repositories currently create repository sprawl.
-    * Evaluate consolidation/branch-based integration between the Oakbridge R&D repository and the separate Databricks/Azure DevOps repository.
-    * Goal is to avoid manual SQL/code copying and provide proper change tracking and merging.
-    * Team to discuss internally and propose a repository strategy within the next couple of weeks.
+* Architecture: Reuse and enhance existing tables/components wherever functionality overlaps; avoid creating duplicate tables and functionality.
+* ToE & Tickets: Use the existing List + Item structure for ticket/support workflows and explore reusable list-level templates.
+* PR & Environments: Define a clear Local → Remote Dev → Staging → Production flow with human approval gates and automated GitHub PR testing.
+* LangGraph/LangSmith: Start scaffolding reusable graphs, subgraphs and nodes, with LangSmith supporting agent monitoring/evaluation and knowledge-gap workflows.
+* Knowledge Base: Implement hierarchical and user-specific permissions at Knowledge Base → Node → Article levels, including CRUD/publish/archive permissions.
+* Shared Entity Model: Reduce junction-table sprawl and create reusable shared components such as comments, notes, history, QA, notifications, etc.
+* Assets & Files: Establish a common Asset → File → File Version structure that can be reused across Goals, Knowledge Articles and other entities.
+* Cleanup: During migration, identify and remove dead code, unused tables and obsolete POC functionality.
+* Repository Consolidation: Evaluate consolidation/integration of the Oakbridge and Databricks repositories to avoid manual code/SQL copying and reduce repository sprawl.
 
 Next Steps
 
-* Team to review the architecture/deck and existing repository structure.
-* Assess shared-table/entity, permissions, asset/file and LangGraph requirements.
-* Define PR/staging gates and automated testing approach.
-* Evaluate GitHub/Databricks repository consolidation options.
-* Follow-up discussion to validate understanding and finalize the implementation approach.
+* Team to review the architecture and existing implementation.
+* Prepare recommendations for repository strategy, shared entities, permissions, migration, and PR/staging process.
+* Discuss and validate the proposed approach in the next follow-up meeting.
