@@ -1,20 +1,196 @@
 
-MoM – Today’s Client Meeting
+# Minutes of Meeting – Azure Migration & Future-State Architecture
 
-Key Discussion Points
+## 1. Meeting Objective
 
-* Architecture: Reuse and enhance existing tables/components wherever functionality overlaps; avoid creating duplicate tables and functionality.
-* ToE & Tickets: Use the existing List + Item structure for ticket/support workflows and explore reusable list-level templates.
-* PR & Environments: Define a clear Local → Remote Dev → Staging → Production flow with human approval gates and automated GitHub PR testing.
-* LangGraph/LangSmith: Start scaffolding reusable graphs, subgraphs and nodes, with LangSmith supporting agent monitoring/evaluation and knowledge-gap workflows.
-* Knowledge Base: Implement hierarchical and user-specific permissions at Knowledge Base → Node → Article levels, including CRUD/publish/archive permissions.
-* Shared Entity Model: Reduce junction-table sprawl and create reusable shared components such as comments, notes, history, QA, notifications, etc.
-* Assets & Files: Establish a common Asset → File → File Version structure that can be reused across Goals, Knowledge Articles and other entities.
-* Cleanup: During migration, identify and remove dead code, unused tables and obsolete POC functionality.
-* Repository Consolidation: Evaluate consolidation/integration of the Oakbridge and Databricks repositories to avoid manual code/SQL copying and reduce repository sprawl.
+The discussion focused on defining the **future-state architecture for the Azure migration**, while keeping the immediate implementation scope limited to the originally identified applications, TOAP, and Knowledge Base. The first two application migrations should establish a **“guiding light” / reference architecture** for future enterprise applications.
 
-Next Steps
+## 2. Key Discussion Points
 
-* Team to review the architecture and existing implementation.
-* Prepare recommendations for repository strategy, shared entities, permissions, migration, and PR/staging process.
-* Discuss and validate the proposed approach in the next follow-up meeting.
+### A. Azure & Databricks Architecture
+
+* The team will evaluate **2–3 architecture options** for Azure and specifically for Databricks.
+* Options must be compared using measurable/meaningful parameters such as:
+
+  * Cost
+  * Scalability
+  * Latency
+  * Performance
+  * Security
+  * Reliability
+  * Migration complexity/effort
+  * Maintainability
+  * Operational complexity
+  * Future extensibility
+* The team should provide **pros, cons, assumptions, and a recommendation** for each approach.
+* Databricks architecture should be evaluated specifically from a scalability and future-growth perspective.
+* The recommendation should be based on the client's existing database, code repositories, applications, and expected future-state requirements.
+
+### B. Current State → Future State
+
+The team needs to understand and document:
+
+* Where applications are currently hosted.
+* Where data currently resides.
+* Whether the future state should use one database or multiple databases.
+* What will replace Supabase.
+* Where permissions/authorization will live.
+* Where files, attachments, and Blob Storage will live.
+* How Azure and Databricks will manage access and permissions.
+* How existing redundant tables can potentially be consolidated during migration.
+
+The Azure lift-and-shift should be used as an **opportunity to consolidate redundant tables**, where there is a strong business and technical justification.
+
+### C. Database Consolidation / Pressure Testing
+
+* Do not automatically reproduce every existing table in the future state.
+* The existing database should be **pressure-tested** to identify duplicate or overlapping functionality.
+* Before creating new infrastructure or backend functionality, establish a solid business/technical reason that the capability must remain separate.
+* Consolidation may involve trade-offs, so those trade-offs should be explicitly documented.
+* Avoid creating multiple backend implementations of the same enterprise capability.
+
+### D. Shared Enterprise Platform
+
+The desired Oil Console architecture should provide reusable shared capabilities for future applications.
+
+Potential shared capabilities include:
+
+* Files/documents
+* Comments
+* Notifications
+* Work items / To-Dos
+* Approvals
+* Entity relationships
+* Entity-level permissions
+* Agent runs
+
+The preferred principle is:
+
+> **Duplicate UI where necessary, but avoid duplicating backend functionality and data models.**
+
+### E. Universal Entity Graph
+
+The future architecture should explore a **universal entity graph** as a common foundation.
+
+The graph could connect entities such as:
+
+* Vendors
+* Carriers
+* Goals
+* Knowledge Base articles
+* Contracts
+* Spend
+* Other future first-class entities
+
+A shared/polymorphic relationship model should allow the platform to determine how entities are related without creating separate relationship implementations for every application.
+
+### F. Entity-Level Authorization
+
+The proposed authorization model should support permissions on a **specific first-class entity record**, rather than only application-wide roles.
+
+Conceptually:
+
+**User/Team → Entity Contributor → Entity Record → Role → Permissions**
+
+Potential roles include:
+
+* Viewer
+* Editor
+* Publisher
+
+The model should support both:
+
+* Individual users
+* Teams/groups
+
+This allows, for example, an entire EXL team to receive viewer/editor access to specific records while team membership automatically determines inherited access.
+
+The authorization hierarchy and permission model need to be explored in greater detail beyond the current basic access/PDPP implementation.
+
+### G. Unified Work / Notification Experience
+
+The long-term goal is for users to have **one central location for work requiring attention**, rather than checking multiple applications.
+
+Examples include:
+
+* TOAP item movements
+* Knowledge Base article approvals
+* Carrier creation
+* Agent/HITL decisions
+* Future application workflows
+
+These should ultimately surface through a common work/task experience and be paired with appropriate notifications.
+
+The NerveHub concept was referenced as an example of a centralized location for work and process tracking.
+
+### H. Centralized Agent Runs
+
+Agent executions should potentially use a shared **Agent Run** model.
+
+An Agent Run could capture:
+
+* Unique run ID
+* Agent
+* Session
+* User
+* Status
+* Related entity/entities
+* Execution information
+
+The relationship between agent runs and entities should support the same shared/polymorphic architecture principles.
+
+### I. Salesforce Future State
+
+The team should consider the possibility that Salesforce functionality could eventually be replaced by another application within the Oil Console/monorepo.
+
+Therefore, the future architecture should avoid creating unnecessary dependencies that assume Salesforce will always remain part of the platform.
+
+### J. Migration Scope
+
+* The current implementation remains **narrowly scoped to the original applications, TOAP, and Knowledge Base migration**.
+* Development of POCs, agents, vendor applications, carrier applications, etc. should continue.
+* The future-state architecture should guide those efforts but should not unnecessarily expand the immediate migration scope.
+* The first two migrated applications should act as the **reference implementation / guiding light** for future applications.
+
+## 3. Expected Deliverable for Next Call
+
+The next call is considered **critical**. The team should prepare a detailed architecture/comparison study covering:
+
+1. Current-state architecture.
+2. Future-state architecture principles.
+3. 2–3 Azure architecture options.
+4. 2–3 Databricks approaches where applicable.
+5. Cost comparison.
+6. Scalability comparison.
+7. Latency/performance comparison.
+8. Security and permissions model.
+9. Data/database strategy.
+10. File and Blob Storage strategy.
+11. Shared entity and relationship model.
+12. Entity-level user/team authorization.
+13. Shared work/notification model.
+14. Agent-run architecture.
+15. Database consolidation opportunities.
+16. Migration effort and timeline.
+17. Risks and trade-offs.
+18. Recommended approach and rationale.
+
+The team should be prepared to **defend the recommendation and answer detailed questions from senior leadership/CIO/CEO-level stakeholders**.
+
+## 4. Collaboration / Next Steps
+
+* Work closely across the team, particularly with **Sachin and Sabir**.
+* Keep **Deepika and Abhishek** in the loop so the architecture remains aligned with the broader EXL work.
+* Reach out to **Stefan** where additional expertise is required.
+* Involve **Haril** for Databricks-specific expertise where needed.
+* Review the existing database and code repositories thoroughly before making architectural recommendations.
+* Prepare detailed questions and do sufficient homework before the next client call.
+* The team should focus on bringing its own **technical expertise and recommendations**, rather than expecting the client to prescribe the architecture.
+
+## 5. Overall Architectural Principle
+
+The future platform should provide a **scalable, reusable enterprise foundation** where applications share common data, entities, permissions, relationships, work items, notifications, files, and agent capabilities wherever practical.
+
+The guiding principle is:
+
+> **Build the foundation once, establish clear guardrails, avoid redundant backend implementations, and allow future applications to build on the same platform without breaking the underlying architecture.**
