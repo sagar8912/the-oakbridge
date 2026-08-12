@@ -1,51 +1,49 @@
 
-MoM – John’s Key Discussion & Action Items
-COURTLISTENER_API_KEY="96cdf820160de43af8d2cdfaf9d5853cfa5066df"
-Key Architectural Principles
+MoM – Oakbridge Application & Architecture Discussion
 
-* Reuse before creating: If a feature has significant overlap with existing functionality, enhance/reuse the existing shared table, entity, or UI component instead of creating a new one.
-* Avoid table/junction sprawl: Consolidate relationships (Goal–Team, Vendor–Tag, Item–Goal, etc.) into a common entity/relationship model where appropriate.
-* Establish governance to decide whether a feature should become a first-class entity or use an existing shared entity.
-* Shared UI/UX components, notifications, permissions, comments, notes, history, approvals, QA runs, reactions, etc. should be reusable across entities.
+Key Discussion Points
 
-Knowledge Base & Permissions
-
-* Implement granular knowledge-base permissions at:
-    * Knowledge Base level
-    * Hierarchy-node level
-    * Individual article level
-* Permissions should support actions such as view, create, edit, delete, publish and archive.
-* Higher-level permissions should flow down unless overridden at a more specific level.
-
-LangSmith / LangGraph
-
-* LangSmith should be the technical operating/observability layer for LLM calls and evaluation data.
-* Start scaffolding LangGraph graphs, subgraphs and nodes.
-* Create the relationship between application records and deployed agents/graphs so users can see and execute agent workflows against records.
-* Knowledge gaps identified through evaluation should feed the knowledge-content workflow.
-
-Environment & PR/Release Process
-
-* Establish a clear flow: Local Dev → Remote Dev/shared DB → Staging → Production.
-* Define both human stage gates and automated GitHub PR tests/checks.
-* Production should contain only explicitly approved changes; PRs/features need clear scope and validation before promotion.
-
-Asset & File Management
-
-* Create a common Asset → Files → File Versions model across the monorepo.
-* Assets should be polymorphic/reusable, allowing one uploaded document to relate to multiple entities without duplicate uploads.
-* Support file versioning (V1, V2, V3…) and consistent underlying storage integration.
-* Review how the Knowledge Base currently handles attachments and align it with the common model.
-
-Migration & Cleanup
-
-* During migration, identify and remove dead code, unused tables and obsolete POC functionality.
-* Review tables such as LLM Settings and determine whether they are still required or should be replaced by existing LangSmith configuration.
-* Where tables have overlapping functionality, collapse/consolidate them rather than maintaining duplicates.
-* The goal is to reduce technical debt, simplify the architecture and eliminate potential sources of bugs.
+1. Architecture Principles
+    * Prioritize reusability of existing tables, components and functionality instead of creating new tables for similar business needs.
+    * Maintain a common/monorepo architecture to avoid duplicated functionality and isolated applications.
+    * Use proper architecture governance to decide whether a feature should extend an existing first-class entity or require a new entity.
+2. ToE / Ticket Functionality
+    * Use the existing ToE List + Item model for support tickets and similar workflows.
+    * Explore per-list templates so different workflows can have different UI while sharing the same underlying data structure.
+3. PR, Environments & Testing
+    * Define clear local → remote development → staging → production flow.
+    * Establish both human stage gates and automated GitHub PR tests/actions before promotion.
+    * Ensure features are properly validated in staging before production.
+4. LangSmith / LangGraph
+    * LangSmith should be the main technical/observability platform for LLM evaluation and knowledge-gap identification.
+    * Start scaffolding LangGraph graphs, subgraphs and nodes.
+    * Create a common relationship/junction between applications, agents and LangSmith executions to support human-in-the-loop workflows.
+5. Knowledge Base & Permissions
+    * Implement hierarchical permissions at Knowledge Base → Hierarchy Node → Article levels.
+    * Support user-specific View/Create/Edit/Delete/Publish/Archive permissions.
+    * Permissions should inherit from higher levels but allow more granular overrides at lower levels.
+6. Shared Entities & Components
+    * Reduce junction-table sprawl by creating a shared entity/relationship model where appropriate.
+    * Common components such as notes, comments, history, QA runs, suggestions, approvals, reactions, notifications, etc. should be reusable across first-class entities.
+    * Maintain consistent UI/UX for these shared components across applications.
+7. Assets & File Management
+    * Define a common Asset → File → File Version structure.
+    * Assets should be polymorphic and reusable across goals, knowledge articles and other entities.
+    * Establish consistent file/version management and storage architecture across the monorepo.
+8. Database & Code Cleanup
+    * During migration, identify and remove dead code, unused tables and obsolete proof-of-concept functionality.
+    * Consolidate tables where functionality significantly overlaps.
+    * Review whether configuration tables such as LLM settings are still required or should be managed through LangSmith.
+9. GitHub / Repository Consolidation
+    * Multiple GitHub organizations/repositories currently create repository sprawl.
+    * Evaluate consolidation/branch-based integration between the Oakbridge R&D repository and the separate Databricks/Azure DevOps repository.
+    * Goal is to avoid manual SQL/code copying and provide proper change tracking and merging.
+    * Team to discuss internally and propose a repository strategy within the next couple of weeks.
 
 Next Steps
 
-* Team to review John’s architecture documents/deck and current implementation.
-* Deep-dive into existing tables, entities, permissions, file management and edge cases.
-* Come back with the team’s understanding, proposed approach and areas requiring clarification before implementation.
+* Team to review the architecture/deck and existing repository structure.
+* Assess shared-table/entity, permissions, asset/file and LangGraph requirements.
+* Define PR/staging gates and automated testing approach.
+* Evaluate GitHub/Databricks repository consolidation options.
+* Follow-up discussion to validate understanding and finalize the implementation approach.
