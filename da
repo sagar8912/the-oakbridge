@@ -1,127 +1,184 @@
-Oakbridge Knowledge Base
-Detailed Product Capabilities & Operating Flows
-Knowledge Admin + The Oakbridge Way  |  Client Discussion Document  |  August 2026
-This document describes how the Oakbridge Knowledge Base works in production terms: how content is authored, governed, published, consumed inside The Oakbridge Way, controlled by access rules, extended with documents and GitHub foundations, and prepared for AI assistants — always with human approval before knowledge becomes organizational truth.
-Two product surfaces work together:
-•	Knowledge Admin — authoring, review, publishing, administration, documents, and GitHub foundations.
-•	The Oakbridge Way — reading and searching approved articles, and linking knowledge to goals, items, and day-to-day work.
-Publishing rule: Approve = Publish. Only content in Approved (Published) status is shown to readers in The Oakbridge Way and used as the source of truth for search and assistants.
-1. Content Authoring
-Authors write knowledge in a Markdown editor designed for operational documentation, not just plain notes. The editor supports three working modes so writers can move fluidly between drafting and quality checking:
-•	Edit — full Markdown drafting surface.
-•	Preview — rendered reading view of the same content.
-•	Split — side-by-side edit and preview for faster iteration.
-Supported content structures include tables, images, lists, checklists, fenced code, Mermaid diagrams, callout blocks, mathematical equations, and media links (including video). This allows policies, playbooks, implementation notes, and process guidance to live in one governed format.
-New content begins as Draft. Authors cannot create an article already in Approved status. That constraint is intentional: publishing is always an explicit governance action.
-2. Content Governance — Draft, Review, Approval
-Knowledge Admin uses a clear editorial lifecycle:
-Status	What it means	Who typically acts
-Draft	Work in progress; editable by authorized authors; not visible to general readers.	Author / Editor
-In Review	Submitted for quality and accuracy review; waiting for approval decision.	Approver / Admin / Owner
-Approved (Published)	Live organizational knowledge; available in The Oakbridge Way and approved search/assistant paths.	Approver / Admin / Owner
-2.1 Publishing lifecycle (end-to-end)
-1.	Author opens a workflow/article under the Knowledge Admin hierarchy and creates or edits Markdown content.
-2.	Content is saved as Draft.
-3.	Author selects Submit for Review → status becomes In Review.
-4.	Reviewer opens the article or the Content Review queue.
-5.	Reviewer either Approve Content (publish) or Send Back to Draft for rework.
-6.	On approval, a version snapshot is recorded, search/index refresh is attempted, and The Oakbridge Way cache is invalidated so readers see current published knowledge.
- 
-Figure 1 — Article Publishing Lifecycle (Draft → In Review → Approved)
-If an Approved article is later edited as live content by someone with live-edit rights, the working body returns to Draft until it is re-approved. Prior published history remains available in version snapshots.
-3. Article History — Versions & Restore
-Each approval creates an immutable version snapshot. This gives the organization an audit trail of what was published and when, and protects against accidental loss of prior wording.
-From Version History, authorized users can compare versions and choose Restore as Draft. Restore never publishes automatically. The restored wording becomes Draft working content; teams must submit and approve again before it becomes live.
- 
-Figure 2 — Version History and Restore-as-Draft
-•	History rows are retained; restore appends a new historical record rather than erasing the past.
-•	Readers continue to see the previously Approved published body until a new approval occurs.
-•	This model supports rollback, auditability, and controlled republishing.
-4. Content Suggestions — Safer Collaboration on Live Content
-Not everyone who can contribute should silently overwrite published knowledge. When an article is Approved and a collaborator does not have live-edit rights, they use Suggest Changes instead of direct edit.
-1.	Collaborator opens an Approved article and submits a proposed Markdown update (optionally with a reason).
-2.	The suggestion is stored separately with status pending; live content remains unchanged.
-3.	Owner / assigned reviewer / authorized approver reviews a diff of live vs proposed content.
-4.	Decision options: Approve & Merge (apply and re-approve), Request Changes, or Reject.
- 
-Figure 3 — Content Suggestion Flow (live content protected until acceptance)
-Client takeaway: Suggestions enable contribution at scale without risking uncontrolled replacement of published knowledge. Live content changes only after an explicit accept-and-approve decision.
-5. Knowledge Navigation
-Knowledge Admin organizes content in a structured hierarchy so teams can manage large knowledge estates:
-Knowledge Base → Journey → Category → Bucket → Article/Workflow
-Administrators and authors use this structure for placement, ownership context, browsing, and operational management.
-In The Oakbridge Way, readers use a focused Knowledge experience optimized for consumption:
-•	Knowledge Base catalog / home
-•	Category browsing
-•	Article reading
-•	Search across approved articles
-This separation is deliberate: administration needs depth; day-to-day users need clarity and speed.
-6. Search and Reading in The Oakbridge Way
-Signed-in users with Knowledge access can search and read Approved articles inside The Oakbridge Way.
-1.	User authenticates to The Oakbridge Way.
-2.	Access is evaluated (KB role and/or valid scoped context).
-3.	User browses Knowledge or searches for approved articles.
-4.	Article body is returned only when the article is Approved for reader consumption.
- 
-Figure 4 — How published knowledge reaches The Oakbridge Way
-Draft and In Review content remain outside the reader surface. Unauthorized users receive a clear access-denied experience rather than partial unpublished content.
-7. Contextual Links — Goals, Items, and Tickets
-Published knowledge is most valuable when connected to active work.
-7.1 Goals and Items (The Oakbridge Way)
-•	From a Goal or Item, users with permission can attach related Approved Knowledge Base articles.
-•	Relationship types support clear intent: Supports, References, Implementation, Policy.
-•	Links are bidirectional for navigation context; unlinking removes the association without deleting the article.
-7.2 Tickets (Knowledge Admin engineering context)
-•	Articles can also be linked to engineering/ticket systems (for example Jira, ServiceNow, Azure DevOps) for operational traceability.
-•	This complements Goal/Item links: strategy and execution on one side, engineering workflow on the other.
-8. Access Management
-Access is designed in layers so organizations can be open where appropriate and strict where required.
-Layer	What it controls
-Sign-in / platform role	Authenticated identity; elevated platform roles (for example Super Admin) where applicable.
-KB role	Baseline product capability: Reader, Editor, Admin.
-Feature permissions	Fine-grained administration of view/create/edit/publish, submit/approve/reject review, user management, GitHub, and related admin features.
-Scoped grants	Limits access to specific Knowledge Bases or hierarchy nodes when broad access is not desired.
-Content ownership	On Approved articles, live edit vs Suggest Changes depends on ownership and permission — protecting published truth.
- 
-Figure 5 — Access Control Layers
-In practice, the combination of role, feature permission, scoped grant, and ownership determines whether a person can read published knowledge, author drafts, submit for review, approve publishing, or administer integrations.
-9. Documents and GitHub Foundations
-9.1 Managed documents
-Knowledge Admin supports managed document uploads (such as PDF/DOCX) with versioned handling and hierarchy linking. After upload, documents move through processing into a ready state for administrative use and indexing. This allows supporting material to live alongside canonical articles without replacing the article approval model.
-1.	Authorized admin uploads a document scoped to a hierarchy node / Knowledge Base.
-2.	System validates and stores the file, then processes/extracts content.
-3.	A document version is recorded; indexing is attempted for retrieval use.
-4.	Document remains administratively managed and searchable as reference material.
-9.2 GitHub synchronization foundations
-GitHub integration provides a foundation for aligning engineering documentation with the Knowledge Base:
-•	Connect repositories and configure branches/paths and destination Knowledge Base mapping.
-•	Sync on demand or via repository events.
-•	Ingested material can be staged according to configured publish mode (draft / review / publish).
-•	Default posture for generated/imported knowledge remains human-controlled: draft or review before live approval unless an organization explicitly configures otherwise.
-Client takeaway: Treat GitHub sync as an operational foundation for bringing documentation into governance — not as an unsupervised replacement for human publishing judgment.
-10. AI Readiness — Retrieval with Human Approval
-Search and retrieval tooling is available for assistants and integrations. The design principle is consistent with reading:
-•	Assistants and retrieval paths are built to use Approved knowledge as the authoritative source.
-•	Draft and In Review content are not treated as organizational truth for reader/assistant answers.
-•	Generated or imported material is intended to land under review and receive human approval before becoming live approved content.
-1.	Knowledge is authored and approved in Knowledge Admin.
-2.	On approval, version authority is recorded and retrieval indexes are refreshed where applicable.
-3.	Assistant/search asks a question and retrieves from approved sources (and related managed evidence where configured).
-4.	Answers can be grounded with citations/sources for transparency.
-5.	Misses can inform knowledge-gap follow-up so humans close content holes deliberately.
-11. How It All Fits Together
-Stage	Where it happens	Result
-Author & structure	Knowledge Admin	Draft knowledge in hierarchy with rich Markdown
-Govern & publish	Knowledge Admin review workflow	Approved (Published) + version snapshot
-Collaborate safely	Suggestions on Approved articles	Proposed changes without overwriting live content
-Consume	The Oakbridge Way	Browse/search/read approved knowledge
-Connect to work	Goals, Items, Tickets	Contextual links at the point of need
-Control access	Roles, features, scoped grants, ownership	Least-privilege administration and publishing
-Extend sources	Managed documents & GitHub foundations	Broader governed evidence under admin control
-AI assist	Retrieval / assistant tooling	Approved-source answers with human publish gate
-In one sentence: Knowledge Admin creates and governs the truth; The Oakbridge Way puts approved truth into daily work; access and approval rules keep unpublished material from becoming organizational fact too early.
-Prepared for client discussion — Oakbridge Knowledge Base
-Product surfaces: Knowledge Admin · The Oakbridge Way
-This document reflects product capabilities delivered for governed content authoring, publishing, reading, linking, access control, documents/GitHub foundations, and AI-ready retrieval under human approval.
- 
- 
+
+1. Meeting Objective
+
+The discussion focused on defining the future-state architecture for the Azure migration, while keeping the immediate implementation scope limited to the originally identified applications, TOAP, and Knowledge Base. The first two application migrations should establish a “guiding light” / reference architecture for future enterprise applications.
+
+2. Key Discussion Points
+A. Azure & Databricks Architecture
+The team will evaluate 2–3 architecture options for Azure and specifically for Databricks.
+Options must be compared using measurable/meaningful parameters such as:
+Cost
+Scalability
+Latency
+Performance
+Security
+Reliability
+Migration complexity/effort
+Maintainability
+Operational complexity
+Future extensibility
+The team should provide pros, cons, assumptions, and a recommendation for each approach.
+Databricks architecture should be evaluated specifically from a scalability and future-growth perspective.
+The recommendation should be based on the client's existing database, code repositories, applications, and expected future-state requirements.
+B. Current State → Future State
+
+The team needs to understand and document:
+
+Where applications are currently hosted.
+Where data currently resides.
+Whether the future state should use one database or multiple databases.
+What will replace Supabase.
+Where permissions/authorization will live.
+Where files, attachments, and Blob Storage will live.
+How Azure and Databricks will manage access and permissions.
+How existing redundant tables can potentially be consolidated during migration.
+
+The Azure lift-and-shift should be used as an opportunity to consolidate redundant tables, where there is a strong business and technical justification.
+
+C. Database Consolidation / Pressure Testing
+Do not automatically reproduce every existing table in the future state.
+The existing database should be pressure-tested to identify duplicate or overlapping functionality.
+Before creating new infrastructure or backend functionality, establish a solid business/technical reason that the capability must remain separate.
+Consolidation may involve trade-offs, so those trade-offs should be explicitly documented.
+Avoid creating multiple backend implementations of the same enterprise capability.
+D. Shared Enterprise Platform
+
+The desired Oil Console architecture should provide reusable shared capabilities for future applications.
+
+Potential shared capabilities include:
+
+Files/documents
+Comments
+Notifications
+Work items / To-Dos
+Approvals
+Entity relationships
+Entity-level permissions
+Agent runs
+
+The preferred principle is:
+
+Duplicate UI where necessary, but avoid duplicating backend functionality and data models.
+
+E. Universal Entity Graph
+
+The future architecture should explore a universal entity graph as a common foundation.
+
+The graph could connect entities such as:
+
+Vendors
+Carriers
+Goals
+Knowledge Base articles
+Contracts
+Spend
+Other future first-class entities
+
+A shared/polymorphic relationship model should allow the platform to determine how entities are related without creating separate relationship implementations for every application.
+
+F. Entity-Level Authorization
+
+The proposed authorization model should support permissions on a specific first-class entity record, rather than only application-wide roles.
+
+Conceptually:
+
+User/Team → Entity Contributor → Entity Record → Role → Permissions
+
+Potential roles include:
+
+Viewer
+Editor
+Publisher
+
+The model should support both:
+
+Individual users
+Teams/groups
+
+This allows, for example, an entire EXL team to receive viewer/editor access to specific records while team membership automatically determines inherited access.
+
+The authorization hierarchy and permission model need to be explored in greater detail beyond the current basic access/PDPP implementation.
+
+G. Unified Work / Notification Experience
+
+The long-term goal is for users to have one central location for work requiring attention, rather than checking multiple applications.
+
+Examples include:
+
+TOAP item movements
+Knowledge Base article approvals
+Carrier creation
+Agent/HITL decisions
+Future application workflows
+
+These should ultimately surface through a common work/task experience and be paired with appropriate notifications.
+
+The NerveHub concept was referenced as an example of a centralized location for work and process tracking.
+
+H. Centralized Agent Runs
+
+Agent executions should potentially use a shared Agent Run model.
+
+An Agent Run could capture:
+
+Unique run ID
+Agent
+Session
+User
+Status
+Related entity/entities
+Execution information
+
+The relationship between agent runs and entities should support the same shared/polymorphic architecture principles.
+
+I. Salesforce Future State
+
+The team should consider the possibility that Salesforce functionality could eventually be replaced by another application within the Oil Console/monorepo.
+
+Therefore, the future architecture should avoid creating unnecessary dependencies that assume Salesforce will always remain part of the platform.
+
+J. Migration Scope
+The current implementation remains narrowly scoped to the original applications, TOAP, and Knowledge Base migration.
+Development of POCs, agents, vendor applications, carrier applications, etc. should continue.
+The future-state architecture should guide those efforts but should not unnecessarily expand the immediate migration scope.
+The first two migrated applications should act as the reference implementation / guiding light for future applications.
+3. Expected Deliverable for Next Call
+
+The next call is considered critical. The team should prepare a detailed architecture/comparison study covering:
+
+Current-state architecture.
+Future-state architecture principles.
+2–3 Azure architecture options.
+2–3 Databricks approaches where applicable.
+Cost comparison.
+Scalability comparison.
+Latency/performance comparison.
+Security and permissions model.
+Data/database strategy.
+File and Blob Storage strategy.
+Shared entity and relationship model.
+Entity-level user/team authorization.
+Shared work/notification model.
+Agent-run architecture.
+Database consolidation opportunities.
+Migration effort and timeline.
+Risks and trade-offs.
+Recommended approach and rationale.
+
+The team should be prepared to defend the recommendation and answer detailed questions from senior leadership/CIO/CEO-level stakeholders.
+
+4. Collaboration / Next Steps
+Work closely across the team, particularly with Sachin and Sabir.
+Keep Deepika and Abhishek in the loop so the architecture remains aligned with the broader EXL work.
+Reach out to Stefan where additional expertise is required.
+Involve Haril for Databricks-specific expertise where needed.
+Review the existing database and code repositories thoroughly before making architectural recommendations.
+Prepare detailed questions and do sufficient homework before the next client call.
+The team should focus on bringing its own technical expertise and recommendations, rather than expecting the client to prescribe the architecture.
+5. Overall Architectural Principle
+
+The future platform should provide a scalable, reusable enterprise foundation where applications share common data, entities, permissions, relationships, work items, notifications, files, and agent capabilities wherever practical.
+
+The guiding principle is:
+
+Build the foundation once, establish clear guardrails, avoid redundant backend implementations, and allow future applications to build on the same platform without breaking the underlying architecture.
