@@ -1,254 +1,58 @@
-WAVE 4 — FINAL VERIFICATION / DIFF REVIEW ONLY
+WAVE 4 — FINAL CLEAN VERIFICATION
 
-Wave 4 implementation is complete.
+Do NOT make any code changes.
 
-IMPORTANT:
-- Do NOT make any further code changes.
-- Do NOT modify Wave 3.
-- Do NOT start Wave 5.
-- Do NOT create a PR.
-- Do NOT commit anything.
-- Do NOT apply any migration to Staging.
-- Do NOT execute INSERT/UPDATE/DELETE/DDL/RPC deployment against Staging.
-- Do NOT run destructive git or database commands.
-- This is a READ-ONLY FINAL REVIEW.
+Do NOT start Wave 5.
+Do NOT create a PR.
+Do NOT commit.
+Do NOT apply the Wave 4 migration to Staging.
+Do NOT perform destructive operations.
 
-The goal is to verify exactly what Wave 4 changed and confirm whether Wave 4 is complete.
+Wave 4 implementation is already complete.
 
-==================================================
-1. GIT / DIFF REVIEW
-==================================================
+I need a final verification only.
 
-Inspect the current working tree and produce:
+1. Run the appropriate existing NEXT/KB Admin production build command.
+   - Do not modify code to make the build pass.
+   - Report the exact command and result.
 
-- git status
-- complete list of changed/untracked files
-- diff/stat summary
-- important code/config/SQL changes
+2. Review the current git diff/status.
 
-For every changed file, explain briefly:
-- why it changed
-- what Wave 4 functionality it supports
-- whether it affects Wave 3 behavior
+3. Separate ALL changed files into:
+   A. Wave 4 intentional changes
+   B. Previous-wave changes that must remain
+   C. Unrelated/pre-existing changes
+   D. Test-only changes
 
-Do NOT modify anything.
+4. For every file classified as unrelated/pre-existing, explain why it is not part of Wave 4.
+   Do NOT revert anything automatically.
 
-==================================================
-2. WAVE 4 REQUIREMENTS CHECK
-==================================================
+5. Verify Wave 3 behavior is unchanged.
 
-Check the implementation against every Wave 4 requirement:
+6. Verify that KB Admin authorization uses the Wave 3 centralized evaluator and that no second permission engine was introduced.
 
-A. KB Admin authorization
-- Knowledge Base
-- Hierarchy node
-- Workflow
-- Content type
+7. Specifically inspect and report:
+   - hasKBRole usage
+   - requireKnowledgeBaseInScope
+   - frontend-only permission checks
+   - direct/legacy KB authorization checks
+   - duplicated evaluator logic
 
-B. Users / Groups / Roles
-- view permissions
-- assign permissions
-- remove permissions
-- explicit vs inherited
-- permission source
+8. Do NOT fix anything. This is verification only.
 
-C. Effective permissions
-- effective permission
-- explicit permission
-- inherited permission
-- permission source
+9. Report:
 
-D. Overrides
-- create
-- remove
-- view
-- existing hierarchy inheritance respected
-
-E. Backend API protection
-- server-side authorization
-- centralized evaluator used
-- no frontend-only security
-
-F. Hierarchy inheritance
-- parent → child inheritance
-- no duplicated frontend calculation
-
-G. Frontend
-- centralized authorization APIs consumed
-- effective permission visible
-- source visible
-- explicit/inherited visible
-- user/group/role visible
-- scope visible
-- override state visible
-
-H. Backward compatibility
-Verify existing:
-- KB navigation
-- content management
-- workflows
-- hierarchy operations
-- role management
-- group management
-- user management
-
-remain intact.
-
-==================================================
-3. CENTRALIZED EVALUATOR VERIFICATION
-==================================================
-
-Search the entire repository for authorization paths.
-
-Specifically search for:
-
-- centralized evaluator usage
-- old KB permission checks
-- direct permission checks
-- feature-based permission checks
-- role-based checks
-- group-based checks
-- frontend-only authorization
-- duplicated inheritance logic
-- duplicated override logic
-- old KB-specific authorization
-
-For every authorization path found, classify it as:
-
-1. Uses centralized evaluator
-2. Intentionally retained compatibility logic
-3. Potential bypass / concern
-
-If anything looks like a bypass, DO NOT fix it now.
-
-Report it clearly as a remaining risk.
-
-==================================================
-4. WAVE 3 REGRESSION CHECK
-==================================================
-
-Verify that Wave 3 remains unchanged.
-
-Check:
-
-- permission catalog
-- canonical kb.* permission keys
-- centralized evaluator
-- ALLOW/DENY semantics
-- scope semantics
-- hierarchy semantics
-- overrides
-- permission audit behavior
-- existing SQL decision path
-
-Confirm whether Wave 4 introduced any regression risk.
-
-==================================================
-5. DATABASE / MIGRATION REVIEW
-==================================================
-
-Inspect all Wave 4 SQL/migration files.
-
-DO NOT APPLY THEM.
-
-Report:
-
-- migration filenames
-- tables affected
-- functions/RPCs affected
-- triggers affected
-- policies affected
-- whether any new permission system was introduced
-- whether existing Wave 3 permission entities are reused
-
-Explicitly confirm:
-
-- no unnecessary permission tables
-- no second PDP/PEP
-- no duplicate grant model
-- no destructive migration
-- no Staging database changes were executed
-
-==================================================
-6. TEST / BUILD RESULTS
-==================================================
-
-Review the test/build results already executed.
-
-Report separately:
-
-- Unit tests
-- Vitest tests
-- Backend tests
-- TypeScript/typecheck
-- Build
-- Any failures/warnings
-
-Do NOT rerun anything that would connect to or mutate Staging.
-
-If a test cannot safely run without Staging, mark it:
-
-DEFERRED — STAGING VERIFICATION REQUIRED
-
-Do not attempt to work around this by creating a local Supabase instance.
-
-==================================================
-7. FINAL FILE SUMMARY
-==================================================
-
-Create a concise table:
-
-| File | Change | Wave 4 Purpose | Wave 3 Impact |
-|------|--------|----------------|---------------|
-
-Include all Wave 4 changed files.
-
-==================================================
-8. FINAL API SUMMARY
-==================================================
-
-List:
-
-- existing APIs reused
-- new APIs
-- modified APIs
-- authorization enforcement points
-
-For each API, state whether authorization is enforced server-side.
-
-==================================================
-9. FINAL STATUS
-==================================================
-
-End with exactly:
-
-WAVE 4 STATUS: COMPLETE / COMPLETE WITH DEFERRED STAGING VERIFICATION / NOT COMPLETE
-
-Then provide:
-
-A. Files changed
-B. APIs changed
-C. Database/migrations changed
-D. Centralized evaluator integration points
-E. Authorization paths reviewed
-F. Tests executed and results
-G. Typecheck/build results
-H. Remaining risks
-I. Staging verification deferred
-J. Wave 3 behavior preserved: YES/NO
+A. Build result
+B. Exact Wave 4 files
+C. Non-Wave-4 files
+D. Tests already passed
+E. Typecheck result
+F. Wave 3 preservation result
+G. Remaining risks
+H. Staging verification that is intentionally deferred
+I. Final recommendation: READY FOR STAGING / NOT READY
 
 IMPORTANT:
-
-This is a verification-only step.
-
-DO NOT:
-- edit files
-- fix issues
-- refactor
-- create PR
-- commit
-- start Wave 5
-- apply migrations
-- modify Staging
-
-If you discover an issue, REPORT it only.
+The repository connects directly to STAGING Supabase.
+Do not attempt to create or use a local Supabase/Postgres instance.
+Do not execute the Wave 4 migration against Staging.
