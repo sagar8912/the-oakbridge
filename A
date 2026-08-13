@@ -1,59 +1,243 @@
-Wave 1 appears to be complete.
+Wave 1 is complete and all Wave 1 tests pass locally.
 
-Do NOT start Wave 2.
+Now implement ONLY WAVE 2: UNIFY L0 / ABSORB kb_user_feature_permissions INTO EXISTING user_permission_grants.
 
-Before I accept the Wave 1 changes, give me a verification report only. Do not modify any files.
+Do NOT start Wave 3, Wave 4, Wave 5, or Wave 6.
+Do NOT redesign the authorization architecture.
+Do NOT create a second PDP.
+Do NOT change the SQL-first source of truth.
+Do NOT rewrite RLS.
+Do NOT create kb_user_roles or kb_role_assignments.
+Do NOT create a new permission/grant table.
+Do NOT create entity_relationships yet.
+Do NOT modify unrelated OOO permissions.
 
-I need you to verify the actual implementation against the Wave 1 requirements.
+Follow the existing Wave 0 mapping exactly:
+kb_user_feature_permissions.feature_id
+        ↓
+kb_feature_permission_map / map_kb_feature_id_to_permission_key
+        ↓
+existing permission_catalog key
+        ↓
+existing user_permission_grants
 
-Report:
+OBJECTIVE
 
-1. EXACT files changed in Wave 1.
-2. Which files belong specifically to:
-    * packages/authorization
-    * KB Admin
-    * SQL/RPC
-    * tests
-    * OOO
-3. Identify the exact PolicyEvaluator implementation that is now being used for KB authorization.
-4. Show the authorization call flow before and after Wave 1.
+Absorb the existing KB feature-level user overrides from:
 
-Expected target:
+    kb_user_feature_permissions
 
-KB Admin PEP
-↓
-packages/authorization
-↓
-PolicyEvaluator
-↓
-existing SQL/RPC PDP
-↓
-RLS/database enforcement
-↓
-permission_audit_log
+into the existing:
 
-5. Confirm whether any new PDP or PEP was created.
-    Expected: NO.
-6. Confirm whether any new permission tables were created.
-    Expected: NO.
-7. Confirm whether kb_user_feature_permissions was dropped or migrated.
-    Expected: NO in Wave 1.
-8. Confirm whether entity_relationships was created.
-    Expected: NO.
-9. Confirm whether RLS policies were changed.
-    Expected: NO.
-10. Confirm whether permission semantics changed.
-    Expected: NO.
-11. Confirm that requireKBPermission and requireKBEntityPermission are now shared-authorization wrappers/adapters rather than independent permission waterfalls.
-12. Identify which existing SQL/RPC functions remain the source of truth.
-13. Confirm OOO authorization behavior was not changed.
-14. List all tests executed and their results.
-15. If any tests were not executed, explain why.
-16. Identify any potentially risky changes among the 22 changed files.
-17. Show a concise before-vs-after authorization flow.
-18. Confirm whether Wave 1 is safe to accept.
+    user_permission_grants
+
+while preserving current behavior and keeping SQL as the authorization source of truth.
 
 IMPORTANT:
-Do not make any additional code changes.
-Do not commit anything.
-Do not start Wave 2.
+kb_user_feature_permissions must NOT be dropped in Wave 2.
+
+WAVE 2 REQUIREMENTS
+
+1. FIRST inspect the repository and current Wave 0 + Wave 1 changes.
+
+Verify:
+- current permission_catalog implementation
+- kb_feature_permission_map / map_kb_feature_id_to_permission_key
+- user_permission_grants schema and existing scope types
+- kb_user_feature_permissions schema
+- existing SQL RPCs/functions used for permission evaluation
+- existing tests
+- Wave 1 implementation
+
+Do not assume column names or schema details. Read the actual migrations/types/functions first.
+
+2. DUAL-WRITE
+
+When a KB feature-level permission override is created, updated, or deleted, write the equivalent permission into:
+
+    user_permission_grants
+
+using the existing canonical permission key from the Wave 0 mapping.
+
+Preserve the existing KB feature permission semantics.
+
+Do NOT introduce a new permission model.
+
+3. SCOPE
+
+Use the existing user_permission_grants scope model.
+
+Map the KB feature override to the appropriate existing scope/entity dimensions.
+
+Do NOT invent new scope types unless the repository proves an existing scope type is required and already supported by the architecture.
+
+The canonical permission key MUST come from:
+
+    kb_feature_permission_map
+    / map_kb_feature_id_to_permission_key
+
+Do not hard-code a second mapping.
+
+4. PRESERVE THE OLD TABLE
+
+Keep:
+
+    kb_user_feature_permissions
+
+readable and intact.
+
+Do NOT drop it.
+
+Do NOT remove its data.
+
+Do NOT remove existing callers yet.
+
+Wave 2 is a dual-write transition.
+
+5. READ PATH
+
+Do NOT blindly switch every existing caller in Wave 2.
+
+The goal of Wave 2 is to establish the equivalent grant in user_permission_grants while maintaining compatibility.
+
+Only migrate read paths where the existing architecture and tests clearly support it.
+
+Do not break existing KB Admin behavior.
+
+6. SQL REMAINS SOURCE OF TRUTH
+
+Permission decisions must continue to flow through the existing SQL authorization mechanism.
+
+Do not move permission evaluation into TypeScript.
+
+Do not create a TypeScript permission waterfall.
+
+Reuse the existing PolicyEvaluator / authorization infrastructure introduced in Wave 1.
+
+7. NO SECOND PDP
+
+There must remain one shared authorization foundation.
+
+Do NOT create:
+- kb PDP
+- KB-specific permission engine
+- second PolicyEvaluator
+- new permission service
+- new grant resolver
+
+8. MIGRATION SAFETY
+
+If a migration is required, make it staging-safe and reversible where practical.
+
+Before writing the migration, inspect existing migration conventions and constraints.
+
+Do not drop kb_user_feature_permissions.
+
+Do not delete existing grants.
+
+Do not perform destructive data changes unless explicitly required by the existing schema.
+
+9. DATA COMPATIBILITY
+
+Ensure existing KB feature permissions can be represented correctly in user_permission_grants.
+
+Use the exact Wave 0 mapping.
+
+Examples include mappings such as:
+
+view_articles      -> kb.article.read
+create_articles    -> kb.article.create
+edit_articles      -> kb.article.update
+delete_articles    -> kb.article.delete
+publish_articles   -> kb.article.publish
+archive_articles   -> kb.article.archive
+restore_articles   -> kb.article.unarchive
+submit_for_review  -> kb.article.submit_for_review
+
+Also preserve the remaining mappings already established by Wave 0.
+
+Do not invent alternative names.
+
+10. TESTS
+
+Add or update tests specifically for Wave 2.
+
+At minimum verify:
+
+A. Existing kb_user_feature_permissions override can be represented in user_permission_grants.
+
+B. Feature ID is converted through the existing Wave 0 mapping.
+
+C. ALLOW is dual-written correctly.
+
+D. DENY is dual-written correctly if the existing model supports explicit deny.
+
+E. Scope is preserved correctly.
+
+F. Updating an existing feature permission does not create duplicate/conflicting grants.
+
+G. Removing/revoking a feature permission does not leave an unintended active grant.
+
+H. Existing KB authorization behavior remains unchanged.
+
+I. Existing Wave 1 tests still pass.
+
+J. Existing authorization tests still pass.
+
+11. RUN TESTS
+
+Run the relevant tests after implementation.
+
+Then run the existing Wave 1 authorization tests again.
+
+Also run any KB permission/feature tests affected by the change.
+
+Do not claim success unless the tests actually execute and pass.
+
+12. FINAL REPORT
+
+When finished, report:
+
+- files changed
+- migrations added
+- exact mapping used
+- how dual-write works
+- how scope is preserved
+- how backward compatibility is maintained
+- tests executed and results
+- any assumptions or risks
+
+MOST IMPORTANT CONSTRAINTS
+
+Wave 2 ONLY.
+
+The intended architecture is:
+
+Existing KB feature permission
+        ↓
+Wave 0 canonical mapping
+        ↓
+permission_catalog
+        ↓
+user_permission_grants
+        ↓
+existing shared authorization / SQL evaluation
+
+Keep:
+
+    kb_user_feature_permissions
+
+during the transition.
+
+Do NOT:
+- drop kb_user_feature_permissions
+- create kb_user_roles
+- create kb_role_assignments
+- create a second PDP
+- create a second permission engine
+- change RLS
+- create entity_relationships
+- modify later waves
+- change unrelated OOO authorization
+
+Before making changes, inspect the actual repository implementation and give me a short implementation plan. Then implement Wave 2 only.
