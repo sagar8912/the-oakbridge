@@ -1,58 +1,23 @@
-WAVE 4 — FINAL CLEAN VERIFICATION
-
 Do NOT make any code changes.
 
-Do NOT start Wave 5.
-Do NOT create a PR.
-Do NOT commit.
-Do NOT apply the Wave 4 migration to Staging.
-Do NOT perform destructive operations.
+I am currently viewing the KB Admin Permission Management drawer for a user.
 
-Wave 4 implementation is already complete.
+The UI shows:
+- Effective permissions such as Read/Create/Edit/Approve/Manage
+- Explicit Grants (User)
+- Inherited Grants (Team)
+- Feature permissions marked INHERITED
+- Administration permissions marked INHERITED
+- Knowledge Base scope
 
-I need a final verification only.
+For this exact UI, tell me:
 
-1. Run the appropriate existing NEXT/KB Admin production build command.
-   - Do not modify code to make the build pass.
-   - Report the exact command and result.
+1. Which API call supplies the effective permission values?
+2. Which API supplies explicit grants?
+3. Which API supplies inherited/team grants?
+4. Where does the UI get the permission source?
+5. Which centralized evaluator is responsible for the final ALLOW/DENY?
+6. Does the UI itself calculate inheritance, or does the backend/evaluator return it?
+7. What is the safest existing test user and permission I can use to verify an explicit ALLOW without modifying production/Staging data?
 
-2. Review the current git diff/status.
-
-3. Separate ALL changed files into:
-   A. Wave 4 intentional changes
-   B. Previous-wave changes that must remain
-   C. Unrelated/pre-existing changes
-   D. Test-only changes
-
-4. For every file classified as unrelated/pre-existing, explain why it is not part of Wave 4.
-   Do NOT revert anything automatically.
-
-5. Verify Wave 3 behavior is unchanged.
-
-6. Verify that KB Admin authorization uses the Wave 3 centralized evaluator and that no second permission engine was introduced.
-
-7. Specifically inspect and report:
-   - hasKBRole usage
-   - requireKnowledgeBaseInScope
-   - frontend-only permission checks
-   - direct/legacy KB authorization checks
-   - duplicated evaluator logic
-
-8. Do NOT fix anything. This is verification only.
-
-9. Report:
-
-A. Build result
-B. Exact Wave 4 files
-C. Non-Wave-4 files
-D. Tests already passed
-E. Typecheck result
-F. Wave 3 preservation result
-G. Remaining risks
-H. Staging verification that is intentionally deferred
-I. Final recommendation: READY FOR STAGING / NOT READY
-
-IMPORTANT:
-The repository connects directly to STAGING Supabase.
-Do not attempt to create or use a local Supabase/Postgres instance.
-Do not execute the Wave 4 migration against Staging.
+Read-only inspection only. Do not modify code, database, migrations, commit, or create a PR.
