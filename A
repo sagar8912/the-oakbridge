@@ -1,378 +1,534 @@
-You are working on the Oakbridge monorepo / TOW + KB Admin application.
+You are working on the Oakbridge monorepo, specifically the TOW + KB Admin application.
 
-We need to implement the Knowledge Base permission architecture exactly according to the requirements discussed with John.
+We need to implement the Knowledge Base permission architecture according to John's requirements discussed with the team.
 
 IMPORTANT:
+Do not blindly implement a new permission system.
+Do not create duplicate tables if the existing authorization/contributor architecture can be reused.
+Do not make production changes.
+Work only on the current development/staging branch.
 
-* Do NOT blindly create a new permission system.
-* First inspect the existing TOW authorization, PDP/PEP, Entity Contributors, Goals, Items, roles, RLS policies, database schema, APIs, hooks, and UI.
-* Reuse existing architecture wherever possible.
-* The Entity Contributors pattern already used for Goals/Items should be the primary reference.
-* Do NOT create duplicate tables or duplicate permission logic if an existing model can be extended.
-* Do NOT change production.
-* Work only in the current development/staging codebase.
-* Before making changes, provide an implementation plan and identify the files/tables that will be affected.
+John's core architectural principle is:
 
-JOHN’S REQUIREMENTS
+"Reuse and evolve existing shared functionality before creating new tables, entities, or permission systems."
 
-1. Separate Application Roles from Record-Level Permissions
+==================================================
+1. JOHN'S REQUIRED PERMISSION ARCHITECTURE
+==================================================
 
-Knowledge Base application roles and individual record permissions are two different concepts.
+The permission model must separate:
 
-Application-level role:
+A. APPLICATION-LEVEL ROLES
+B. RECORD-LEVEL PERMISSIONS
 
-* Controls access across the entire KB Admin application.
-* Example roles may include Reader/Viewer, Editor, Admin.
-* Most users should have limited/default access.
-* KB Admin should be a high-privilege role and should be assigned only to appropriate users.
+These are NOT the same thing.
 
-Record-level permissions:
-
-* Allow a user to receive additional permissions for a specific Knowledge Base area/entity without making that user a KB application Admin.
-* This is the same general concept already used by Goals and Items in TOW.
+Application-level roles control what a user can do across the entire KB Admin application.
 
 Example:
+- Viewer / Reader
+- Editor
+- Admin
 
-* John Sweet can be a Viewer at the KB application level.
-* John Sweet can then be assigned Editor/Author/Publisher permissions specifically for the IT Support knowledge area.
-* He must NOT need full KB Admin privileges just to manage IT Support content.
+Most users should have limited/default application access.
+KB Admin/Admin should be a high-privilege role and should be assigned only to a small number of users.
 
-2. Reuse Entity Contributors
+Record-level permissions provide additional privileges for specific Knowledge Base records without giving the user full KB Admin access.
 
-Inspect the existing Entity Contributors implementation used by:
+Example from John's requirement:
 
-* Goals
-* Items
+John Sweet can be a Viewer for the entire KB application.
 
-Use this existing pattern for Knowledge Base entities.
+But John Sweet can be assigned:
+- Editor
+- Author
+- Publisher
+etc.
 
-The model should conceptually support:
+for the specific IT Support knowledge area.
 
-User
-↓
-Entity Contributor / Permission Assignment
-↓
-First-Class Entity / Record
-↓
-Permissions
+He should NOT need to become a KB Admin just to manage IT Support.
 
-Do NOT create a completely separate KB-specific contributor architecture if the existing Entity Contributors model can be extended safely.
+==================================================
+2. KNOWLEDGE BASE HIERARCHY
+==================================================
 
-First determine whether the existing Entity Contributors table can support:
-
-* Knowledge Base
-* Hierarchy Node
-* Knowledge Article
-
-If extension is appropriate, extend it rather than creating redundant tables.
-
-3. Knowledge Base Permission Hierarchy
-
-The Knowledge Base structure is:
+The permission hierarchy is:
 
 Knowledge Base
-↓
+    ↓
 Hierarchy Node / Domain
-↓
+    ↓
 Knowledge Article
 
-Permissions should be assignable at all three levels.
+Permissions must be assignable at all three levels.
 
 Example:
 
-Knowledge Base: Data & Analytics
-↓
-Hierarchy Node: IT Support
-↓
-Article: VPN Troubleshooting
+Data & Analytics Knowledge Base
+    ↓
+IT Support hierarchy/domain
+    ↓
+VPN Troubleshooting article
 
-A user can receive permissions at the Knowledge Base level, hierarchy-node level, or individual article level.
+A user can receive permissions at:
+- Knowledge Base level
+- Hierarchy Node level
+- Article level
 
-4. Permission Inheritance
+==================================================
+3. ENTITY CONTRIBUTORS MUST BE REUSED
+==================================================
 
-Implement hierarchical inheritance.
+John specifically wants the existing Entity Contributors pattern used by Goals and Items to be reused.
+
+First inspect the current implementation of:
+
+- Entity Contributors
+- Goal contributors
+- Item contributors
+- Existing authorization tables
+- Existing role/permission tables
+- Existing KB access tables
+- PDP/PEP
+- RLS policies
+
+Determine whether the existing contributor model can support:
+
+- Knowledge Base
+- Hierarchy Node
+- Knowledge Article
+
+Prefer extending the existing shared model.
+
+DO NOT create a separate KB-only contributor system unless you prove that the existing architecture cannot support this requirement.
+
+==================================================
+4. PERMISSION INHERITANCE
+==================================================
+
+Permissions must support hierarchical inheritance.
 
 Example:
-
-If:
 
 Stefan = Editor
 at Knowledge Base level
 
-then the permission should be inherited by the hierarchy nodes and articles underneath that Knowledge Base unless explicitly overridden.
+Then Stefan should inherit Editor access to the hierarchy nodes and articles underneath that Knowledge Base.
 
 Similarly:
 
-If:
-
 Sean = Editor
-at a hierarchy-node level
+at IT Support hierarchy level
 
-then child articles should inherit that permission.
+Then Sean should inherit that permission for articles underneath IT Support.
 
-A lower-level assignment should be capable of overriding/increasing specificity compared with the inherited permission.
+An article can also have a direct user permission.
 
-Do NOT hard-code inheritance into individual pages. Implement it in the authorization/service layer so the same rules are consistently applied by:
+Example:
 
-* UI
-* API
-* server-side authorization
-* PDP/PEP
-* database/RLS where applicable
+Article: VPN Troubleshooting
 
-5. Permission Types
+John Sweet = Editor directly on this article.
 
-Support the permission concepts discussed by John.
+The system must distinguish:
 
-At minimum investigate and support:
+1. Inherited permission
+2. Direct permission
+3. Effective permission
 
-* View
-* Create
-* Edit
-* Delete
-* Author
-* Publish
-* Archive
+Implement inheritance in the shared authorization/service layer.
 
-Before implementing, inspect the existing role/permission naming conventions and reuse them where possible.
+Do NOT implement inheritance separately inside individual React pages.
 
-Do not invent conflicting role names if equivalent permissions already exist.
+The same authorization rules must be respected by:
 
-6. UI Requirements
+- UI
+- API
+- server-side authorization
+- PDP/PEP
+- RLS where applicable
 
-Permission management must be available from the relevant Knowledge Base record UI.
+==================================================
+5. PERMISSIONS
+==================================================
 
-For a Knowledge Base:
+John discussed granular permissions such as:
 
-* Show a Permissions/Contributors section or tab.
-* Allow authorized users to search/select users.
-* Assign appropriate permissions.
+- View
+- Create
+- Edit
+- Delete
+- Author
+- Publish
+- Archive
 
-For a Hierarchy Node:
+Before creating new permission names, inspect the existing permission model.
 
-* Allow authorized users to manage node-level contributors/permissions.
+Reuse existing permissions where equivalent permissions already exist.
 
-For an Article:
+Avoid duplicate/conflicting role names.
 
-* Allow authorized users to manage article-level contributors/permissions.
+==================================================
+6. IMPORTANT QUESTIONS FROM YOUR CURRENT ANALYSIS
+==================================================
+
+Your previous analysis identified these open questions:
+
+1. Override algebra:
+   Should permissions use elevation-only union/inheritance, or should a child record be able to remove/restrict an inherited permission?
+
+2. Publisher:
+   Should Publisher be a separate record-level role/permission, or should publishing simply be a Publish permission attached to Editor/Author?
+
+3. Author:
+   Should Author represent Create + Edit, or should Author be a separate permission?
+
+4. Application Editor:
+   Should an application-level Editor retain broad KB editing access while record-level grants are primarily used to elevate Viewers?
+
+DO NOT guess these questions.
+
+Analyze John's statements and the existing implementation.
+
+For each question:
+- Explain what John's requirements imply.
+- Explain what the existing architecture supports.
+- Recommend the safest implementation.
+- Prefer the model that avoids duplicate roles/tables and follows John's reuse principle.
+
+If a decision genuinely cannot be determined from John's requirements or existing code, STOP and clearly identify the decision that requires team confirmation.
+
+==================================================
+7. UI REQUIREMENTS
+==================================================
+
+The KB UI must support permission management on:
+
+A. Knowledge Base
+B. Hierarchy Node
+C. Knowledge Article
+
+Each relevant record should have a Permissions/Contributors section or tab.
+
+Authorized users should be able to:
+
+- Search/select a user
+- Assign permissions
+- View direct permissions
+- View inherited permissions
+- Understand effective permissions
 
 Example:
 
 Knowledge Article
+-------------------------
 Permissions
 
-User: Stefan
-Permissions:
-  View
-  Create
-  Edit
-User: John
-Permissions:
-  Delete
-  Publish
-  Archive
+Stefan
+Inherited: Editor
+Source: Data & Analytics KB
 
-The UI should clearly distinguish:
+John Sweet
+Direct: Editor, Publish
 
-* inherited permissions
-* directly assigned permissions
-* effective permissions
+Sean
+Direct: Author
+-------------------------
 
-Do not expose permission-management controls to unauthorized users.
+The UI must NOT expose permission-management controls to unauthorized users.
 
-7. Application-Level Role UI
+==================================================
+8. APPLICATION ROLE VS RECORD PERMISSION
+==================================================
 
-Review the existing KB application role management.
-
-Application roles should remain separate from record-level permissions.
+Make this distinction extremely clear in both backend and UI.
 
 Example:
 
-KB Application Role:
+User:
+John Sweet
 
-* Viewer
-* Editor
-* Admin
+Application role:
+Viewer
 
 Record-level assignment:
+IT Support → Editor + Author + Publish
 
-* User X → Editor for IT Support
-* User Y → Publisher for a specific article
+Effective result:
 
-Do NOT turn every record-level permission into an application role.
+John can view the KB generally,
+but can edit/author/publish content specifically within IT Support.
 
-8. Authorization / PDP / PEP
+Do not make John a KB Admin simply because he needs elevated access to IT Support.
 
-This implementation must enforce authorization server-side.
+==================================================
+9. PDP / PEP / API SECURITY
+==================================================
 
-Do not rely only on hiding buttons in React.
+Do not rely only on hiding UI buttons.
 
-For every protected operation verify:
+Every protected operation must be authorized server-side.
 
-* UI permission
-* API authorization
-* PDP/PEP evaluation
-* RLS/database protection where applicable
+Test direct API access.
 
-Test unauthorized direct API requests as well.
+For example:
 
-Example:
+User without Edit:
+→ UI should not show Edit
+→ API edit request must be denied
 
-A user without Edit permission must not be able to edit an article simply by calling the API directly.
+User without Publish:
+→ UI should not show Publish
+→ API publish request must be denied
 
-A user without Publish permission must not be able to publish an article through a direct request.
+User without Delete:
+→ UI should not show Delete
+→ API delete request must be denied
 
-9. Database Architecture
+Existing PDP/PEP architecture should be reused and extended where necessary.
 
-Before creating migrations:
+==================================================
+10. RLS
+==================================================
 
-1. Inspect existing authorization tables.
-2. Inspect existing Entity Contributors table.
-3. Inspect existing Roles/Permissions tables.
-4. Inspect Goal/Item contributor relationships.
-5. Inspect Knowledge Base, Hierarchy Node and Article tables.
-6. Inspect existing RLS policies.
+Inspect existing RLS policies.
 
-Then determine the minimum schema changes required.
+Ensure the permission hierarchy works correctly with database-level security.
 
-Preferred approach:
+Do not bypass existing RLS.
 
-* Extend reusable/shared tables where practical.
-* Avoid creating duplicate KB-only permission tables.
-* Maintain foreign-key integrity.
-* Follow existing naming conventions.
-* Add appropriate indexes.
-* Add RLS policies where required.
+Do not duplicate authorization logic unnecessarily between application code and database policies.
 
-If a new table is genuinely required, explain why an existing table cannot support the requirement before creating it.
+Document where authorization is enforced:
 
-10. Shared Entity Relationship Architecture
+- Application/service layer
+- PDP/PEP
+- RLS
 
-John also wants to avoid relationship-table sprawl.
+==================================================
+11. SHARED ENTITY RELATIONSHIP ARCHITECTURE
+==================================================
 
-Before introducing additional junction tables, inspect the existing shared entity/relationship architecture.
+John also wants to reduce relationship-table sprawl.
 
-Determine whether Knowledge Base relationships can use the existing shared relationship model.
+The system currently has many relationships such as:
 
-Do not create separate relationship tables for every new entity unless there is a clear technical/business reason.
+Goal → Team
+Vendor → Tag
+Vendor → Item
+Item → Goal
+Goal → Standard
+etc.
 
-Document the decision.
+John wants us to evaluate whether these can be represented through a shared entity relationship model rather than continuously creating separate junction tables.
 
-11. Backward Compatibility
+For KB implementation:
 
-Existing TOW functionality must continue working.
+Before creating any new relationship/junction table:
 
-Specifically regression-test:
+1. Inspect the existing shared entity relationship architecture.
+2. Determine whether KB relationships can reuse it.
+3. Only create a new table if there is a strong technical/business reason.
+4. Document why reuse is not possible if a new table is required.
 
-* Goal contributors
-* Item contributors
-* Existing application roles
-* Existing PDP/PEP rules
-* Existing RLS
-* Existing user authorization
-* Existing KB article access
+==================================================
+12. DATABASE REQUIREMENTS
+==================================================
 
-Do not break existing permissions while adding KB permissions.
+Before modifying the database, inspect:
 
-12. Implementation Process
+- users
+- application roles
+- permissions
+- kb_access_grants
+- entity contributors
+- Goals
+- Items
+- Knowledge Bases
+- hierarchy nodes
+- articles
+- RLS
+- PDP/PEP
 
-Follow this sequence:
+Your current analysis indicates that:
+
+- schema work has already started
+- kb_access_grants exists
+- an Entity Contributors pattern exists
+- SQL ancestor-walk/inheritance logic exists
+- some permissions are still globally enforced
+- record-level UI support is incomplete
+
+Verify these findings directly from the code.
+
+Prefer:
+
+Existing shared tables
+    +
+Existing contributor model
+    +
+Existing permission model
+
+over:
+
+New KB-specific permission tables.
+
+==================================================
+13. IMPLEMENTATION PROCESS
+==================================================
 
 PHASE 1 — AUDIT
 
-* Inspect current implementation.
-* Identify reusable tables/components/services.
-* Map current authorization flow.
-* Map Entity Contributors.
-* Map PDP/PEP.
-* Map RLS.
-* Map KB hierarchy.
-
-PHASE 2 — DESIGN
-Create a concise proposed architecture showing:
-
-Application Role
-↓
-Knowledge Base
-↓
-Hierarchy Node
-↓
-Knowledge Article
-↓
-Entity Contributor / Permission Assignment
-
-Explain inheritance and overrides.
-
-PHASE 3 — IMPLEMENT
-Implement:
-
-* Database changes/migrations
-* Permission model
-* Inheritance logic
-* API/service authorization
-* PDP/PEP integration
-* RLS where applicable
-* React UI
-* Hooks/services
-* Tests
-
-PHASE 4 — TEST
-Test at minimum:
-
-1. Viewer can view permitted content.
-2. Viewer cannot edit protected content.
-3. User assigned Editor at Knowledge Base level can edit child articles.
-4. User assigned Editor at hierarchy-node level can edit articles under that node.
-5. User assigned Editor to one article can edit that article but not unrelated articles.
-6. User with Publish permission can publish.
-7. User without Publish permission cannot publish.
-8. User without Delete permission cannot delete.
-9. Application Admin retains appropriate broad access.
-10. Existing Goal/Item contributor functionality still works.
-11. Direct API requests are denied when permissions are missing.
-12. Permission inheritance works after refresh.
-13. Lower-level overrides work correctly.
-
-13. IMPORTANT SAFETY RULE
-
-Before modifying code or database:
-
-STOP and provide me:
+Before modifying anything, inspect the repository and provide:
 
 1. Current authorization architecture.
-2. Existing Entity Contributors implementation.
-3. Existing KB tables.
-4. Existing role/permission tables.
-5. Existing PDP/PEP implementation.
-6. Existing RLS policies.
-7. Recommended tables to reuse.
-8. Any new tables that are genuinely necessary.
-9. Exact files you intend to modify.
-10. Migration plan.
-11. Test plan.
+2. Current KB role architecture.
+3. Current kb_access_grants structure.
+4. Current Entity Contributors implementation.
+5. Goal contributor implementation.
+6. Item contributor implementation.
+7. Current PDP/PEP flow.
+8. Current RLS policies.
+9. Current KB → hierarchy → article relationships.
+10. Existing UI permission-management pages.
+11. Existing permission inheritance logic.
 
-Do NOT start implementation until this analysis is complete.
+Then produce a gap analysis:
 
-After the analysis, wait for approval before making database/schema changes.
+Requirement | Current implementation | Gap | Recommended change
 
-FINAL DELIVERABLE
+Do not implement yet.
 
-After implementation, provide:
+==================================================
+PHASE 2 — ARCHITECTURE DECISION
+==================================================
 
-* Files changed
-* Database migrations created
-* Tables reused
-* Tables added (if any) and why
-* Permission model
-* Inheritance behavior
-* PDP/PEP changes
-* RLS changes
-* UI changes
-* API changes
-* Tests added
-* Test results
-* Any remaining risks or open questions
+Based on the audit, produce the smallest architecture required to satisfy John's requirements.
 
-The implementation must follow John’s core architectural principle:
+The preferred architecture is:
 
-“Reuse and evolve existing shared functionality before creating new tables, entities, or permission systems.”
+Application Role
+        ↓
+Knowledge Base
+        ↓
+Hierarchy Node
+        ↓
+Knowledge Article
+        ↓
+Shared Entity Contributor / Record Permission
+        ↓
+Effective Permission
+
+Explain:
+
+- inheritance
+- direct assignments
+- overrides
+- application roles
+- record permissions
+
+Do not add tables unless necessary.
+
+==================================================
+PHASE 3 — IMPLEMENTATION
+==================================================
+
+After completing the audit and architecture decision, implement:
+
+- Database migrations
+- Permission model changes
+- Permission inheritance
+- Entity Contributor integration
+- KB/node/article permissions
+- PDP/PEP integration
+- RLS changes where required
+- API/service changes
+- React UI
+- Permission hooks/services
+- Automated tests
+
+Do not change unrelated functionality.
+
+==================================================
+PHASE 4 — TESTING
+==================================================
+
+Create and execute tests for:
+
+1. KB Viewer can view allowed content.
+2. Viewer cannot edit content without permission.
+3. KB-level Editor can edit child articles.
+4. Node-level Editor can edit articles underneath that node.
+5. Article-level Editor can edit only that article.
+6. User can have different permissions on different articles.
+7. Publish permission works correctly.
+8. User without Publish cannot publish through UI or API.
+9. Delete permission works correctly.
+10. User without Delete cannot delete through UI or API.
+11. Inherited permissions are visible in the UI.
+12. Direct permissions are visible in the UI.
+13. Effective permissions are calculated correctly.
+14. Existing Goal contributor functionality still works.
+15. Existing Item contributor functionality still works.
+16. Existing application-level roles continue working.
+17. RLS does not expose unauthorized records.
+18. Refresh/session changes do not incorrectly remove or grant permissions.
+19. No unauthorized user can bypass permissions using direct API calls.
+
+==================================================
+17. IMPORTANT: NO BLIND IMPLEMENTATION
+==================================================
+
+If you discover that the existing architecture already partially implements John's requirement, DO NOT rebuild it.
+
+Instead:
+
+- identify what is already correct
+- identify what is incomplete
+- modify only what is necessary
+
+If existing kb_access_grants can be extended to meet the requirement, prefer that.
+
+If Entity Contributors can be extended, prefer that.
+
+If existing PDP/PEP can support the requirement, extend it.
+
+Do not create:
+
+- duplicate contributor tables
+- duplicate role tables
+- duplicate permission tables
+- duplicate inheritance engines
+- duplicate authorization services
+
+==================================================
+18. FINAL REPORT
+==================================================
+
+After implementation, report:
+
+1. Files changed
+2. Database migrations
+3. Existing tables reused
+4. New tables, if any, and exact reason
+5. Permission hierarchy
+6. Application-role behavior
+7. Record-level permission behavior
+8. Inheritance behavior
+9. Override behavior
+10. Entity Contributor changes
+11. PDP/PEP changes
+12. RLS changes
+13. UI changes
+14. API changes
+15. Tests created
+16. Test results
+17. Remaining gaps
+18. Any decisions that still require John/team confirmation
+
+MOST IMPORTANT:
+
+The implementation must satisfy John's principle:
+
+"Application-level roles determine broad application access. Record-level permissions provide granular access to specific Knowledge Base entities. Reuse the existing Entity Contributors and shared authorization architecture instead of creating a separate KB permission system."
