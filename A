@@ -1,96 +1,67 @@
-Wave 3 implementation is already complete.
-
-IMPORTANT: We are NOT opening a PR yet.
-Our goal right now is to COMPLETE AND VERIFY WAVE 3 as far as safely possible.
+Do NOT make any changes.
 
 Do NOT start Wave 4.
+Do NOT create a PR.
+Do NOT commit anything.
+Do NOT run Supabase/Staging database operations.
 
-ENVIRONMENT:
-- We do NOT have a local Supabase/Postgres instance.
-- The application connects directly to the STAGING Supabase environment.
-- Do NOT run destructive/live database tests against Staging.
+I want to REVIEW the completed Wave 3 implementation only.
 
-DO NOT:
-- run `supabase test db`
-- run `pg_prove`
-- apply migrations to Staging
-- manually execute migrations against Staging
-- execute INSERT/UPDATE/DELETE against Staging
-- create/reset a local Supabase database
-- modify Staging data
-- open or create a PR
-- commit changes
-- start Wave 4
+Analyze the current working tree and compare it against the branch/state from before Wave 3.
 
-NOW FINISH WAVE 3.
+Please review:
 
-1. Run all SAFE automated tests:
-   - Vitest authorization tests
-   - Wave 1 tests
-   - Wave 2 tests
-   - Wave 3 tests
-   - KB Admin/OOU tests
-   - mocked permission evaluator tests
-   - frontend tests
-   - any other repository tests that do not require a live database
+1. Complete git diff
+2. All files changed by Wave 3
+3. New files created by Wave 3
+4. Deleted files, if any
+5. SQL migrations/functions/triggers added
+6. TypeScript authorization/evaluator changes
+7. Frontend permission-check changes
+8. Changes involving:
+   - kb_user_feature_permissions
+   - user_permission_grants
+   - kb.* permission keys
+   - kb_effective_hierarchy_role
+   - hierarchyRoleAllowsKbCapability
+   - the new RPC/evaluator
+   - entity_relationships
+   - RLS policies
 
-2. Run SAFE static validation:
-   - TypeScript type-check
-   - ESLint/lint
-   - build
-   - relevant package checks
-   - search for stale/obsolete permission paths
-   - verify no duplicate permission evaluator/PDP was introduced
-   - verify Wave 3 changes are internally consistent
+For each change, explain:
+- What changed
+- Why it changed
+- Whether it belongs to Wave 3
+- Whether it changes existing behavior
+- Any backward-compatibility concern
 
-3. Handle failures carefully:
-   - If a failure is caused by missing Staging DB objects/RPCs, DO NOT modify code to work around it.
-   - If a test requires live Supabase/Staging, SKIP it.
-   - If a normal unit/type/lint/build test fails, investigate the failure.
-   - You MAY fix genuine Wave 3 implementation issues if they are clearly caused by the Wave 3 changes.
-   - Do NOT make unrelated refactors.
+Also check for:
+- accidental Wave 4 work
+- unrelated refactoring
+- duplicate permission/PDP logic
+- permission behavior changes
+- missing mappings
+- incorrect permission keys
+- unsafe SQL
+- destructive migration operations
+- references that should have been removed
+- references that should intentionally remain
 
-4. Wave 3 completion requirements:
-   - Shared permission evaluator is used correctly.
-   - Existing authorization behavior is preserved.
-   - Wave 3 SQL/migration files are present and internally consistent.
-   - TypeScript references to the new RPC/evaluator are correct.
-   - Frontend permission checks are correctly migrated where required.
-   - No unintended second PDP/permission system exists.
-   - kb_effective_hierarchy_role remains only where intended for UI/grant display.
-   - kb_user_feature_permissions is NOT dropped prematurely.
-   - No Wave 4 work is started.
+IMPORTANT:
+This is a REVIEW ONLY.
+Do not modify any files.
 
-5. IMPORTANT:
-   The following are expected because we are not applying the migration to Staging yet:
-   - New RPC may not exist in Staging.
-   - Generated DB types may not contain the new RPC.
-   - SQL capability ordinals and TypeScript hierarchyRoleAllowsKbCapability must remain aligned.
-   - kb.* catalog keys may remain unenforced in SQL until the later migration/deployment step.
+At the end give me:
 
-6. If the migration and TypeScript changes need to be kept together for Wave 3 correctness, keep them together in the repository. Do NOT apply them manually to Staging.
+A. Wave 3 files changed
+B. Wave 3 files that look correct
+C. Suspicious changes
+D. Potential bugs
+E. Backward-compatibility risks
+F. Security/authorization risks
+G. Database migration risks
+H. Items intentionally deferred because Staging/Supabase has not been verified
+I. Any changes you recommend before considering Wave 3 fully finished
+J. Overall verdict: APPROVE / NEEDS CHANGES
 
-7. At the end, provide a COMPLETE WAVE 3 STATUS REPORT:
-
-   A. Implementation completed
-   B. Files changed
-   C. Tests passed
-   D. Tests failed
-   E. Tests skipped because they require Staging/Supabase
-   F. TypeScript result
-   G. Lint result
-   H. Build result
-   I. Static/reference-check result
-   J. Remaining kb_user_feature_permissions references
-   K. Remaining expected database/deployment dependencies
-   L. Any genuine Wave 3 issues still requiring code changes
-   M. Final status:
-      - WAVE 3 COMPLETE
-      OR
-      - WAVE 3 NOT COMPLETE
-
-Do NOT stop at "ready for PR".
-Do NOT tell me to open a PR.
-Do NOT start Wave 4.
-
-Our objective is to finish Wave 3 itself now and leave only the intentionally deferred Staging/Supabase verification for later.
+Do not start Wave 4.
