@@ -1,146 +1,211 @@
-The repository audit is complete. Do NOT redesign the architecture.
+Wave 0 is complete and reviewed.
 
-The audit confirms that the application already has the shared authorization foundation:
+Now implement ONLY WAVE 1: SHARED KB POLICY EVALUATOR.
+
+Do not implement Wave 2, Wave 3, Wave 4, Wave 5, or Wave 6 yet.
+
+Do not create new permission tables.
+
+Do not create a new PDP.
+
+Do not create a new PEP.
+
+Do not create a second authorization package.
+
+The repository audit confirmed that the existing shared authorization foundation is:
 
 * packages/authorization
-* permission_catalog
+* PolicyEvaluator
+* composeDecision
+* permission catalog
 * user_permission_grants
-* role_default_permissions
-* permission_rules
-* permission_audit_log
+* existing SQL PDP/RPC functions
+* permission audit logging
+
+The existing KB Admin and OOO flows currently have overlapping authorization logic.
+
+OBJECTIVE
+
+Make the existing shared authorization package the common PolicyEvaluator for Knowledge Base authorization.
+
+The goal is:
+
+Client
+↓
+PEP
+↓
+packages/authorization PolicyEvaluator
+↓
+existing KB SQL/RPC decision functions
+↓
+RLS / database enforcement
+↓
+permission_audit_log
+
+Do NOT change the underlying permission semantics in this wave.
+
+This is an architectural consolidation, not a behavior change.
+
+STEP 1 — AUDIT CURRENT KB PDP
+
+Inspect all current KB authorization paths, including:
+
+* apps/kb-admin/src/lib/pdp/**
 * kb_access_grants
-* item_contributors / goal_contributors
-* existing SQL PDP/PEP flow
-
-It also confirms that kb_user_feature_permissions is a second/duplicate L0 permission mechanism and should eventually be removed.
-
-We are now implementing the architecture in controlled migration waves.
-
-IMPORTANT:
-Implement ONLY WAVE 0 in this task.
-
-Do not implement Wave 1, Wave 2, entity_relationships, RLS changes, or frontend changes yet.
-
-WAVE 0 — FREEZE AND NORMALIZE THE PERMISSION CATALOG
-
-Goal:
-
-Make the existing permission catalog the canonical vocabulary for Knowledge Base permissions without creating a new permission system.
-
-First inspect:
-
-* permission_catalog
-* user_permission_grants
+* kb_effective_hierarchy_role
+* can_user_manage_kb*
+* requireKBPermission
+* requireKBEntityPermission
 * kb_user_feature_permissions
-* kb_access_grants
-* existing KB feature IDs
-* existing permission keys
-* all usages of kb_user_feature_permissions
-* all usages of permission_catalog
-* all usages of user_permission_grants
+* permission_catalog
+* user_permission_grants
+* existing SQL authorization functions
+* existing RLS policies
 
-Create a complete mapping from existing KB feature IDs to canonical permission_catalog keys.
+Document which functions currently make authorization decisions.
 
-Examples may include concepts such as:
+STEP 2 — EXTEND THE EXISTING SHARED POLICY EVALUATOR
 
-kb.article.edit
-kb.article.review
-kb.article.delete
+Reuse the existing PolicyEvaluator.
 
-BUT do not invent permission names if equivalent keys already exist.
+Do not create another evaluator.
 
-Use the project’s existing naming convention.
+Add the minimum KB-specific adapter/decision input required for the existing evaluator to call the current SQL/RPC authorization logic.
 
-SCOPE MODEL
+The evaluator must remain generic.
 
-Extend the existing user_permission_grants scope model only if required.
+Conceptually it should support:
 
-The supported scope dimensions should ultimately be able to distinguish:
+evaluate({
+user,
+permission,
+resource,
+resourceType,
+resourceId,
+context
+})
 
-* global
-* knowledge_base
-* hierarchy_node
-* article
-* content_type
+Use the project’s existing types and naming conventions rather than inventing a parallel type system.
 
-Do not create separate permission tables for these scopes.
+STEP 3 — PRESERVE EXISTING KB SEMANTICS
 
-If the current database already has scope_type/scope_id, extend it rather than creating another grant table.
+The following must continue to work exactly as they do today:
 
-DATA SAFETY
+* global KB access
+* KB-specific access
+* hierarchy-node access
+* article/record access
+* existing KB roles
+* existing contributors
+* existing RLS behavior
+* existing admin behavior
+* existing impersonation behavior
 
-Before changing anything:
+Do not change precedence or authorization outcomes in this wave.
 
-1. Identify all rows in kb_user_feature_permissions.
-2. Identify all rows in user_permission_grants.
-3. Identify all existing permission_catalog entries.
-4. Identify all KB feature IDs.
-5. Produce a deterministic mapping between the old feature permissions and canonical permission keys.
-6. Identify any unmapped or ambiguous permissions.
+If the same request currently returns ALLOW, it must still return ALLOW.
 
-Do NOT delete kb_user_feature_permissions yet.
+If it currently returns DENY, it must still return DENY.
 
-Do NOT migrate/drop data unless the mapping is complete and deterministic.
+Add regression tests to prove this.
 
-Create the migration required for Wave 0 only.
+STEP 4 — KB ADMIN PEP
 
-The migration must:
+Update KB Admin’s PEP layer so it delegates authorization decisions to packages/authorization.
 
-* be reversible
-* preserve existing data
-* avoid duplicate grants
-* preserve existing permission behavior
-* follow the existing migration conventions
-* include appropriate constraints/indexes
+Existing functions such as:
 
-TESTS
+requireKBPermission
+requireKBEntityPermission
 
-Add database tests proving:
+may remain as compatibility wrappers if they are widely used.
 
-1. Existing permission_catalog keys remain valid.
-2. Existing user_permission_grants remain valid.
-3. Scope types are validated.
-4. Duplicate grants cannot be introduced incorrectly.
-5. Existing KB permissions still resolve.
-6. Existing users retain their current access.
-7. Existing kb_user_feature_permissions data is untouched in this wave.
+However, they must delegate to the shared PolicyEvaluator rather than implementing their own permission waterfall.
 
-IMPORTANT ARCHITECTURAL RULES
+Do not force a large application-wide refactor if a compatibility adapter is safer.
 
-Do NOT create:
+STEP 5 — OOO SAFETY
 
-* a new PDP
-* a new PEP
-* a new permission engine
-* kb_user_roles
-* kb_role_assignments
-* content_type_permissions
-* another user override table
-* another contributor table
-* another entity graph
-* another authorization package
+Do not break the existing OOO authorization flow.
 
-Reuse the existing packages/authorization implementation.
+OOO already uses the shared authorization infrastructure.
 
-Do not change frontend behavior.
+Verify that the changes made for KB do not alter:
 
-Do not change RLS.
+* OOO permissions
+* OOO SQL waterfall
+* OOO PEP behavior
+* OOO UI permission relay
 
-Do not create entity_relationships yet.
+STEP 6 — SQL IS STILL SOURCE OF TRUTH
 
-Do not remove kb_user_feature_permissions yet.
+Do not implement a TypeScript permission waterfall.
 
-At the end, report:
+Do not duplicate SQL permission evaluation in TypeScript.
+
+TypeScript should be an adapter/PEP.
+
+The existing SQL/PDP implementation remains the source of truth.
+
+STEP 7 — AUDIT
+
+Ensure authorization decisions continue to produce the existing permission audit records.
+
+Do not create a second audit log.
+
+STEP 8 — TESTS
+
+Add/update tests for:
+
+1. KB global permission
+2. KB-specific permission
+3. hierarchy-node permission
+4. article/entity permission
+5. admin permission
+6. denied permission
+7. existing role-based access
+8. existing contributor access
+9. impersonation
+10. OOO regression
+
+Also verify that existing permission outcomes before and after the change are identical.
+
+If practical, create a small authorization regression matrix.
+
+STEP 9 — DO NOT DO THESE THINGS
+
+Do NOT:
+
+* create new database permission tables
+* create kb_user_roles
+* create kb_role_assignments
+* create content_type_permissions
+* create another PDP
+* create another PEP
+* create another PolicyEvaluator
+* create entity_relationships
+* migrate/drop kb_user_feature_permissions
+* rewrite RLS
+* change frontend permission UI
+* change permission semantics
+* merge item_contributors and goal_contributors
+* introduce a TypeScript authorization waterfall
+
+STEP 10 — FINAL REPORT
+
+When finished, report:
 
 A. Files changed
-B. Migration created
-C. Permission catalog mappings
-D. Scope changes
-E. Tests added
-F. Existing data affected
-G. Rollback procedure
-H. Any ambiguous mappings that require human review
-
-If any mapping is ambiguous, STOP before destructive changes and report the ambiguity instead of guessing.
+B. Shared evaluator changes
+C. KB adapter changes
+D. SQL/RPC functions reused
+E. Compatibility wrappers retained
+F. Authorization behavior before/after
+G. Tests executed
+H. Any failing tests
+I. Any risks
+J. Exact next step required for Wave 2
 
 Do not commit anything.
+
+If you discover that implementing Wave 1 would require changing permission semantics, STOP and report the issue instead of making the behavior change.
