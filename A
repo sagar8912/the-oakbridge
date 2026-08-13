@@ -1,67 +1,152 @@
-Do NOT make any changes.
-
-Do NOT start Wave 4.
-Do NOT create a PR.
-Do NOT commit anything.
-Do NOT run Supabase/Staging database operations.
-
-I want to REVIEW the completed Wave 3 implementation only.
-
-Analyze the current working tree and compare it against the branch/state from before Wave 3.
-
-Please review:
-
-1. Complete git diff
-2. All files changed by Wave 3
-3. New files created by Wave 3
-4. Deleted files, if any
-5. SQL migrations/functions/triggers added
-6. TypeScript authorization/evaluator changes
-7. Frontend permission-check changes
-8. Changes involving:
-   - kb_user_feature_permissions
-   - user_permission_grants
-   - kb.* permission keys
-   - kb_effective_hierarchy_role
-   - hierarchyRoleAllowsKbCapability
-   - the new RPC/evaluator
-   - entity_relationships
-   - RLS policies
-
-For each change, explain:
-- What changed
-- Why it changed
-- Whether it belongs to Wave 3
-- Whether it changes existing behavior
-- Any backward-compatibility concern
-
-Also check for:
-- accidental Wave 4 work
-- unrelated refactoring
-- duplicate permission/PDP logic
-- permission behavior changes
-- missing mappings
-- incorrect permission keys
-- unsafe SQL
-- destructive migration operations
-- references that should have been removed
-- references that should intentionally remain
+Start WAVE 4 — KB Admin Centralized Authorization Integration.
 
 IMPORTANT:
-This is a REVIEW ONLY.
-Do not modify any files.
+- Wave 3 is complete and approved.
+- Vitest checks and the migration/evaluator RPC deployment-unit checks have already been completed.
+- Do NOT modify or regress Wave 3.
+- Do NOT start Wave 5.
+- Do NOT create a PR.
+- Do NOT perform destructive operations such as git reset --hard, git clean, dropping tables, or deleting existing permissions/data.
+- First inspect the existing Wave 3 implementation and repository structure before making changes.
+- The centralized permission evaluator from Wave 3 is the SINGLE authorization engine. Do NOT create a second permission engine for KB Admin.
 
-At the end give me:
+WAVE 4 GOAL:
+Make KB Admin consume the centralized authorization model consistently for Knowledge Base access, hierarchy nodes, workflows, and content types.
 
-A. Wave 3 files changed
-B. Wave 3 files that look correct
-C. Suspicious changes
-D. Potential bugs
-E. Backward-compatibility risks
-F. Security/authorization risks
-G. Database migration risks
-H. Items intentionally deferred because Staging/Supabase has not been verified
-I. Any changes you recommend before considering Wave 3 fully finished
-J. Overall verdict: APPROVE / NEEDS CHANGES
+SCOPE:
 
-Do not start Wave 4.
+1. KB ADMIN AUTHORIZATION
+Integrate KB Admin with the centralized permission evaluator.
+
+Authorization must support:
+- Knowledge Base
+- Hierarchy node
+- Workflow
+- Content type
+
+Use the existing centralized evaluator and existing ALLOW/DENY + scope semantics from Wave 3.
+
+2. ROLES / GROUPS / USERS
+Update KB Admin permission management so administrators can:
+- View permissions for users/groups/roles
+- Assign permissions
+- Remove permissions
+- Distinguish inherited permissions from explicit permissions
+- Show the source of the effective permission
+
+Do not introduce a parallel authorization model.
+
+3. EFFECTIVE PERMISSIONS
+Provide/use APIs for:
+- Effective permissions
+- Permission sources
+- Explicit permissions
+- Inherited permissions
+- Permission inheritance through the hierarchy
+
+The UI must clearly distinguish:
+- Explicit permission
+- Inherited permission
+- Effective permission
+- Permission source
+
+4. OVERRIDES
+Support the existing centralized permission model for:
+- Creating permission overrides
+- Removing permission overrides
+- Viewing current overrides
+
+Respect the existing hierarchy inheritance behavior.
+
+5. API PROTECTION
+Protect KB Admin APIs using the same centralized evaluator.
+
+Do not rely only on frontend hiding/disabling.
+Every protected backend operation must enforce authorization server-side.
+
+6. HIERARCHY INHERITANCE
+Ensure permissions inherited from parent hierarchy nodes are correctly reflected on child nodes.
+
+Do not duplicate permission calculations in the frontend.
+
+7. FRONTEND
+Update the KB Admin UI to consume the centralized authorization APIs.
+
+Keep the existing UI design unless a change is required for authorization clarity.
+
+The UI should clearly show:
+- Effective permission
+- Permission source
+- Explicit vs inherited
+- User/group/role
+- Scope
+- Override state
+
+8. BACKWARD COMPATIBILITY
+Preserve all existing KB Admin functionality that is not directly related to authorization.
+
+Do not break:
+- Existing KB navigation
+- Existing content management
+- Existing workflows
+- Existing hierarchy operations
+- Existing role/group/user management
+
+9. TESTING
+Before declaring Wave 4 complete:
+
+Run:
+- Existing unit tests
+- Existing Vitest tests
+- Backend tests
+- Type checking
+- Build
+
+Add/update focused tests for:
+- ALLOW
+- DENY
+- inherited permission
+- explicit permission
+- override
+- permission removal
+- hierarchy inheritance
+- user authorization
+- group authorization
+- role authorization
+- unauthorized API access
+
+10. VALIDATION
+Verify that the SAME centralized evaluator is being used everywhere.
+
+Search the repository for:
+- duplicated permission evaluation
+- old KB-specific authorization logic
+- direct permission checks that bypass the centralized evaluator
+- frontend-only authorization checks
+
+Do not blindly delete old code. First determine whether it is still required and replace it only when safe.
+
+11. DATABASE / MIGRATIONS
+Do not create unnecessary tables or a second permission system.
+
+Reuse the centralized permission entity/model created in Wave 3.
+
+Any migration required for Wave 4 must be minimal, backward-compatible, and deployed in the same deployment unit as the code that depends on it.
+
+12. FINAL VERIFICATION
+At the end, report:
+
+A. Files changed
+B. APIs changed
+C. Database/migrations changed
+D. Centralized evaluator integration points
+E. Tests executed and results
+F. Build/typecheck results
+G. Any remaining risks
+H. Confirmation that Wave 3 behavior was preserved
+
+DO NOT move to Wave 5.
+
+Do not make unrelated refactoring or cosmetic changes.
+
+Work incrementally and validate after each logical section.
