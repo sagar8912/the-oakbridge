@@ -1,26 +1,77 @@
 
-MoM – Azure Migration & Future-State Architecture
+You are working on the Oakbridge / OIL Console application.
 
-Key Discussion Points
+I need to implement a new centralized permission and entity-relationship architecture based on the following design principles:
 
-* Evaluate 2–3 Azure/Databricks architecture options and compare them on cost, scalability, latency, performance, security, migration effort, and maintainability.
-* Review the existing database and code repositories before recommending the future-state architecture.
-* Finalize the Supabase replacement, application hosting, database strategy, permissions/authorization, and Blob/File Storage approach.
-* Use the Azure migration as an opportunity to identify and consolidate redundant tables/backend functionality, while documenting trade-offs.
-* Establish a shared enterprise foundation for common capabilities such as files, comments, notifications, work items, approvals, and agent runs.
-* Explore a universal entity graph with polymorphic relationships between entities.
-* Support record-level permissions using users/teams + roles such as Viewer, Editor, and Publisher.
-* Provide a centralized work/notification experience so users do not need to check multiple applications for pending work.
-* Consider the future possibility of replacing Salesforce functionality within the Oil Console, without making it part of the immediate migration scope.
-* The first two migrated applications should serve as the “guiding light” / reference architecture for future enterprise applications.
-* Current implementation scope remains focused on the original migration, TOAP, and Knowledge Base, while POCs and other application development can continue.
+1. One shared back-end, never duplicated.
+2. Shared-first capabilities.
+3. One universal entity graph.
+4. One record-role/contributor model for permissions.
+5. One layered permission vocabulary:
+    * Level 0: explicit user permission override
+    * Level 1: system role
+    * Level 2: application role
+    * Level 3: record/entity-level permissions
 
-Next Steps
+The target design also includes Knowledge Base administration permissions such as:
 
-1. Prepare the architecture comparison study with 2–3 options.
-2. Include pros, cons, metrics, assumptions, and recommended approach.
-3. Deep-dive into Databricks scalability and Azure architecture.
-4. Review current database/code and identify consolidation opportunities.
-5. Define the future-state data, permission, storage, and shared-platform model.
-6. Collaborate with Sachin, Sabir, Deepika, Abhishek, Stefan, and Haril where required.
-7. Prepare thoroughly for the next senior-leadership/client architecture discussion.
+* Per Knowledge Base
+* Per Hierarchy Node
+* Per Workflow
+* Per Content Type
+
+And entity relationships must be first-class, polymorphic relationships between entities.
+
+IMPORTANT:
+Do NOT modify code or database yet.
+
+First perform a complete repository audit.
+
+Inspect:
+
+* frontend architecture
+* backend architecture
+* database schema
+* migrations
+* ORM/models
+* existing authentication
+* user/group/team handling
+* existing RBAC/permissions
+* Knowledge Base Admin implementation
+* hierarchy implementation
+* workflow implementation
+* content type implementation
+* entity implementation
+* entity relationship implementation
+* existing contributor/ownership tables
+* authorization middleware/services
+* API endpoints
+* frontend permission guards
+* tests
+
+Search the entire repository for terms such as:
+permission, permissions, role, roles, authorization, authorize, policy, PDP, PEP, user, group, team, contributor, entity, entity_relationship, knowledge_base, hierarchy, workflow, content_type, admin.
+
+Do not assume table names.
+
+Produce an implementation report containing:
+
+A. Current architecture
+B. Existing database tables relevant to permissions
+C. Existing entity/entity_relationship tables
+D. Existing KB Admin permission implementation
+E. Existing authorization flow
+F. Existing frontend permission checks
+G. What can be reused
+H. What must be changed
+I. What should NOT be duplicated
+J. Proposed migration strategy
+K. Proposed API changes
+L. Proposed frontend changes
+M. Risks and backward compatibility concerns
+
+Most importantly, identify whether the current system already has equivalent functionality before proposing new tables.
+
+Do not create duplicate permission systems.
+
+At the end, provide a concrete file-by-file implementation plan, but do not implement it yet.
