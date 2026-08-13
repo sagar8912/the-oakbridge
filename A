@@ -1,112 +1,146 @@
-Using the repository audit you just completed, implement the database foundation for the new shared permission architecture.
+The repository audit is complete. Do NOT redesign the architecture.
+
+The audit confirms that the application already has the shared authorization foundation:
+
+* packages/authorization
+* permission_catalog
+* user_permission_grants
+* role_default_permissions
+* permission_rules
+* permission_audit_log
+* kb_access_grants
+* item_contributors / goal_contributors
+* existing SQL PDP/PEP flow
+
+It also confirms that kb_user_feature_permissions is a second/duplicate L0 permission mechanism and should eventually be removed.
+
+We are now implementing the architecture in controlled migration waves.
 
 IMPORTANT:
-Reuse existing tables/models whenever possible.
-Do not create duplicate concepts.
-Before creating a migration, verify whether an equivalent table already exists.
+Implement ONLY WAVE 0 in this task.
 
-TARGET ENTITY RELATIONSHIP MODEL
+Do not implement Wave 1, Wave 2, entity_relationships, RLS changes, or frontend changes yet.
 
-The entity relationship model should support:
+WAVE 0 — FREEZE AND NORMALIZE THE PERMISSION CATALOG
 
-* independent entities
-* polymorphic source entities
-* polymorphic target entities
-* cross-application relationships
-* agent-readable relationships
-* relationships with their own lifecycle
+Goal:
 
-The target entity_relationships structure conceptually contains:
+Make the existing permission catalog the canonical vocabulary for Knowledge Base permissions without creating a new permission system.
 
-* id
-* source_entity_type
-* source_entity_id
-* target_entity_type
-* target_entity_id
-* relationship_type
-* metadata JSON/JSONB
-* notes
-* created_by
-* updated_by
-* created_at
-* updated_at
+First inspect:
 
-Do not blindly copy these column names if the existing schema has an established naming convention. Adapt them consistently to the current project.
+* permission_catalog
+* user_permission_grants
+* kb_user_feature_permissions
+* kb_access_grants
+* existing KB feature IDs
+* existing permission keys
+* all usages of kb_user_feature_permissions
+* all usages of permission_catalog
+* all usages of user_permission_grants
 
-The relationship type must be controlled rather than arbitrary free text. Use the project’s existing enum/reference-table convention.
+Create a complete mapping from existing KB feature IDs to canonical permission_catalog keys.
 
-The model must support relationships such as:
+Examples may include concepts such as:
 
-Company → Knowledge Base
-Knowledge Base → Hierarchy Node
-Hierarchy Node → Workflow
-User → Entity
-Team → Entity
-Entity → Entity
+kb.article.edit
+kb.article.review
+kb.article.delete
 
-The source and target must be polymorphic.
+BUT do not invent permission names if equivalent keys already exist.
 
-Add appropriate indexes for:
+Use the project’s existing naming convention.
 
-* source_entity_type + source_entity_id
-* target_entity_type + target_entity_id
-* relationship_type
-* common lookup combinations
+SCOPE MODEL
 
-Add uniqueness protection where appropriate so the same relationship cannot accidentally be inserted multiple times.
+Extend the existing user_permission_grants scope model only if required.
 
-PERMISSION DATABASE MODEL
+The supported scope dimensions should ultimately be able to distinguish:
 
-Implement the shared permission model using existing structures where possible.
+* global
+* knowledge_base
+* hierarchy_node
+* article
+* content_type
 
-The permission model must support these layers:
+Do not create separate permission tables for these scopes.
 
-Level 0:
-Explicit user permission override.
+If the current database already has scope_type/scope_id, extend it rather than creating another grant table.
 
-* user
-* resource/scope
-* permission
-* allow/deny
+DATA SAFETY
 
-Level 1:
-System role.
-Examples:
+Before changing anything:
 
-* Super Admin
-* Admin
-* Viewer
+1. Identify all rows in kb_user_feature_permissions.
+2. Identify all rows in user_permission_grants.
+3. Identify all existing permission_catalog entries.
+4. Identify all KB feature IDs.
+5. Produce a deterministic mapping between the old feature permissions and canonical permission keys.
+6. Identify any unmapped or ambiguous permissions.
 
-Level 2:
-Application role.
-An application-specific role that applies only to one application.
+Do NOT delete kb_user_feature_permissions yet.
 
-Level 3:
-Record/entity-level access.
-This should integrate with the existing contributor/ownership model and hierarchy inheritance rather than creating a second contributor system.
+Do NOT migrate/drop data unless the mapping is complete and deterministic.
 
-Knowledge Base permissions must be capable of expressing:
+Create the migration required for Wave 0 only.
 
-* Knowledge Base scope
-* Hierarchy Node scope
-* Workflow scope
-* Content Type scope
+The migration must:
 
-Before implementation, map these concepts to the existing schema.
+* be reversible
+* preserve existing data
+* avoid duplicate grants
+* preserve existing permission behavior
+* follow the existing migration conventions
+* include appropriate constraints/indexes
 
-Create migrations, models, indexes, constraints and seed/reference data as appropriate.
+TESTS
 
-Do not remove existing data.
+Add database tests proving:
 
-Do not break existing authentication.
+1. Existing permission_catalog keys remain valid.
+2. Existing user_permission_grants remain valid.
+3. Scope types are validated.
+4. Duplicate grants cannot be introduced incorrectly.
+5. Existing KB permissions still resolve.
+6. Existing users retain their current access.
+7. Existing kb_user_feature_permissions data is untouched in this wave.
 
-Add migration rollback support.
+IMPORTANT ARCHITECTURAL RULES
 
-After implementation:
+Do NOT create:
 
-1. Run migrations.
-2. Run existing database tests.
-3. Add tests for entity relationships.
-4. Add tests for permission records.
-5. Show me every file changed.
-6. Explain why every new table/column exists.
+* a new PDP
+* a new PEP
+* a new permission engine
+* kb_user_roles
+* kb_role_assignments
+* content_type_permissions
+* another user override table
+* another contributor table
+* another entity graph
+* another authorization package
+
+Reuse the existing packages/authorization implementation.
+
+Do not change frontend behavior.
+
+Do not change RLS.
+
+Do not create entity_relationships yet.
+
+Do not remove kb_user_feature_permissions yet.
+
+At the end, report:
+
+A. Files changed
+B. Migration created
+C. Permission catalog mappings
+D. Scope changes
+E. Tests added
+F. Existing data affected
+G. Rollback procedure
+H. Any ambiguous mappings that require human review
+
+If any mapping is ambiguous, STOP before destructive changes and report the ambiguity instead of guessing.
+
+Do not commit anything.
