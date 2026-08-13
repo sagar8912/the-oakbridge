@@ -1,77 +1,112 @@
-
-You are working on the Oakbridge / OIL Console application.
-
-I need to implement a new centralized permission and entity-relationship architecture based on the following design principles:
-
-1. One shared back-end, never duplicated.
-2. Shared-first capabilities.
-3. One universal entity graph.
-4. One record-role/contributor model for permissions.
-5. One layered permission vocabulary:
-    * Level 0: explicit user permission override
-    * Level 1: system role
-    * Level 2: application role
-    * Level 3: record/entity-level permissions
-
-The target design also includes Knowledge Base administration permissions such as:
-
-* Per Knowledge Base
-* Per Hierarchy Node
-* Per Workflow
-* Per Content Type
-
-And entity relationships must be first-class, polymorphic relationships between entities.
+Using the repository audit you just completed, implement the database foundation for the new shared permission architecture.
 
 IMPORTANT:
-Do NOT modify code or database yet.
+Reuse existing tables/models whenever possible.
+Do not create duplicate concepts.
+Before creating a migration, verify whether an equivalent table already exists.
 
-First perform a complete repository audit.
+TARGET ENTITY RELATIONSHIP MODEL
 
-Inspect:
+The entity relationship model should support:
 
-* frontend architecture
-* backend architecture
-* database schema
-* migrations
-* ORM/models
-* existing authentication
-* user/group/team handling
-* existing RBAC/permissions
-* Knowledge Base Admin implementation
-* hierarchy implementation
-* workflow implementation
-* content type implementation
-* entity implementation
-* entity relationship implementation
-* existing contributor/ownership tables
-* authorization middleware/services
-* API endpoints
-* frontend permission guards
-* tests
+* independent entities
+* polymorphic source entities
+* polymorphic target entities
+* cross-application relationships
+* agent-readable relationships
+* relationships with their own lifecycle
 
-Search the entire repository for terms such as:
-permission, permissions, role, roles, authorization, authorize, policy, PDP, PEP, user, group, team, contributor, entity, entity_relationship, knowledge_base, hierarchy, workflow, content_type, admin.
+The target entity_relationships structure conceptually contains:
 
-Do not assume table names.
+* id
+* source_entity_type
+* source_entity_id
+* target_entity_type
+* target_entity_id
+* relationship_type
+* metadata JSON/JSONB
+* notes
+* created_by
+* updated_by
+* created_at
+* updated_at
 
-Produce an implementation report containing:
+Do not blindly copy these column names if the existing schema has an established naming convention. Adapt them consistently to the current project.
 
-A. Current architecture
-B. Existing database tables relevant to permissions
-C. Existing entity/entity_relationship tables
-D. Existing KB Admin permission implementation
-E. Existing authorization flow
-F. Existing frontend permission checks
-G. What can be reused
-H. What must be changed
-I. What should NOT be duplicated
-J. Proposed migration strategy
-K. Proposed API changes
-L. Proposed frontend changes
-M. Risks and backward compatibility concerns
+The relationship type must be controlled rather than arbitrary free text. Use the project’s existing enum/reference-table convention.
 
-Most importantly, identify whether the current system already has equivalent functionality before proposing new tables.
+The model must support relationships such as:
 
-Do not create duplicate permission systems.
+Company → Knowledge Base
+Knowledge Base → Hierarchy Node
+Hierarchy Node → Workflow
+User → Entity
+Team → Entity
+Entity → Entity
 
-At the end, provide a concrete file-by-file implementation plan, but do not implement it yet.
+The source and target must be polymorphic.
+
+Add appropriate indexes for:
+
+* source_entity_type + source_entity_id
+* target_entity_type + target_entity_id
+* relationship_type
+* common lookup combinations
+
+Add uniqueness protection where appropriate so the same relationship cannot accidentally be inserted multiple times.
+
+PERMISSION DATABASE MODEL
+
+Implement the shared permission model using existing structures where possible.
+
+The permission model must support these layers:
+
+Level 0:
+Explicit user permission override.
+
+* user
+* resource/scope
+* permission
+* allow/deny
+
+Level 1:
+System role.
+Examples:
+
+* Super Admin
+* Admin
+* Viewer
+
+Level 2:
+Application role.
+An application-specific role that applies only to one application.
+
+Level 3:
+Record/entity-level access.
+This should integrate with the existing contributor/ownership model and hierarchy inheritance rather than creating a second contributor system.
+
+Knowledge Base permissions must be capable of expressing:
+
+* Knowledge Base scope
+* Hierarchy Node scope
+* Workflow scope
+* Content Type scope
+
+Before implementation, map these concepts to the existing schema.
+
+Create migrations, models, indexes, constraints and seed/reference data as appropriate.
+
+Do not remove existing data.
+
+Do not break existing authentication.
+
+Add migration rollback support.
+
+After implementation:
+
+1. Run migrations.
+2. Run existing database tests.
+3. Add tests for entity relationships.
+4. Add tests for permission records.
+5. Show me every file changed.
+6. Explain why every new table/column exists.
