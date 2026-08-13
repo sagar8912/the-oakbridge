@@ -1,37 +1,96 @@
-Do not modify any application code yet.
+Wave 2 is complete and the non-Supabase tests are passing.
 
-We need to verify Wave 2 against our existing STAGING Supabase environment.
+Now implement ONLY WAVE 3.
 
-The previous test attempt tried to connect to 127.0.0.1:54322, which is incorrect for this project.
+IMPORTANT ENVIRONMENT RULE:
+We do NOT have a local Supabase/Postgres instance.
+The repository connects directly to the STAGING Supabase environment.
 
-Please inspect the repository ONLY to determine:
+For this Wave 3 task:
+- DO NOT run `supabase test db`
+- DO NOT run any Supabase SQL test file against Staging
+- DO NOT run `pg_prove` against Staging
+- DO NOT execute INSERT/UPDATE/DELETE against Staging
+- DO NOT apply migrations directly to Staging
+- DO NOT use Supabase CLI to push/reset anything
+- DO NOT modify the Staging database manually
+- Skip all tests that require a live database.
+- Perform all other safe tests: TypeScript, Vitest, mocked tests, static checks, lint, type-check, and build where applicable.
 
-1. How this project normally connects to the staging Supabase database.
-2. Which environment variables/configuration are used for staging.
-3. Which existing test commands are intended to run against staging.
-4. Whether the Wave 2 SQL/DML tests can safely run against staging without destructive operations.
-5. Why the previous test command attempted to connect to localhost:54322.
+WAVE 3 SCOPE ONLY:
 
-Do NOT:
-- start local Supabase
-- start Docker
-- create a local PostgreSQL instance
-- modify application configuration
-- modify .env files
-- change Wave 2 implementation
-- create migrations
-- reset/truncate/drop staging data
-- start Wave 3
-- commit anything
+1. SHARED PERMISSION EVALUATION
+   - Move callers toward the shared KB permission evaluator created in Wave 1.
+   - Reuse the existing authorization foundation.
+   - Do NOT create a second permission engine/PDP.
+   - Do NOT redesign the authorization architecture.
+   - Preserve existing ALLOW/DENY semantics.
+   - Preserve existing scope semantics.
 
-If the repository requires a specific environment variable or test command for staging, tell me the exact command/configuration needed, but do not expose any secret values.
+2. DATA MIGRATION / FINAL ABSORPTION
+   - Use the existing Wave 0 feature-id → canonical permission-key mapping.
+   - Ensure kb_user_feature_permissions data can be represented by user_permission_grants.
+   - Do NOT delete kb_user_feature_permissions yet unless the repository's existing Wave 3 plan explicitly requires it after verification.
+   - Do not silently drop or transform existing permission data.
 
-Then report:
+3. RLS / DATABASE AUTHORIZATION
+   - Implement ONLY the RLS changes explicitly required by the existing Wave 3 design.
+   - Do not introduce a second authorization mechanism.
+   - Do not change unrelated RLS policies.
+   - Do not execute the RLS migration against Staging.
 
-A. Existing staging connection mechanism
-B. Correct test command(s)
-C. Why the previous command used localhost
-D. Whether Wave 2 tests are safe to execute against staging
-E. Any test that must NOT be run against staging because it is destructive
+4. ENTITY RELATIONSHIPS
+   - Implement only the entity_relationships work already defined in the Wave 3 plan.
+   - Do not invent new relationships or architecture.
+   - Preserve existing behavior.
 
-STOP after this investigation. Do not run the tests yet and do not change files.
+5. FRONTEND PERMISSION UI
+   - Update the frontend to consume the centralized permission model where required.
+   - Remove dependency on obsolete feature-permission checks only where Wave 3 explicitly requires it.
+   - Do not redesign unrelated UI.
+   - Preserve current user experience and behavior.
+
+6. OLD FEATURE-PERMISSION SYSTEM
+   - Identify every remaining application dependency on kb_user_feature_permissions.
+   - Replace only the dependencies that Wave 3 requires.
+   - Do NOT drop the table yet.
+   - Do NOT remove compatibility code until all callers are verified.
+
+7. TESTING
+   Run every SAFE test that does not require Supabase/Postgres:
+   - authorization Vitest tests
+   - Wave 1 tests
+   - Wave 2 tests
+   - Wave 3 unit/mock tests
+   - frontend tests
+   - TypeScript type-check
+   - ESLint/lint
+   - build checks
+   - static dependency/reference checks
+
+   SKIP:
+   - supabase test db
+   - pg_prove
+   - live SQL/DML tests
+   - staging database mutations
+   - migration execution against Staging
+
+8. FINAL VERIFICATION REPORT
+   At the end report:
+
+   A. Files changed
+   B. Wave 3 functionality implemented
+   C. Tests actually executed
+   D. Tests skipped because they require Supabase/Staging
+   E. Any failures
+   F. Any remaining references to kb_user_feature_permissions
+   G. Any architectural concerns
+   H. Whether Wave 3 is ready for PR review
+
+IMPORTANT:
+- Do not start Wave 4 or any additional cleanup.
+- Do not redesign architecture.
+- Do not make unrelated refactors.
+- Do not commit.
+- Do not modify application behavior outside Wave 3.
+- Stop after the Wave 3 implementation and safe verification report.
