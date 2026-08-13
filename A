@@ -1,39 +1,37 @@
-Correction: We do NOT run a local Supabase/Postgres instance.
+Do not modify any application code yet.
 
-This repository connects directly to the STAGING Supabase environment.
+We need to verify Wave 2 against our existing STAGING Supabase environment.
 
-Do NOT start Docker, local Supabase, or a local PostgreSQL instance.
-Do NOT change the application configuration to introduce local Supabase.
+The previous test attempt tried to connect to 127.0.0.1:54322, which is incorrect for this project.
 
-For Wave 2 verification:
+Please inspect the repository ONLY to determine:
 
-1. Inspect the repository's existing staging Supabase configuration/environment and use the same connection mechanism already used by the project.
+1. How this project normally connects to the staging Supabase database.
+2. Which environment variables/configuration are used for staging.
+3. Which existing test commands are intended to run against staging.
+4. Whether the Wave 2 SQL/DML tests can safely run against staging without destructive operations.
+5. Why the previous test command attempted to connect to localhost:54322.
 
-2. Do NOT expose, print, or modify any Supabase credentials, service-role keys, passwords, or secrets.
+Do NOT:
+- start local Supabase
+- start Docker
+- create a local PostgreSQL instance
+- modify application configuration
+- modify .env files
+- change Wave 2 implementation
+- create migrations
+- reset/truncate/drop staging data
+- start Wave 3
+- commit anything
 
-3. Run the Wave 2 tests against the configured staging environment using the repository's existing test/database mechanism.
+If the repository requires a specific environment variable or test command for staging, tell me the exact command/configuration needed, but do not expose any secret values.
 
-4. If the current tests are hard-coded to 127.0.0.1:54322, STOP and identify exactly where that assumption comes from. Do not rewrite application code just to bypass it.
+Then report:
 
-5. Verify whether the repository has an existing staging/test command, environment variable, or Supabase connection setup that should be used instead.
+A. Existing staging connection mechanism
+B. Correct test command(s)
+C. Why the previous command used localhost
+D. Whether Wave 2 tests are safe to execute against staging
+E. Any test that must NOT be run against staging because it is destructive
 
-6. Run:
-   - all Wave 2 tests
-   - all Wave 1 tests
-   - relevant KB permission tests
-
-7. Do NOT start Wave 3 or make any Wave 3+ changes.
-
-8. Do NOT commit anything.
-
-At the end report:
-- exact test commands executed
-- whether they connected to STAGING Supabase
-- pass/fail result
-- any tests that could not safely run against staging
-- files changed
-- confirmation that kb_user_feature_permissions was NOT dropped
-- confirmation that no Wave 3+ work was started
-
-IMPORTANT:
-Because this is STAGING, do not perform destructive operations or modify production-like data merely to make tests pass. If a test requires destructive/reset operations, stop and report it instead.
+STOP after this investigation. Do not run the tests yet and do not change files.
