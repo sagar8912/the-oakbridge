@@ -1,534 +1,264 @@
-You are working on the Oakbridge monorepo, specifically the TOW + KB Admin application.
+Create a professional, client-ready Word document that will be used as the source/reference for creating a PowerPoint presentation on the Knowledge Base (KB) Permission Management model.
 
-We need to implement the Knowledge Base permission architecture according to John's requirements discussed with the team.
+IMPORTANT CONTEXT:
+The permission workflow was discussed with Sachin. The presentation must clearly explain the permission model from the beginning and then progressively show how permissions are managed.
 
-IMPORTANT:
-Do not blindly implement a new permission system.
-Do not create duplicate tables if the existing authorization/contributor architecture can be reused.
-Do not make production changes.
-Work only on the current development/staging branch.
+The final PPT should be approximately 6–7 slides/pages, with 8 slides maximum. Do NOT make it unnecessarily long.
 
-John's core architectural principle is:
+CORE WORKFLOW SUGGESTED BY SACHIN:
 
-"Reuse and evolve existing shared functionality before creating new tables, entities, or permission systems."
-
-==================================================
-1. JOHN'S REQUIRED PERMISSION ARCHITECTURE
-==================================================
-
-The permission model must separate:
-
-A. APPLICATION-LEVEL ROLES
-B. RECORD-LEVEL PERMISSIONS
-
-These are NOT the same thing.
-
-Application-level roles control what a user can do across the entire KB Admin application.
-
-Example:
-- Viewer / Reader
-- Editor
-- Admin
-
-Most users should have limited/default application access.
-KB Admin/Admin should be a high-privilege role and should be assigned only to a small number of users.
-
-Record-level permissions provide additional privileges for specific Knowledge Base records without giving the user full KB Admin access.
-
-Example from John's requirement:
-
-John Sweet can be a Viewer for the entire KB application.
-
-But John Sweet can be assigned:
-- Editor
-- Author
-- Publisher
-etc.
-
-for the specific IT Support knowledge area.
-
-He should NOT need to become a KB Admin just to manage IT Support.
-
-==================================================
-2. KNOWLEDGE BASE HIERARCHY
-==================================================
-
-The permission hierarchy is:
-
-Knowledge Base
-    ↓
-Hierarchy Node / Domain
-    ↓
-Knowledge Article
-
-Permissions must be assignable at all three levels.
-
-Example:
-
-Data & Analytics Knowledge Base
-    ↓
-IT Support hierarchy/domain
-    ↓
-VPN Troubleshooting article
-
-A user can receive permissions at:
-- Knowledge Base level
-- Hierarchy Node level
-- Article level
-
-==================================================
-3. ENTITY CONTRIBUTORS MUST BE REUSED
-==================================================
-
-John specifically wants the existing Entity Contributors pattern used by Goals and Items to be reused.
-
-First inspect the current implementation of:
-
-- Entity Contributors
-- Goal contributors
-- Item contributors
-- Existing authorization tables
-- Existing role/permission tables
-- Existing KB access tables
-- PDP/PEP
-- RLS policies
-
-Determine whether the existing contributor model can support:
-
-- Knowledge Base
-- Hierarchy Node
-- Knowledge Article
-
-Prefer extending the existing shared model.
-
-DO NOT create a separate KB-only contributor system unless you prove that the existing architecture cannot support this requirement.
-
-==================================================
-4. PERMISSION INHERITANCE
-==================================================
-
-Permissions must support hierarchical inheritance.
-
-Example:
-
-Stefan = Editor
-at Knowledge Base level
-
-Then Stefan should inherit Editor access to the hierarchy nodes and articles underneath that Knowledge Base.
-
-Similarly:
-
-Sean = Editor
-at IT Support hierarchy level
-
-Then Sean should inherit that permission for articles underneath IT Support.
-
-An article can also have a direct user permission.
-
-Example:
-
-Article: VPN Troubleshooting
-
-John Sweet = Editor directly on this article.
-
-The system must distinguish:
-
-1. Inherited permission
-2. Direct permission
-3. Effective permission
-
-Implement inheritance in the shared authorization/service layer.
-
-Do NOT implement inheritance separately inside individual React pages.
-
-The same authorization rules must be respected by:
-
-- UI
-- API
-- server-side authorization
-- PDP/PEP
-- RLS where applicable
-
-==================================================
-5. PERMISSIONS
-==================================================
-
-John discussed granular permissions such as:
-
-- View
-- Create
-- Edit
-- Delete
-- Author
-- Publish
-- Archive
-
-Before creating new permission names, inspect the existing permission model.
-
-Reuse existing permissions where equivalent permissions already exist.
-
-Avoid duplicate/conflicting role names.
-
-==================================================
-6. IMPORTANT QUESTIONS FROM YOUR CURRENT ANALYSIS
-==================================================
-
-Your previous analysis identified these open questions:
-
-1. Override algebra:
-   Should permissions use elevation-only union/inheritance, or should a child record be able to remove/restrict an inherited permission?
-
-2. Publisher:
-   Should Publisher be a separate record-level role/permission, or should publishing simply be a Publish permission attached to Editor/Author?
-
-3. Author:
-   Should Author represent Create + Edit, or should Author be a separate permission?
-
-4. Application Editor:
-   Should an application-level Editor retain broad KB editing access while record-level grants are primarily used to elevate Viewers?
-
-DO NOT guess these questions.
-
-Analyze John's statements and the existing implementation.
-
-For each question:
-- Explain what John's requirements imply.
-- Explain what the existing architecture supports.
-- Recommend the safest implementation.
-- Prefer the model that avoids duplicate roles/tables and follows John's reuse principle.
-
-If a decision genuinely cannot be determined from John's requirements or existing code, STOP and clearly identify the decision that requires team confirmation.
-
-==================================================
-7. UI REQUIREMENTS
-==================================================
-
-The KB UI must support permission management on:
-
-A. Knowledge Base
-B. Hierarchy Node
-C. Knowledge Article
-
-Each relevant record should have a Permissions/Contributors section or tab.
-
-Authorized users should be able to:
-
-- Search/select a user
-- Assign permissions
-- View direct permissions
-- View inherited permissions
-- Understand effective permissions
-
-Example:
-
-Knowledge Article
--------------------------
-Permissions
-
-Stefan
-Inherited: Editor
-Source: Data & Analytics KB
-
-John Sweet
-Direct: Editor, Publish
-
-Sean
-Direct: Author
--------------------------
-
-The UI must NOT expose permission-management controls to unauthorized users.
-
-==================================================
-8. APPLICATION ROLE VS RECORD PERMISSION
-==================================================
-
-Make this distinction extremely clear in both backend and UI.
-
-Example:
-
-User:
-John Sweet
-
-Application role:
-Viewer
-
-Record-level assignment:
-IT Support → Editor + Author + Publish
-
-Effective result:
-
-John can view the KB generally,
-but can edit/author/publish content specifically within IT Support.
-
-Do not make John a KB Admin simply because he needs elevated access to IT Support.
-
-==================================================
-9. PDP / PEP / API SECURITY
-==================================================
-
-Do not rely only on hiding UI buttons.
-
-Every protected operation must be authorized server-side.
-
-Test direct API access.
-
-For example:
-
-User without Edit:
-→ UI should not show Edit
-→ API edit request must be denied
-
-User without Publish:
-→ UI should not show Publish
-→ API publish request must be denied
-
-User without Delete:
-→ UI should not show Delete
-→ API delete request must be denied
-
-Existing PDP/PEP architecture should be reused and extended where necessary.
-
-==================================================
-10. RLS
-==================================================
-
-Inspect existing RLS policies.
-
-Ensure the permission hierarchy works correctly with database-level security.
-
-Do not bypass existing RLS.
-
-Do not duplicate authorization logic unnecessarily between application code and database policies.
-
-Document where authorization is enforced:
-
-- Application/service layer
-- PDP/PEP
-- RLS
-
-==================================================
-11. SHARED ENTITY RELATIONSHIP ARCHITECTURE
-==================================================
-
-John also wants to reduce relationship-table sprawl.
-
-The system currently has many relationships such as:
-
-Goal → Team
-Vendor → Tag
-Vendor → Item
-Item → Goal
-Goal → Standard
-etc.
-
-John wants us to evaluate whether these can be represented through a shared entity relationship model rather than continuously creating separate junction tables.
-
-For KB implementation:
-
-Before creating any new relationship/junction table:
-
-1. Inspect the existing shared entity relationship architecture.
-2. Determine whether KB relationships can reuse it.
-3. Only create a new table if there is a strong technical/business reason.
-4. Document why reuse is not possible if a new table is required.
-
-==================================================
-12. DATABASE REQUIREMENTS
-==================================================
-
-Before modifying the database, inspect:
-
-- users
-- application roles
-- permissions
-- kb_access_grants
-- entity contributors
-- Goals
-- Items
-- Knowledge Bases
-- hierarchy nodes
-- articles
-- RLS
-- PDP/PEP
-
-Your current analysis indicates that:
-
-- schema work has already started
-- kb_access_grants exists
-- an Entity Contributors pattern exists
-- SQL ancestor-walk/inheritance logic exists
-- some permissions are still globally enforced
-- record-level UI support is incomplete
-
-Verify these findings directly from the code.
-
-Prefer:
-
-Existing shared tables
-    +
-Existing contributor model
-    +
-Existing permission model
-
-over:
-
-New KB-specific permission tables.
-
-==================================================
-13. IMPLEMENTATION PROCESS
-==================================================
-
-PHASE 1 — AUDIT
-
-Before modifying anything, inspect the repository and provide:
-
-1. Current authorization architecture.
-2. Current KB role architecture.
-3. Current kb_access_grants structure.
-4. Current Entity Contributors implementation.
-5. Goal contributor implementation.
-6. Item contributor implementation.
-7. Current PDP/PEP flow.
-8. Current RLS policies.
-9. Current KB → hierarchy → article relationships.
-10. Existing UI permission-management pages.
-11. Existing permission inheritance logic.
-
-Then produce a gap analysis:
-
-Requirement | Current implementation | Gap | Recommended change
-
-Do not implement yet.
-
-==================================================
-PHASE 2 — ARCHITECTURE DECISION
-==================================================
-
-Based on the audit, produce the smallest architecture required to satisfy John's requirements.
-
-The preferred architecture is:
-
-Application Role
+KB Super Admin
         ↓
-Knowledge Base
+Create KB User
         ↓
-Hierarchy Node
+Default KB Role / Permissions
         ↓
-Knowledge Article
+Reader + Viewer by default
         ↓
-Shared Entity Contributor / Record Permission
+Permission Management
         ↓
-Effective Permission
+Feature-level Permissions
+        ↓
+Content-wise Permissions
+        ↓
+Final User Access
+
+DOCUMENT STRUCTURE:
+
+SECTION 1 — KB Admin & KB Role
+
+Explain clearly:
+
+1. What is a KB (Knowledge Base) Admin?
+2. What is a KB Super Admin?
+3. What is a KB User?
+4. What is a KB Role?
+5. What responsibility does the Super Admin have in managing users and permissions?
+6. Explain the relationship between:
+   - KB Super Admin
+   - KB User
+   - KB Role
+   - Permissions
+
+Clearly explain that the Super Admin is responsible for creating/managing KB users and controlling their access.
+
+Also explain the default behavior:
+
+When a new KB user is created and no additional/specific permissions are assigned, the user receives the default:
+- Reader
+- Viewer
+
+Make this distinction very clear:
+- Reader = the user's default access/role for reading/accessing permitted KB information.
+- Viewer = the user's default viewing capability.
+Do not invent additional permissions that were not discussed.
+
+SECTION 2 — KB Admin / Role FLOW DIAGRAM
+
+Create a simple professional diagram specification showing:
+
+KB Super Admin
+      ↓
+Create KB User
+      ↓
+Assign/Apply KB Role
+      ↓
+Default Access
+      ↓
+Reader + Viewer
+
+The diagram should be suitable for directly converting into a PowerPoint visual.
+
+Include a short explanation below the diagram describing the flow.
+
+SECTION 3 — PERMISSION MANAGEMENT
+
+Explain the Permission Management concept in detail but concisely.
+
+Cover:
+
+1. Why Permission Management is required.
+2. How the KB Super Admin reaches Permission Management.
+3. How the Super Admin can manage permissions for a user.
+4. Feature-level permissions.
+5. How permissions can be granted/managed beyond the default Reader + Viewer access.
+6. Explain that Permission Management controls what features/actions a user can access.
+
+Do NOT invent specific feature names unless they already exist in the project/UI. If feature names are available in the existing code/documentation, use those actual names.
+
+Clearly differentiate:
+- Default role/access
+vs.
+- Feature permissions
+
+SECTION 4 — PERMISSION MANAGEMENT FLOW DIAGRAM
+
+Create a professional diagram specification:
+
+KB Super Admin
+      ↓
+Permission Management
+      ↓
+Select KB User
+      ↓
+Review Existing Permissions
+      ↓
+Manage Feature Permissions
+      ↓
+Save / Apply Permissions
+      ↓
+User receives updated feature access
+
+Add a short explanation explaining the flow.
+
+SECTION 5 — CONTENT-WISE PERMISSIONS
+
+Explain Content-wise Permission Management.
+
+This section must clearly establish that after managing feature-level permissions, the administrator can move to content-level access management.
 
 Explain:
 
-- inheritance
-- direct assignments
-- overrides
-- application roles
-- record permissions
+1. What content-wise permission means.
+2. Why content-level permissions are required.
+3. How the Super Admin navigates from Permission Management to Content Management.
+4. How access can be controlled for specific KB content/resources.
+5. Explain the difference between:
+   - Feature-level permission
+   - Content-level permission
 
-Do not add tables unless necessary.
+Use a simple example, but clearly label it as an example and do not introduce unsupported functionality.
 
-==================================================
-PHASE 3 — IMPLEMENTATION
-==================================================
+Example:
 
-After completing the audit and architecture decision, implement:
+A user may have permission to use/access a KB feature, but their access to specific KB content can still be controlled separately.
 
-- Database migrations
-- Permission model changes
-- Permission inheritance
-- Entity Contributor integration
-- KB/node/article permissions
-- PDP/PEP integration
-- RLS changes where required
-- API/service changes
-- React UI
-- Permission hooks/services
-- Automated tests
+SECTION 6 — CONTENT PERMISSION FLOW DIAGRAM
 
-Do not change unrelated functionality.
+Create a professional diagram specification:
 
-==================================================
-PHASE 4 — TESTING
-==================================================
+KB Super Admin
+      ↓
+Permission Management
+      ↓
+Content Management
+      ↓
+Select User / Role
+      ↓
+Select KB Content / Resource
+      ↓
+Configure Content Access
+      ↓
+Save / Apply
+      ↓
+User gets access according to assigned content permission
 
-Create and execute tests for:
+Again, do not invent permission types that are not supported by the actual application.
 
-1. KB Viewer can view allowed content.
-2. Viewer cannot edit content without permission.
-3. KB-level Editor can edit child articles.
-4. Node-level Editor can edit articles underneath that node.
-5. Article-level Editor can edit only that article.
-6. User can have different permissions on different articles.
-7. Publish permission works correctly.
-8. User without Publish cannot publish through UI or API.
-9. Delete permission works correctly.
-10. User without Delete cannot delete through UI or API.
-11. Inherited permissions are visible in the UI.
-12. Direct permissions are visible in the UI.
-13. Effective permissions are calculated correctly.
-14. Existing Goal contributor functionality still works.
-15. Existing Item contributor functionality still works.
-16. Existing application-level roles continue working.
-17. RLS does not expose unauthorized records.
-18. Refresh/session changes do not incorrectly remove or grant permissions.
-19. No unauthorized user can bypass permissions using direct API calls.
+SECTION 7 — END-TO-END PERMISSION WORKFLOW
 
-==================================================
-17. IMPORTANT: NO BLIND IMPLEMENTATION
-==================================================
+Create one final consolidated workflow showing the complete journey:
 
-If you discover that the existing architecture already partially implements John's requirement, DO NOT rebuild it.
+KB Super Admin
+      ↓
+Create KB User
+      ↓
+KB Role
+      ↓
+Default Reader + Viewer
+      ↓
+Permission Management
+      ↓
+Feature Permissions
+      ↓
+Content Management
+      ↓
+Content-wise Permissions
+      ↓
+Final User Access
 
-Instead:
+Add a concise explanation of how all layers work together.
 
-- identify what is already correct
-- identify what is incomplete
-- modify only what is necessary
+IMPORTANT CLIENT-READY REQUIREMENTS:
 
-If existing kb_access_grants can be extended to meet the requirement, prefer that.
+- The document must be written in professional business language.
+- It should be suitable for a client-facing presentation.
+- Avoid overly technical implementation details unless they are necessary to explain the permission model.
+- Avoid making unsupported assumptions.
+- Do not invent permission names, roles, features, APIs, database tables, or workflows.
+- Clearly distinguish confirmed functionality from examples.
+- Use consistent terminology throughout:
+  - KB Super Admin
+  - KB User
+  - KB Role
+  - Reader
+  - Viewer
+  - Permission Management
+  - Feature Permissions
+  - Content-wise Permissions
+  - Content Management
 
-If Entity Contributors can be extended, prefer that.
+PRESENTATION-READY FORMAT:
 
-If existing PDP/PEP can support the requirement, extend it.
+For every major section provide:
 
-Do not create:
+1. Slide/Page Title
+2. Key Message
+3. Explanation
+4. Recommended visual/diagram
+5. Diagram nodes and arrows
+6. Key takeaway
 
-- duplicate contributor tables
-- duplicate role tables
-- duplicate permission tables
-- duplicate inheritance engines
-- duplicate authorization services
+Keep the content concise enough to fit into a professional PPT.
 
-==================================================
-18. FINAL REPORT
-==================================================
+TARGET PPT STRUCTURE:
 
-After implementation, report:
+Slide 1 — KB Admin & KB Role
+Slide 2 — KB Admin / Role Flow
+Slide 3 — Permission Management
+Slide 4 — Permission Management Flow
+Slide 5 — Content-wise Permissions
+Slide 6 — Content Permission Flow
+Slide 7 — End-to-End Permission Workflow
 
-1. Files changed
-2. Database migrations
-3. Existing tables reused
-4. New tables, if any, and exact reason
-5. Permission hierarchy
-6. Application-role behavior
-7. Record-level permission behavior
-8. Inheritance behavior
-9. Override behavior
-10. Entity Contributor changes
-11. PDP/PEP changes
-12. RLS changes
-13. UI changes
-14. API changes
-15. Tests created
-16. Test results
-17. Remaining gaps
-18. Any decisions that still require John/team confirmation
+Maximum 8 slides.
 
-MOST IMPORTANT:
+DESIGN DIRECTION FOR THE FUTURE PPT:
 
-The implementation must satisfy John's principle:
+The Word document should act as a complete content blueprint for a polished client presentation.
 
-"Application-level roles determine broad application access. Record-level permissions provide granular access to specific Knowledge Base entities. Reuse the existing Entity Contributors and shared authorization architecture instead of creating a separate KB permission system."
+Use:
+- Clear hierarchy
+- Short paragraphs
+- Executive-friendly language
+- Tables where they improve clarity
+- Consistent terminology
+- Clean process flows
+- Minimal text on diagrams
+- Clear distinction between roles, feature permissions, and content permissions
+
+Do not write generic filler content.
+
+At the end of the Word document, add a section called:
+
+"Client Presentation Narrative"
+
+This should provide a short speaking narrative for each of the 7 proposed slides so that a presenter can explain the permission model confidently to the client.
+
+Also add:
+
+"Key Assumptions / Items to Validate"
+
+List only the points that need confirmation from Sachin/product team because they were not explicitly defined in the discussion.
+
+Finally, create the Word document in a professional format with:
+- Title page
+- Table of contents
+- Proper headings
+- Consistent formatting
+- Tables where useful
+- Numbered sections
+- Clean diagram specifications
+- Page breaks between major sections where appropriate
+
+The final Word document should be detailed enough that another person can take it and create the complete client-ready PPT without needing to ask for the missing content.
