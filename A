@@ -1,264 +1,181 @@
-Create a professional, client-ready Word document that will be used as the source/reference for creating a PowerPoint presentation on the Knowledge Base (KB) Permission Management model.
+Update the existing HTML/PPT content and remove the incorrect "KB Super Admin" terminology completely.
 
-IMPORTANT CONTEXT:
-The permission workflow was discussed with Sachin. The presentation must clearly explain the permission model from the beginning and then progressively show how permissions are managed.
+IMPORTANT:
+Do NOT use "Super Admin" anywhere in the presentation.
+The correct permission/role model should use only these three KB roles:
 
-The final PPT should be approximately 6–7 slides/pages, with 8 slides maximum. Do NOT make it unnecessarily long.
+1. KB Admin
+2. KB Editor
+3. KB Reader / Viewer
 
-CORE WORKFLOW SUGGESTED BY SACHIN:
+Use these three roles consistently throughout the entire presentation.
 
-KB Super Admin
-        ↓
-Create KB User
-        ↓
-Default KB Role / Permissions
-        ↓
-Reader + Viewer by default
-        ↓
+ROLE DEFINITIONS:
+
+KB Admin
+- Has administrative control over the Knowledge Base.
+- Can manage KB users/roles and permissions.
+- Can access Permission Management.
+- Can manage feature-level permissions.
+- Can manage content-wise permissions.
+
+KB Editor
+- Can work with/edit KB content according to the permissions assigned to them.
+- Their access should be controlled through the configured feature and content permissions.
+- Do not describe them as an administrator.
+
+KB Reader / Viewer
+- Read/view-only access to permitted KB content.
+- Cannot be described as an editor or administrator.
+- Use "KB Reader / Viewer" consistently wherever the view/read-only role is referenced.
+
+IMPORTANT CORRECTION:
+Do NOT show:
+- KB Super Admin
+- Super Admin
+- Generic KB User as a primary role
+- Any other role that is not part of the three-role model above.
+
+The presentation should explain the permission model using ONLY:
+KB Admin → KB Editor → KB Reader / Viewer
+
+UPDATE THE FIRST SLIDES:
+
+Slide 1:
+Title: "KB Roles & Permissions"
+
+Show the three roles visually:
+
+KB Admin
+↓
+KB Editor
+↓
+KB Reader / Viewer
+
+However, do NOT imply that this is necessarily a strict hierarchy unless supported by the existing product behavior. Present them as the three defined KB roles.
+
+Add a concise explanation of each role.
+
+Slide 2:
+Title: "KB Role & Access Model"
+
+Create a clean visual showing:
+
+KB Admin
+- Manage users
+- Manage permissions
+- Manage KB access
+
+KB Editor
+- Create/Edit content where permitted
+- Access assigned features
+- Access assigned content
+
+KB Reader / Viewer
+- View permitted content
+- Read-only access
+
+IMPORTANT:
+Only include "Create/Edit content" for KB Editor if this is supported by the existing application. Otherwise phrase it as "Edit assigned content".
+
+PERMISSION MANAGEMENT FLOW:
+
+Update the existing Permission Management section to use:
+
+KB Admin
+   ↓
 Permission Management
-        ↓
-Feature-level Permissions
-        ↓
-Content-wise Permissions
-        ↓
-Final User Access
-
-DOCUMENT STRUCTURE:
-
-SECTION 1 — KB Admin & KB Role
-
-Explain clearly:
-
-1. What is a KB (Knowledge Base) Admin?
-2. What is a KB Super Admin?
-3. What is a KB User?
-4. What is a KB Role?
-5. What responsibility does the Super Admin have in managing users and permissions?
-6. Explain the relationship between:
-   - KB Super Admin
-   - KB User
-   - KB Role
-   - Permissions
-
-Clearly explain that the Super Admin is responsible for creating/managing KB users and controlling their access.
-
-Also explain the default behavior:
-
-When a new KB user is created and no additional/specific permissions are assigned, the user receives the default:
-- Reader
-- Viewer
-
-Make this distinction very clear:
-- Reader = the user's default access/role for reading/accessing permitted KB information.
-- Viewer = the user's default viewing capability.
-Do not invent additional permissions that were not discussed.
-
-SECTION 2 — KB Admin / Role FLOW DIAGRAM
-
-Create a simple professional diagram specification showing:
-
-KB Super Admin
-      ↓
-Create KB User
-      ↓
-Assign/Apply KB Role
-      ↓
-Default Access
-      ↓
-Reader + Viewer
-
-The diagram should be suitable for directly converting into a PowerPoint visual.
-
-Include a short explanation below the diagram describing the flow.
-
-SECTION 3 — PERMISSION MANAGEMENT
-
-Explain the Permission Management concept in detail but concisely.
-
-Cover:
-
-1. Why Permission Management is required.
-2. How the KB Super Admin reaches Permission Management.
-3. How the Super Admin can manage permissions for a user.
-4. Feature-level permissions.
-5. How permissions can be granted/managed beyond the default Reader + Viewer access.
-6. Explain that Permission Management controls what features/actions a user can access.
-
-Do NOT invent specific feature names unless they already exist in the project/UI. If feature names are available in the existing code/documentation, use those actual names.
-
-Clearly differentiate:
-- Default role/access
-vs.
-- Feature permissions
-
-SECTION 4 — PERMISSION MANAGEMENT FLOW DIAGRAM
-
-Create a professional diagram specification:
-
-KB Super Admin
-      ↓
-Permission Management
-      ↓
-Select KB User
-      ↓
-Review Existing Permissions
-      ↓
+   ↓
+Select KB Role / User
+   ↓
 Manage Feature Permissions
-      ↓
-Save / Apply Permissions
-      ↓
-User receives updated feature access
+   ↓
+Manage Content-wise Permissions
+   ↓
+Apply Access
 
-Add a short explanation explaining the flow.
+Do NOT mention a Super Admin anywhere.
 
-SECTION 5 — CONTENT-WISE PERMISSIONS
+CONTENT-WISE PERMISSION FLOW:
 
-Explain Content-wise Permission Management.
-
-This section must clearly establish that after managing feature-level permissions, the administrator can move to content-level access management.
-
-Explain:
-
-1. What content-wise permission means.
-2. Why content-level permissions are required.
-3. How the Super Admin navigates from Permission Management to Content Management.
-4. How access can be controlled for specific KB content/resources.
-5. Explain the difference between:
-   - Feature-level permission
-   - Content-level permission
-
-Use a simple example, but clearly label it as an example and do not introduce unsupported functionality.
-
-Example:
-
-A user may have permission to use/access a KB feature, but their access to specific KB content can still be controlled separately.
-
-SECTION 6 — CONTENT PERMISSION FLOW DIAGRAM
-
-Create a professional diagram specification:
-
-KB Super Admin
-      ↓
+KB Admin
+   ↓
 Permission Management
-      ↓
+   ↓
 Content Management
-      ↓
-Select User / Role
-      ↓
-Select KB Content / Resource
-      ↓
-Configure Content Access
-      ↓
-Save / Apply
-      ↓
-User gets access according to assigned content permission
+   ↓
+Select KB Editor / KB Reader-Viewer
+   ↓
+Configure permitted content
+   ↓
+Apply access
 
-Again, do not invent permission types that are not supported by the actual application.
+Again, do not invent unsupported permission types.
 
-SECTION 7 — END-TO-END PERMISSION WORKFLOW
+DEFAULT ACCESS:
 
-Create one final consolidated workflow showing the complete journey:
+If the existing application/product behavior confirms default Reader/Viewer access, explain it as:
 
-KB Super Admin
-      ↓
-Create KB User
-      ↓
-KB Role
-      ↓
-Default Reader + Viewer
-      ↓
+"Users without additional assigned permissions receive the applicable Reader / Viewer level of access."
+
+Do not claim that every newly created user automatically receives both Reader AND Viewer unless this is confirmed in the actual product.
+
+VERY IMPORTANT:
+The presentation should distinguish between:
+
+ROLE
+- KB Admin
+- KB Editor
+- KB Reader / Viewer
+
+FEATURE PERMISSIONS
+- What features/actions the role can access
+
+CONTENT PERMISSIONS
+- What KB content/resources the user can access
+
+Do not mix these three concepts.
+
+UPDATE THE FINAL END-TO-END DIAGRAM:
+
+KB Admin
+   ↓
+User / Role Assignment
+   ↓
+KB Editor OR KB Reader / Viewer
+   ↓
 Permission Management
-      ↓
+   ↓
 Feature Permissions
-      ↓
-Content Management
-      ↓
+   ↓
 Content-wise Permissions
-      ↓
+   ↓
 Final User Access
 
-Add a concise explanation of how all layers work together.
+PRESENTATION STRUCTURE SHOULD NOW BE:
 
-IMPORTANT CLIENT-READY REQUIREMENTS:
-
-- The document must be written in professional business language.
-- It should be suitable for a client-facing presentation.
-- Avoid overly technical implementation details unless they are necessary to explain the permission model.
-- Avoid making unsupported assumptions.
-- Do not invent permission names, roles, features, APIs, database tables, or workflows.
-- Clearly distinguish confirmed functionality from examples.
-- Use consistent terminology throughout:
-  - KB Super Admin
-  - KB User
-  - KB Role
-  - Reader
-  - Viewer
-  - Permission Management
-  - Feature Permissions
-  - Content-wise Permissions
-  - Content Management
-
-PRESENTATION-READY FORMAT:
-
-For every major section provide:
-
-1. Slide/Page Title
-2. Key Message
-3. Explanation
-4. Recommended visual/diagram
-5. Diagram nodes and arrows
-6. Key takeaway
-
-Keep the content concise enough to fit into a professional PPT.
-
-TARGET PPT STRUCTURE:
-
-Slide 1 — KB Admin & KB Role
-Slide 2 — KB Admin / Role Flow
+Slide 1 — KB Roles & Permissions
+Slide 2 — KB Role & Access Model
 Slide 3 — Permission Management
 Slide 4 — Permission Management Flow
 Slide 5 — Content-wise Permissions
 Slide 6 — Content Permission Flow
 Slide 7 — End-to-End Permission Workflow
 
-Maximum 8 slides.
+Keep it client-ready, professional and visually clean.
 
-DESIGN DIRECTION FOR THE FUTURE PPT:
+MOST IMPORTANT:
+Before generating the updated HTML/PPT, search the existing content and replace ALL occurrences of:
+"KB Super Admin"
+"Super Admin"
+"KB User"
 
-The Word document should act as a complete content blueprint for a polished client presentation.
+with the correct terminology wherever appropriate.
 
-Use:
-- Clear hierarchy
-- Short paragraphs
-- Executive-friendly language
-- Tables where they improve clarity
-- Consistent terminology
-- Clean process flows
-- Minimal text on diagrams
-- Clear distinction between roles, feature permissions, and content permissions
+Do not simply rename the words. Rework the surrounding explanation so that the permission model logically represents:
 
-Do not write generic filler content.
+KB Admin
+KB Editor
+KB Reader / Viewer
 
-At the end of the Word document, add a section called:
-
-"Client Presentation Narrative"
-
-This should provide a short speaking narrative for each of the 7 proposed slides so that a presenter can explain the permission model confidently to the client.
-
-Also add:
-
-"Key Assumptions / Items to Validate"
-
-List only the points that need confirmation from Sachin/product team because they were not explicitly defined in the discussion.
-
-Finally, create the Word document in a professional format with:
-- Title page
-- Table of contents
-- Proper headings
-- Consistent formatting
-- Tables where useful
-- Numbered sections
-- Clean diagram specifications
-- Page breaks between major sections where appropriate
-
-The final Word document should be detailed enough that another person can take it and create the complete client-ready PPT without needing to ask for the missing content.
+The final presentation must look like an intentional product permission model, not like an edited version of the previous incorrect model.
