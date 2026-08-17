@@ -1,177 +1,520 @@
-I want to update the existing permission-management document that you created earlier.
+I need you to create a professional Word document titled:
 
-Before making any changes, first review the existing document/content and identify:
-1. What content is already present.
-2. What needs to be changed based on the updated KB role model.
-3. What content should remain unchanged.
-4. What information is missing for creating a client-ready PowerPoint.
+"KB Permission Management — Implementation Plan"
 
-IMPORTANT ROLE CORRECTION:
+This document will later be used as the source material for creating a client-ready PowerPoint presentation of approximately 10–12 slides.
 
-The presentation must NOT use "KB Super Admin" or "Super Admin".
+IMPORTANT:
+This is an IMPLEMENTATION PLAN, not a high-level permission overview.
 
-The correct KB roles are:
+The document must explain:
+- What we changed
+- Why we changed it
+- Where we changed it
+- How we implemented it
+- Database changes
+- Backend/code changes
+- API changes
+- Authorization/permission logic
+- Frontend/UI changes
+- Testing/validation
+- Deployment/migration considerations
+
+MOST IMPORTANT REQUIREMENT:
+
+Before writing the document, inspect the actual repository and existing implementation.
+
+Do NOT invent database tables, columns, APIs, files, functions, components, permissions, or implementation details.
+
+Use the actual codebase as the source of truth.
+
+First inspect and identify:
+
+1. Existing database/schema/migration files
+2. Existing user/role models
+3. Existing permission models
+4. Existing KB-related models
+5. Existing content-related models
+6. Backend/API implementation
+7. Authorization middleware/services
+8. Frontend permission-management screens
+9. Existing role-management screens
+10. Content-management screens
+11. Tests related to permissions
+12. Any recent Git changes/commits related to KB permissions
+13. Existing documentation related to permission management
+
+If database migrations are present, inspect them carefully and document the actual changes.
+
+If the project uses SQL/ORM/schema files, identify the actual:
+- Tables
+- Columns
+- Primary keys
+- Foreign keys
+- Relationships
+- Indexes
+- Constraints
+
+If exact database details cannot be confirmed from the repository, explicitly mark them as:
+
+"To be validated"
+
+Do NOT guess.
+
+--------------------------------------------------
+PERMISSION MODEL
+--------------------------------------------------
+
+The current intended KB role model is:
 
 1. KB Admin
 2. KB Editor
 3. KB Reader / Viewer
 
-Remove or replace incorrect terminology such as:
+Do NOT use:
 - KB Super Admin
 - Super Admin
-- KB User (where it is being used as a role)
 
-The final permission model should focus only on:
-KB Admin → KB Editor → KB Reader / Viewer
+Do not introduce additional roles unless they already exist in the actual implementation.
 
-The presentation should explain:
+The implementation should distinguish between:
+
+A. ROLE
+- KB Admin
+- KB Editor
+- KB Reader / Viewer
+
+B. FEATURE-LEVEL PERMISSIONS
+What features/actions a role/user can access.
+
+C. CONTENT-WISE PERMISSIONS
+What specific KB content/resources a user can access.
+
+The implementation plan must clearly explain the relationship between these three layers.
+
+--------------------------------------------------
+DOCUMENT STRUCTURE
+--------------------------------------------------
+
+Create the Word document with the following sections.
+
+SECTION 1 — Executive Summary
+
+Explain:
+- Purpose of the permission-management implementation
+- Business/technical objective
+- What areas of the application are affected
+- Overall implementation approach
+
+Keep this concise and client-friendly.
+
+--------------------------------------------------
+SECTION 2 — Current State vs Target State
+
+Explain:
+
+Current state:
+- How permissions/access were handled before the implementation, based on the actual repository.
+
+Target state:
 - KB Admin
 - KB Editor
 - KB Reader / Viewer
 - Feature-level permissions
 - Content-wise permissions
-- How these work together
 
-TARGET PPT STRUCTURE:
+Create a clear Current State → Target State comparison table.
 
-Slide 1 — KB Roles & Permissions
-Slide 2 — KB Role & Access Model
-Slide 3 — Permission Management
-Slide 4 — Permission Management Flow
-Slide 5 — Content-wise Permissions
-Slide 6 — Content Permission Flow
-Slide 7 — End-to-End Permission Workflow
+Do not assume the current state. Derive it from the codebase.
 
-Now, in addition to updating the document content, I want you to add the required coding part so that this document/content can be used to generate a NEW professional PowerPoint.
+--------------------------------------------------
+SECTION 3 — Permission Architecture
 
-IMPORTANT:
-Do not just give me a textual explanation of how to create the PPT.
+Explain the overall architecture:
 
-I want actual working code that can generate the PPT from the approved content.
-
-The code should:
-
-1. Create a PowerPoint file (.pptx).
-2. Generate all 7 slides.
-3. Use professional client-ready formatting.
-4. Use consistent fonts, spacing, alignment and typography.
-5. Create clean role/permission diagrams using PowerPoint shapes.
-6. Use arrows/connectors between workflow steps.
-7. Use separate visual sections for:
-   - KB Roles
-   - Feature Permissions
-   - Content Permissions
-8. Keep diagrams simple and readable.
-9. Avoid overcrowding slides.
-10. Make the PPT editable — use PowerPoint text boxes, shapes and connectors instead of screenshots wherever possible.
-11. Keep the design suitable for a professional client presentation.
-12. Make sure no content is clipped or overflowing outside slide boundaries.
-13. Use consistent terminology throughout the presentation.
-
-CONTENT MODEL:
-
-KB Admin:
-- Administrative control of the Knowledge Base.
-- User/role management.
-- Permission management.
-- Feature-level permission management.
-- Content-wise permission management.
-
-KB Editor:
-- Can edit assigned/permitted KB content.
-- Access depends on configured feature and content permissions.
-
-KB Reader / Viewer:
-- Read/view-only access to permitted KB content.
-- No editing capability unless explicitly supported by the configured permissions.
-
-IMPORTANT:
-Do not invent functionality that is not present in the existing application.
-If something is uncertain, mark it as:
-"To be validated with product/team"
-
-PERMISSION MODEL:
-
-Role
-   ↓
+User
+  ↓
+KB Role
+  ↓
 Feature Permissions
-   ↓
+  ↓
 Content-wise Permissions
-   ↓
-Final Access
+  ↓
+Authorization Decision
+  ↓
+Allow / Deny
 
-END-TO-END FLOW:
+Explain how the actual implementation handles this flow.
+
+Create a professional architecture/flow diagram specification.
+
+--------------------------------------------------
+SECTION 4 — DATABASE CHANGES
+
+This is one of the MOST IMPORTANT sections.
+
+Inspect the actual database implementation and document:
+
+- Existing tables affected
+- New tables
+- Modified tables
+- New columns
+- Removed columns, if any
+- Primary keys
+- Foreign keys
+- Relationships
+- Constraints
+- Indexes
+- Role mappings
+- Permission mappings
+- User-to-role mappings
+- Content-to-permission mappings
+- Feature-to-permission mappings
+- Migration scripts
+
+For every database change, provide a table:
+
+| Database Object | Change | Purpose | Relationship/Impact |
+|----------------|--------|---------|---------------------|
+
+Only include actual changes found in the repository.
+
+If no database change exists for something, explicitly say:
+"No database change identified."
+
+Also create an ER/relationship diagram specification showing the relevant entities.
+
+--------------------------------------------------
+SECTION 5 — BACKEND / CODE CHANGES
+
+Inspect the actual backend code.
+
+Document:
+
+- Files/modules modified
+- New files/modules
+- Models/entities changed
+- Services changed
+- Permission services
+- Authorization middleware
+- Controllers/routes
+- Utility functions
+- Validation logic
+- Error handling
+- Permission evaluation logic
+
+For each major code change use:
+
+| File / Module | Change | Purpose | Permission Impact |
+|--------------|--------|---------|-------------------|
+
+Use actual file paths from the repository.
+
+Do NOT invent filenames.
+
+--------------------------------------------------
+SECTION 6 — API CHANGES
+
+Inspect the actual API implementation.
+
+Document:
+
+- Existing APIs modified
+- New APIs
+- HTTP methods
+- Purpose
+- Request/response changes
+- Authorization checks
+- Error responses
+
+Use:
+
+| API / Endpoint | Method | Change | Purpose | Authorization |
+|---------------|--------|--------|---------|---------------|
+
+Only document APIs that actually exist.
+
+If API details cannot be confirmed:
+"To be validated."
+
+--------------------------------------------------
+SECTION 7 — AUTHORIZATION / PERMISSION LOGIC
+
+Explain how permission evaluation works in the implemented code.
+
+Show the actual flow:
+
+Incoming Request
+   ↓
+Identify User
+   ↓
+Resolve KB Role
+   ↓
+Check Feature Permission
+   ↓
+Check Content Permission
+   ↓
+Authorization Decision
+   ↓
+Allow / Deny
+
+Explain:
+- Where authorization happens
+- Which service/middleware performs the check
+- How role is resolved
+- How feature permission is checked
+- How content permission is checked
+- What happens when permission is missing
+- How unauthorized requests are handled
+
+Use actual implementation details from the code.
+
+--------------------------------------------------
+SECTION 8 — FRONTEND / UI CHANGES
+
+Inspect the actual frontend implementation.
+
+Document:
+
+- Permission Management screen
+- Role management
+- User management
+- Feature permission UI
+- Content permission UI
+- New components
+- Modified components
+- API integration
+- Permission state handling
+- Loading/error states
+- Save/apply behavior
+
+Use:
+
+| Component / Screen | Change | Purpose | Backend Integration |
+|-------------------|--------|---------|---------------------|
+
+Use actual component/file names.
+
+Also describe the user workflow:
 
 KB Admin
-   ↓
-User / Role Assignment
-   ↓
-KB Editor OR KB Reader / Viewer
-   ↓
+ ↓
+Select User / Role
+ ↓
 Permission Management
-   ↓
+ ↓
 Feature Permissions
-   ↓
-Content-wise Permissions
-   ↓
-Final User Access
+ ↓
+Content Permissions
+ ↓
+Save / Apply
+ ↓
+Updated Access
 
-Also create separate diagrams for:
+Only include steps actually supported by the application.
 
-A. KB Role Model
+--------------------------------------------------
+SECTION 9 — ROLE-BASED ACCESS MODEL
 
-KB Admin
-KB Editor
-KB Reader / Viewer
+Create a clear matrix:
 
-B. Permission Management
+| Capability | KB Admin | KB Editor | KB Reader / Viewer |
+|-----------|----------|-----------|--------------------|
 
-KB Admin
-   ↓
-Permission Management
-   ↓
-Select User / Role
-   ↓
-Manage Feature Permissions
-   ↓
-Apply Permissions
+Populate this ONLY using actual implemented permissions.
 
-C. Content Permission
+If a capability cannot be confirmed, mark it:
+"To be validated"
 
-KB Admin
-   ↓
-Content Management
-   ↓
-Select User / Role
-   ↓
-Configure Content Access
-   ↓
-Apply Access
+Do not assume that KB Editor automatically has every editing permission.
 
-The document should contain both:
-1. The final approved presentation content.
-2. The complete PPT-generation code.
+--------------------------------------------------
+SECTION 10 — TESTING & VALIDATION
 
-Prefer Python with python-pptx if that is appropriate for the existing project/environment.
+Inspect the repository for tests and document:
 
-Before writing the code, inspect the existing project/files and determine:
-- Which file currently contains the permission content.
-- Which file is the current HTML/document source.
-- Whether there is already PPT-generation code.
-- What libraries/dependencies are already available.
+- Unit tests
+- Integration tests
+- API tests
+- Permission tests
+- UI tests
+- Role-based scenarios
+- Positive scenarios
+- Negative/unauthorized scenarios
 
-Do not unnecessarily recreate existing functionality.
+Create a validation matrix:
 
-If an existing PPT-generation script exists, modify/improve it instead of creating a duplicate.
+| Scenario | Role | Expected Result | Actual/Implemented |
+|----------|------|-----------------|--------------------|
 
-Create the code in a clearly separated section/file so I can run it independently to generate the new PPT.
+Include scenarios such as:
 
-Expected output:
+1. KB Admin accesses Permission Management
+2. KB Editor accesses permitted functionality
+3. KB Reader / Viewer accesses permitted content
+4. User without required feature permission
+5. User without required content permission
+6. Unauthorized access attempt
 
-1. Updated permission-management content/document.
-2. PPT-generation script.
-3. Clear instructions for running the script.
-4. Generated PPT file, if the environment supports generating it.
-5. A short list of assumptions or items that still need validation.
+Only claim a test exists if you find evidence in the repository.
 
-Most importantly, review the existing content first and preserve anything that is already correct. Only make the changes required for the updated KB Admin / KB Editor / KB Reader-Viewer model.
+--------------------------------------------------
+SECTION 11 — MIGRATION & DEPLOYMENT PLAN
+
+Document:
+
+- Database migration requirements
+- Existing-user migration
+- Default role handling
+- Backward compatibility
+- Backend deployment
+- Frontend deployment
+- Configuration/environment changes
+- Rollback considerations
+
+Separate:
+
+Completed
+In Progress
+To Be Validated
+
+Do not invent deployment steps that are not relevant to the repository.
+
+--------------------------------------------------
+SECTION 12 — SECURITY & AUDIT CONSIDERATIONS
+
+Explain implementation considerations around:
+
+- Least privilege
+- Role-based access
+- Feature-level authorization
+- Content-level authorization
+- Unauthorized access prevention
+- Server-side authorization
+- Permission changes
+- Auditability, if implemented
+
+Clearly distinguish between:
+"Implemented"
+and
+"Recommended / Future"
+
+Do not present recommendations as completed functionality.
+
+--------------------------------------------------
+SECTION 13 — IMPLEMENTATION SUMMARY
+
+Create a final summary table:
+
+| Area | Change Implemented | Status |
+|------|--------------------|--------|
+| Database | ... | ... |
+| Backend | ... | ... |
+| API | ... | ... |
+| Authorization | ... | ... |
+| Frontend | ... | ... |
+| Testing | ... | ... |
+| Deployment | ... | ... |
+
+Then provide:
+
+Completed
+- ...
+
+In Progress
+- ...
+
+To Be Validated
+- ...
+
+Next Steps
+- ...
+
+--------------------------------------------------
+PRESENTATION MAPPING
+--------------------------------------------------
+
+At the end of the Word document, add a section:
+
+"Recommended PPT Structure"
+
+Map the document into approximately 10–12 slides:
+
+Slide 1 — Implementation Plan Overview
+Slide 2 — Current State vs Target State
+Slide 3 — Permission Architecture
+Slide 4 — Database Changes
+Slide 5 — Database / ER Diagram
+Slide 6 — Backend & Code Changes
+Slide 7 — API & Authorization Changes
+Slide 8 — Frontend / UI Changes
+Slide 9 — Role & Permission Matrix
+Slide 10 — Testing & Validation
+Slide 11 — Migration / Deployment / Security
+Slide 12 — Implementation Summary & Next Steps
+
+For every proposed slide provide:
+- Slide title
+- Key message
+- Content to show
+- Recommended visual/diagram
+- Important technical details
+
+--------------------------------------------------
+CLIENT-READY WRITING REQUIREMENTS
+--------------------------------------------------
+
+The Word document should be:
+
+- Professional
+- Structured
+- Clear
+- Technically accurate
+- Client-presentable
+- Easy to convert into PPT
+- Concise but sufficiently detailed
+
+Avoid unnecessary technical jargon.
+
+However, because this is an implementation plan, include actual technical evidence such as:
+- Database objects
+- File paths
+- APIs
+- Components
+- Services
+- Migrations
+- Authorization logic
+
+Use tables and diagrams wherever they improve clarity.
+
+--------------------------------------------------
+CRITICAL ACCURACY RULE
+--------------------------------------------------
+
+The repository is the source of truth.
+
+Before generating the final document:
+
+1. Inspect the code.
+2. Inspect database/schema/migration files.
+3. Inspect relevant Git changes if available.
+4. Trace permission flow from frontend → API → backend → database.
+5. Identify actual implementation.
+6. Separate confirmed implementation from assumptions.
+7. Mark uncertain items as "To be validated."
+8. Do not fabricate technical details.
+
+Finally, create the Word document as a properly formatted .docx file with:
+
+- Cover page
+- Table of contents
+- Professional headings
+- Tables
+- Diagrams/diagram specifications
+- Page breaks
+- Headers/footers where appropriate
+- Consistent formatting
+
+Also provide the exact file path of the generated Word document.
+
+If the repository already contains a documentation-generation script or template, reuse it where appropriate instead of creating duplicate tooling.
