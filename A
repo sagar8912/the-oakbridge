@@ -1,181 +1,446 @@
-Update the existing HTML/PPT content and remove the incorrect "KB Super Admin" terminology completely.
+You are working on the Oakbridge monorepo.
 
-IMPORTANT:
-Do NOT use "Super Admin" anywhere in the presentation.
-The correct permission/role model should use only these three KB roles:
+IMPORTANT: DO NOT MODIFY ANY CODE, CONFIGURATION, BRANCHES, DATABASES, CI/CD workflows, or deployment settings.
 
-1. KB Admin
-2. KB Editor
-3. KB Reader / Viewer
+The client has provided a proposed/future-state deployment process and wants us to confirm whether our CURRENT repository and deployment process already follows this model.
 
-Use these three roles consistently throughout the entire presentation.
+Your task is to perform a READ-ONLY audit of the repository and compare the actual implementation against the client's requirements below.
 
-ROLE DEFINITIONS:
+==================================================
+CLIENT'S EXPECTED FUTURE-STATE PROCESS
+==================================================
 
-KB Admin
-- Has administrative control over the Knowledge Base.
-- Can manage KB users/roles and permissions.
-- Can access Permission Management.
-- Can manage feature-level permissions.
-- Can manage content-wise permissions.
+The client expects the following deployment model:
 
-KB Editor
-- Can work with/edit KB content according to the permissions assigned to them.
-- Their access should be controlled through the configured feature and content permissions.
-- Do not describe them as an administrator.
+1. BRANCH PATH
 
-KB Reader / Viewer
-- Read/view-only access to permitted KB content.
-- Cannot be described as an editor or administrator.
-- Use "KB Reader / Viewer" consistently wherever the view/read-only role is referenced.
+Development → Staging → Production
 
-IMPORTANT CORRECTION:
-Do NOT show:
-- KB Super Admin
-- Super Admin
-- Generic KB User as a primary role
-- Any other role that is not part of the three-role model above.
+There may also be a Sandbox/experimental area before Development.
 
-The presentation should explain the permission model using ONLY:
-KB Admin → KB Editor → KB Reader / Viewer
+Expected concept:
 
-UPDATE THE FIRST SLIDES:
-
-Slide 1:
-Title: "KB Roles & Permissions"
-
-Show the three roles visually:
-
-KB Admin
-↓
-KB Editor
-↓
-KB Reader / Viewer
-
-However, do NOT imply that this is necessarily a strict hierarchy unless supported by the existing product behavior. Present them as the three defined KB roles.
-
-Add a concise explanation of each role.
-
-Slide 2:
-Title: "KB Role & Access Model"
-
-Create a clean visual showing:
-
-KB Admin
-- Manage users
-- Manage permissions
-- Manage KB access
-
-KB Editor
-- Create/Edit content where permitted
-- Access assigned features
-- Access assigned content
-
-KB Reader / Viewer
-- View permitted content
-- Read-only access
-
-IMPORTANT:
-Only include "Create/Edit content" for KB Editor if this is supported by the existing application. Otherwise phrase it as "Edit assigned content".
-
-PERMISSION MANAGEMENT FLOW:
-
-Update the existing Permission Management section to use:
-
-KB Admin
+Sandbox
    ↓
-Permission Management
+Development
    ↓
-Select KB Role / User
+Staging
    ↓
-Manage Feature Permissions
+Production
+
+However, the client's email specifically identifies the intended branch path as:
+
+Dev → Staging → Production
+
+Determine whether our actual Git branch/environment structure follows this.
+
+==================================================
+2. BRANCH RULES
+==================================================
+
+The client wants defined branch rules, including:
+
+- Persistent branches where appropriate
+- Merge restrictions
+- Controlled promotion between environments
+- Protection against uncontrolled direct changes
+- Clear ownership/approval requirements
+
+Inspect the repository and determine:
+
+- What branches exist?
+- Which branches correspond to Dev, Staging and Production?
+- Are branches protected?
+- Are direct pushes allowed?
+- Are pull requests required?
+- Are approvals required?
+- Are status checks required?
+- Can developers bypass the intended promotion flow?
+
+==================================================
+3. DATABASE ENVIRONMENTS
+==================================================
+
+Client expectation:
+
+Supabase now → Azure later.
+
+Audit how our current application handles databases.
+
+Determine:
+
+- Which database is currently used?
+- Is there a separate database/environment for Development?
+- Is there a separate database/environment for Staging?
+- Is Production isolated?
+- How are database migrations promoted?
+- Are migrations committed to Git?
+- Are migrations automatically applied?
+- Can a developer accidentally modify Staging/Production directly?
+- Is the current setup compatible with moving from Supabase to Azure later?
+
+Do NOT assume Azure is already implemented.
+
+Clearly report the CURRENT state.
+
+==================================================
+4. PR CHECKS
+==================================================
+
+The client specifically said:
+
+"We need to define what checks"
+
+Audit all CI/CD workflows and repository configuration.
+
+Look for:
+
+- GitHub Actions
+- Azure DevOps pipelines
+- CI workflows
+- Build checks
+- Lint checks
+- Type checks
+- Unit tests
+- Integration tests
+- E2E tests
+- Security checks
+- Database migration checks
+- Deployment checks
+- Required status checks
+- PR approval requirements
+
+Determine:
+
+A. Which checks currently exist?
+B. Which checks automatically run?
+C. Which checks are required before merge?
+D. Which checks are missing compared with the client's desired process?
+
+Do not simply list workflows.
+
+Explain the actual enforcement mechanism.
+
+==================================================
+5. PR ACTIONS / SCRIPTS
+==================================================
+
+The client specifically mentioned:
+
+"PR Actions/scripts — e.g. knowledge base article creation"
+
+Audit the repository for:
+
+- GitHub Actions
+- PR automation
+- scripts
+- deployment scripts
+- migration scripts
+- KB article creation scripts
+- post-merge scripts
+- pre-deployment scripts
+- environment promotion scripts
+
+Determine:
+
+- What is automated today?
+- What is manual today?
+- Which scripts are triggered by PRs?
+- Which scripts are triggered after merge?
+- Which scripts run during deployment?
+- Is KB article creation automated or manual?
+
+==================================================
+6. DEPLOYMENT GATES
+==================================================
+
+The client's diagram defines three important gates.
+
+GATE 1 — Sandbox/Idea → Development
+
+Purpose:
+- Validate the concept
+- Confirm technical approach
+- Identify obvious flaws
+- Confirm the idea is worth investing in
+
+GATE 2 — Development → Staging
+
+Purpose:
+- Confirm functionality is complete
+- Confirm it consistently works as intended
+- Developers verify features
+- Resolve defects and edge cases
+- Confirm solution is stable enough for business review
+
+GATE 3 — Staging → Production
+
+Purpose:
+- Business validation is complete
+- Power Users / SMEs validate real-world workflows
+- Confirm outputs are accurate
+- Identify usability issues
+- Approve the solution for production
+
+Audit whether our actual process implements these gates.
+
+For each gate answer:
+
+1. Does the gate exist?
+2. What triggers the promotion?
+3. Who performs the validation?
+4. Is approval required?
+5. Is approval technically enforced?
+6. Can someone bypass the gate?
+7. Is the gate documented?
+
+==================================================
+7. TESTING RESPONSIBILITIES
+==================================================
+
+Client's intended testing model:
+
+Development:
+Developers perform technical testing.
+
+Staging:
+Power Users / SMEs perform business validation.
+
+Production:
+Business depends on the validated solution.
+
+Determine whether our current process follows this separation.
+
+Specifically identify:
+
+- Developer testing
+- QA/testing
+- Business/SME testing
+- Staging validation
+- Production approval
+
+If responsibilities are unclear, flag this as a gap.
+
+==================================================
+8. ENVIRONMENT PROMOTION
+==================================================
+
+Trace an actual change through the repository.
+
+Use a recent feature/PR as an example if possible.
+
+Show:
+
+Developer change
    ↓
-Manage Content-wise Permissions
+PR
    ↓
-Apply Access
-
-Do NOT mention a Super Admin anywhere.
-
-CONTENT-WISE PERMISSION FLOW:
-
-KB Admin
+Development
    ↓
-Permission Management
+PR/approval/checks
    ↓
-Content Management
+Staging
    ↓
-Select KB Editor / KB Reader-Viewer
+Business validation
    ↓
-Configure permitted content
+Production
+
+Determine where our actual process differs.
+
+==================================================
+9. OVERLAPPING WORK / MERGING DOWNSTREAM
+==================================================
+
+The client explicitly said:
+
+"I still don't have a clear idea of how our overlapping work can be checked and merged downstream."
+
+This is an important requirement.
+
+Audit how overlapping work is currently handled.
+
+Determine:
+
+- How multiple developers work on the same area
+- How feature branches are created
+- How conflicts are detected
+- How PRs identify overlapping changes
+- How changes are merged into Development
+- How Development changes are promoted to Staging
+- How Staging changes are promoted to Production
+- Whether the same change can accidentally be implemented twice
+- Whether there is a clear downstream merge strategy
+- Whether cherry-picking is used
+- Whether branches are rebased/merged
+- Whether release branches exist
+- Whether developers manually copy code between environments
+
+Provide a concrete example from the repository if possible.
+
+==================================================
+10. IMPORTANT: READ-ONLY AUDIT
+==================================================
+
+Do NOT:
+
+- modify code
+- create branches
+- modify workflows
+- modify GitHub settings
+- modify database
+- deploy anything
+- create migrations
+- change environment variables
+- commit anything
+- push anything
+
+This is an AUDIT ONLY.
+
+==================================================
+11. OUTPUT FORMAT
+==================================================
+
+Create a concise report with the following structure:
+
+# CI/CD FUTURE-STATE ALIGNMENT AUDIT
+
+## 1. Executive Summary
+
+Give an overall status:
+
+🟢 Aligned
+🟡 Partially Aligned
+🔴 Not Aligned
+
+Explain why in 3-5 bullets.
+
+## 2. Requirement vs Current State
+
+Create this table:
+
+| Client Requirement | Current Implementation | Status | Evidence | Gap/Action Needed |
+|---|---|---|---|---|
+| Dev → Staging → Production | | | | |
+| Branch rules | | | | |
+| Supabase now / Azure later | | | | |
+| PR checks | | | | |
+| PR actions/scripts | | | | |
+| Development gate | | | | |
+| Staging gate | | | | |
+| Production gate | | | | |
+| Developer testing | | | | |
+| SME/Power User validation | | | | |
+| Overlapping work/merge strategy | | | | |
+
+## 3. CURRENT ACTUAL FLOW
+
+Draw the actual flow found in the repository.
+
+Example:
+
+Feature branch
    ↓
-Apply access
-
-Again, do not invent unsupported permission types.
-
-DEFAULT ACCESS:
-
-If the existing application/product behavior confirms default Reader/Viewer access, explain it as:
-
-"Users without additional assigned permissions receive the applicable Reader / Viewer level of access."
-
-Do not claim that every newly created user automatically receives both Reader AND Viewer unless this is confirmed in the actual product.
-
-VERY IMPORTANT:
-The presentation should distinguish between:
-
-ROLE
-- KB Admin
-- KB Editor
-- KB Reader / Viewer
-
-FEATURE PERMISSIONS
-- What features/actions the role can access
-
-CONTENT PERMISSIONS
-- What KB content/resources the user can access
-
-Do not mix these three concepts.
-
-UPDATE THE FINAL END-TO-END DIAGRAM:
-
-KB Admin
+PR
    ↓
-User / Role Assignment
+Dev
    ↓
-KB Editor OR KB Reader / Viewer
-   ↓
-Permission Management
-   ↓
-Feature Permissions
-   ↓
-Content-wise Permissions
-   ↓
-Final User Access
+...
+   
+Do not use the example unless it matches the repository.
 
-PRESENTATION STRUCTURE SHOULD NOW BE:
+## 4. BRANCH AUDIT
 
-Slide 1 — KB Roles & Permissions
-Slide 2 — KB Role & Access Model
-Slide 3 — Permission Management
-Slide 4 — Permission Management Flow
-Slide 5 — Content-wise Permissions
-Slide 6 — Content Permission Flow
-Slide 7 — End-to-End Permission Workflow
+List:
 
-Keep it client-ready, professional and visually clean.
+- Branches
+- Branch purpose
+- Protection
+- PR requirement
+- Approval requirement
+- Status checks
+- Direct push capability
 
-MOST IMPORTANT:
-Before generating the updated HTML/PPT, search the existing content and replace ALL occurrences of:
-"KB Super Admin"
-"Super Admin"
-"KB User"
+## 5. CI/CD AUDIT
 
-with the correct terminology wherever appropriate.
+List every relevant workflow/pipeline and explain:
 
-Do not simply rename the words. Rework the surrounding explanation so that the permission model logically represents:
+- Trigger
+- Checks
+- Build
+- Test
+- Deployment
+- Environment
+- Approval
 
-KB Admin
-KB Editor
-KB Reader / Viewer
+## 6. DATABASE AUDIT
 
-The final presentation must look like an intentional product permission model, not like an edited version of the previous incorrect model.
+Explain current:
+
+- Development DB
+- Staging DB
+- Production DB
+- Migration process
+- Promotion process
+
+## 7. PR CHECK AUDIT
+
+Clearly distinguish:
+
+EXISTING AND ENFORCED
+EXISTING BUT NOT ENFORCED
+MISSING
+
+## 8. PR ACTIONS/SCRIPTS
+
+Especially investigate KB article creation and related automation.
+
+## 9. OVERLAPPING WORK
+
+Explain exactly how overlapping changes are currently handled and whether this satisfies the client's concern.
+
+## 10. GAPS
+
+List only genuine gaps.
+
+Prioritize:
+
+🔴 Critical
+🟠 High
+🟡 Medium
+🟢 Low
+
+## 11. RECOMMENDED FUTURE FLOW
+
+Show the minimum changes required to reach the client's expected process.
+
+Do NOT implement them.
+
+## 12. EVIDENCE
+
+For every important conclusion, provide:
+
+- File path
+- Workflow/configuration name
+- Branch/configuration reference
+- Relevant code/config section
+- Short explanation
+
+Do not make assumptions.
+
+If something cannot be verified from the repository, explicitly say:
+
+"Not verifiable from repository — requires GitHub/Azure/administrator confirmation."
+
+==================================================
+FINAL RULE
+==================================================
+
+The purpose of this task is NOT to design a new CI/CD system.
+
+The purpose is to answer one question:
+
+"Are we currently following the deployment process the client described in the email/deck, and if not, exactly where do we differ?"
+
+Be factual, evidence-based, and concise.
+
+DO NOT CHANGE ANYTHING.
