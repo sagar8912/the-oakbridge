@@ -1,17 +1,840 @@
-Approve the draft as a PROPOSED architecture note only, not as a final implementation decision.
+Public Schema Table Connectivity
 
-Please do not make assumptions or implement the three open architectural decisions yet:
+Created: 2026-08-21
+Updated: 2026-08-21
+Status: Research / reference
+Owner: Oakbridge Engineering
 
-1. Which traffic classes should go through APIM first
-2. Whether Entra app roles should directly feed the SQL PDP or continue through the existing provisioning/role model
-3. Whether policy authoring should move to a declarative store that compiles to SQL + APIM
+Purpose
 
-Keep all three clearly marked as “TBD – client/architecture confirmation required”.
+Help engineers find how public tables connect (foreign keys and hubs) when navigating the Supabase schema. Scope is public only — not auth, storage, realtime, vault, or supabase_migrations.
 
-The existing SQL PDP/PEP and shared session/cookie architecture remains the current source of truth until an approved migration decision exists.
+Live DEV snapshot (user-reported)
 
-You may add only a short cross-reference/pointer in the local permission-architecture.md explaining that Azure/Entra/APIM is a future extension direction.
+Queried on the local DEV project (uqlqraavwimxjqjosuze):
 
-Do not duplicate the full architecture locally and do not create a second source of truth.
 
-Do not modify production authorization logic based only on this draft.
+
+
+
+
+
+Schema
+
+
+
+Tables
+
+
+
+
+
+auth
+
+
+
+23
+
+
+
+
+
+public
+
+
+
+75
+
+
+
+
+
+realtime
+
+
+
+10
+
+
+
+
+
+storage
+
+
+
+8
+
+
+
+
+
+supabase_migrations
+
+
+
+2
+
+
+
+
+
+vault
+
+
+
+1
+
+This document focuses on public (75 on live DEV).
+
+Source of the connectivity map
+
+
+
+
+
+
+
+Source
+
+
+
+Public tables
+
+
+
+Notes
+
+
+
+
+
+Live DEV (information_schema)
+
+
+
+75
+
+
+
+Authoritative for what is deployed locally
+
+
+
+
+
+Repo types (packages/types/src/database.generated.ts)
+
+
+
+87
+
+
+
+Authoritative for typed FK relationships in app code
+
+Drift: generated types currently list 12 more public tables than live DEV. Treat the edge list below as the typed FK graph from the repo. Reconcile against live DEV with:
+
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_type = 'BASE TABLE'
+ORDER BY table_name;
+
+After schema changes, regenerate types and refresh this doc.
+
+
+
+
+
+How to use this doc
+
+
+
+
+
+Find a table in Alphabetized table list.
+
+
+
+See its domain in Domain map.
+
+
+
+Trace FKs in Foreign-key edges (from.column → to.column).
+
+
+
+Start from hubs in Hub tables if you need “what points at X?”.
+
+
+
+Remember polymorphic tables (entity_*, article_content.entity_*, field_history) often do not have typed FKs to every target entity — only to shared refs like user_profiles / tags.
+
+
+
+
+
+Core connectivity (mental model)
+
+flowchart TB
+  UP[user_profiles]
+  T[teams]
+  L[lists]
+  I[items]
+  G[goals]
+  KB[knowledge_base]
+  AHN[article_hierarchy_nodes]
+  A[articles]
+  M[meetings]
+
+  UP --> T
+  UP --> L
+  UP --> I
+  UP --> G
+  T --> L
+  L --> I
+  T --> G
+  G --> I
+  KB --> AHN
+  AHN --> A
+  T --> M
+  UP --> M
+
+Read direction: arrows follow common ownership / containment (not every FK). Full edges are listed below.
+
+
+
+
+
+Domain map
+
+
+
+OOO core — teams, lists, items, goals, todos, users, notifications
+
+audit_logs, comments, goal_audit_log, goal_levels, goal_progress_history, goal_quality_reviews, goal_strategic_pillar_jt, goal_team_associations, goal_transfer_requests, goals, hierarchy_level_allowed_goal_levels, item_categories, item_tags, item_vote_resets, item_votes, items, list_security_settings, lists, notification_preferences, notifications, strategic_pillars, team_allowed_goal_levels, team_hierarchy_levels, team_members, team_transfer_targets, teams, todos, user_preferences, user_profiles
+
+Typical path: user_profiles → teams → lists → items (+ goals on team; items may link goals).
+
+Contributors / relationships / movements
+
+entity_article_links, entity_contributors, entity_relationships, entity_tags, goal_contributors, goal_relationships, item_contributors, item_goal_relationships, item_movements, item_relationships, tags
+
+Note: legacy *_contributors / *_relationships tables still coexist with entity_* tables.
+
+Meetings / headlines / cascading / standards
+
+cascading_messages, cascading_messages_meetings, cascading_messages_teams, headlines, headlines_meetings, headlines_teams, meeting_attendees, meeting_segment_templates, meeting_segments, meeting_team_associations, meeting_templates, meetings, standards, standards_teams
+
+Typical path: meeting_templates → meetings → (meeting_segments | meeting_attendees | *_meetings junctions) ↔ teams.
+
+KB / knowledge / RAG / vendors / workflows
+
+article_attachment_history, article_content, article_hierarchy_nodes, article_operating_logic, article_versions, articles, chat_interactions, chat_sessions, data_dictionary, data_dictionary_tags, decision_rights, document_chunks, documents, exception_overrides, knowledge_base, knowledge_gaps, org_roles, responsibility_rules, vendor_relationships, vendors, workflow_exceptions, workflow_maps
+
+Typical path: knowledge_base → article_hierarchy_nodes → articles / documents → chunks / versions / operating logic.
+
+Authz / permissions
+
+permission_audit_log, permission_catalog, permission_rules, role_default_permissions, user_permission_grants
+
+Typical path: permission_catalog ← role_default_permissions / user_permission_grants (key-based, not always UUID FK).
+
+Other / platform
+
+dev_errors, field_history, llm_settings, mcp_server_tools, mcp_servers, obie_personas
+
+
+
+
+
+Hub tables (most inbound FKs)
+
+From generated Relationships (inbound count):
+
+
+
+
+
+
+
+Rank
+
+
+
+Table
+
+
+
+Inbound FKs
+
+
+
+Role
+
+
+
+
+
+1
+
+
+
+user_profiles
+
+
+
+70
+
+
+
+People / audit actors
+
+
+
+
+
+2
+
+
+
+teams
+
+
+
+21
+
+
+
+Org container
+
+
+
+
+
+3
+
+
+
+goals
+
+
+
+14
+
+
+
+Goal graph
+
+
+
+
+
+4
+
+
+
+items
+
+
+
+11
+
+
+
+Work items
+
+
+
+
+
+5
+
+
+
+lists
+
+
+
+10
+
+
+
+Item containers
+
+
+
+
+
+6
+
+
+
+org_roles
+
+
+
+7
+
+
+
+KB RACI / decision roles
+
+
+
+
+
+7
+
+
+
+article_hierarchy_nodes
+
+
+
+6
+
+
+
+KB tree
+
+
+
+
+
+8
+
+
+
+meetings
+
+
+
+5
+
+
+
+Meeting instances
+
+
+
+
+
+9
+
+
+
+knowledge_base
+
+
+
+4
+
+
+
+KB root
+
+
+
+
+
+10
+
+
+
+articles
+
+
+
+4
+
+
+
+KB articles
+
+
+
+
+
+11
+
+
+
+goal_levels
+
+
+
+4
+
+
+
+Goal level catalog
+
+If you are debugging “who references this row?”, start with these hubs.
+
+
+
+
+
+Isolates (no typed FK in or out)
+
+These appear in generated types with no Relationships and no inbound FKs:
+
+
+
+
+
+dev_errors
+
+
+
+llm_settings
+
+
+
+obie_personas
+
+
+
+permission_audit_log
+
+
+
+permission_rules
+
+They may still be used via app code, soft refs, or RLS helpers without PostgREST-declared FKs.
+
+
+
+
+
+Alphabetized table list (from generated types)
+
+87 tables in Database.public.Tables:
+
+article_attachment_history, article_content, article_hierarchy_nodes, article_operating_logic, article_versions, articles, audit_logs, cascading_messages, cascading_messages_meetings, cascading_messages_teams, chat_interactions, chat_sessions, comments, data_dictionary, data_dictionary_tags, decision_rights, dev_errors, document_chunks, documents, entity_article_links, entity_contributors, entity_relationships, entity_tags, exception_overrides, field_history, goal_audit_log, goal_contributors, goal_levels, goal_progress_history, goal_quality_reviews, goal_relationships, goal_strategic_pillar_jt, goal_team_associations, goal_transfer_requests, goals, headlines, headlines_meetings, headlines_teams, hierarchy_level_allowed_goal_levels, item_categories, item_contributors, item_goal_relationships, item_movements, item_relationships, item_tags, item_vote_resets, item_votes, items, knowledge_base, knowledge_gaps, list_security_settings, lists, llm_settings, mcp_server_tools, mcp_servers, meeting_attendees, meeting_segment_templates, meeting_segments, meeting_team_associations, meeting_templates, meetings, notification_preferences, notifications, obie_personas, org_roles, permission_audit_log, permission_catalog, permission_rules, responsibility_rules, role_default_permissions, standards, standards_teams, strategic_pillars, tags, team_allowed_goal_levels, team_hierarchy_levels, team_members, team_transfer_targets, teams, todos, user_permission_grants, user_preferences, user_profiles, vendor_relationships, vendors, workflow_exceptions, workflow_maps
+
+
+
+
+
+Foreign-key edges
+
+Format: from_table.column → to_table.column
+Source: packages/types/src/database.generated.ts Relationships (184 edges).
+Unless noted, targets are *.id. Exceptions: permission_catalog.key.
+
+article_attachment_history.article_id → articles.id
+article_attachment_history.from_node_id → article_hierarchy_nodes.id
+article_attachment_history.to_node_id → article_hierarchy_nodes.id
+article_hierarchy_nodes.knowledge_base_id → knowledge_base.id
+article_hierarchy_nodes.parent_id → article_hierarchy_nodes.id
+article_operating_logic.accountable_role_id → org_roles.id
+article_operating_logic.article_id → articles.id
+article_operating_logic.escalation_role_id → org_roles.id
+article_versions.content_id → article_content.id
+articles.hierarchy_node_id → article_hierarchy_nodes.id
+articles.knowledge_base_id → knowledge_base.id
+audit_logs.user_id → user_profiles.id
+cascading_messages.attributed_to → user_profiles.id
+cascading_messages_meetings.created_by → user_profiles.id
+cascading_messages_meetings.meeting_id → meetings.id
+cascading_messages_meetings.message_id → cascading_messages.id
+cascading_messages_teams.created_by → user_profiles.id
+cascading_messages_teams.message_id → cascading_messages.id
+cascading_messages_teams.overridden_by → user_profiles.id
+cascading_messages_teams.team_id → teams.id
+chat_interactions.knowledge_base_id → knowledge_base.id
+chat_interactions.session_id → chat_sessions.id
+comments.author_id → user_profiles.id
+comments.goal_id → goals.id
+comments.item_id → items.id
+data_dictionary_tags.data_dictionary_id → data_dictionary.id
+decision_rights.authority_role_id → org_roles.id
+decision_rights.second_approver_role_id → org_roles.id
+document_chunks.document_id → documents.id
+document_chunks.hierarchy_node_id → article_hierarchy_nodes.id
+documents.hierarchy_node_id → article_hierarchy_nodes.id
+documents.knowledge_base_id → knowledge_base.id
+documents.vendor_id → vendors.id
+entity_article_links.article_id → articles.id
+entity_article_links.created_by → user_profiles.id
+entity_contributors.added_by → user_profiles.id
+entity_contributors.updated_by → user_profiles.id
+entity_contributors.user_id → user_profiles.id
+entity_relationships.created_by → user_profiles.id
+entity_relationships.updated_by → user_profiles.id
+entity_tags.tag_id → tags.id
+exception_overrides.approver_role_id → org_roles.id
+exception_overrides.scope_team_id → teams.id
+field_history.changed_by → user_profiles.id
+goal_audit_log.goal_id → goals.id
+goal_audit_log.user_id → user_profiles.id
+goal_contributors.added_by → user_profiles.id
+goal_contributors.goal_id → goals.id
+goal_contributors.updated_by → user_profiles.id
+goal_contributors.user_id → user_profiles.id
+goal_progress_history.goal_id → goals.id
+goal_progress_history.updated_by → user_profiles.id
+goal_quality_reviews.goal_id → goals.id
+goal_quality_reviews.requested_by → user_profiles.id
+goal_relationships.created_by → user_profiles.id
+goal_relationships.goal_a_id → goals.id
+goal_relationships.goal_b_id → goals.id
+goal_strategic_pillar_jt.goal_id → goals.id
+goal_strategic_pillar_jt.strategic_pillar_id → strategic_pillars.id
+goal_team_associations.created_by → user_profiles.id
+goal_team_associations.goal_id → goals.id
+goal_team_associations.team_id → teams.id
+goal_transfer_requests.approved_by_user_id → user_profiles.id
+goal_transfer_requests.cancelled_by_user_id → user_profiles.id
+goal_transfer_requests.goal_id → goals.id
+goal_transfer_requests.rejected_by_user_id → user_profiles.id
+goal_transfer_requests.requested_by_user_id → user_profiles.id
+goal_transfer_requests.requested_goal_level_id → goal_levels.id
+goal_transfer_requests.requested_owner_id → user_profiles.id
+goal_transfer_requests.source_team_id → teams.id
+goal_transfer_requests.target_team_id → teams.id
+goals.created_by → user_profiles.id
+goals.goal_level_id → goal_levels.id
+goals.owner_id → user_profiles.id
+goals.strategic_pillar → strategic_pillars.id
+goals.team_id → teams.id
+goals.updated_by → user_profiles.id
+headlines.attributed_to → user_profiles.id
+headlines_meetings.created_by → user_profiles.id
+headlines_meetings.headline_id → headlines.id
+headlines_meetings.meeting_id → meetings.id
+headlines_teams.created_by → user_profiles.id
+headlines_teams.headline_id → headlines.id
+headlines_teams.team_id → teams.id
+hierarchy_level_allowed_goal_levels.goal_level_id → goal_levels.id
+hierarchy_level_allowed_goal_levels.hierarchy_level_id → team_hierarchy_levels.id
+item_contributors.added_by → user_profiles.id
+item_contributors.item_id → items.id
+item_contributors.updated_by → user_profiles.id
+item_contributors.user_id → user_profiles.id
+item_goal_relationships.converted_by → user_profiles.id
+item_goal_relationships.goal_id → goals.id
+item_goal_relationships.item_id → items.id
+item_movements.accepted_by → user_profiles.id
+item_movements.accepted_with_owner_id → user_profiles.id
+item_movements.cancelled_by → user_profiles.id
+item_movements.from_list_id → lists.id
+item_movements.from_team_id → teams.id
+item_movements.initiated_by → user_profiles.id
+item_movements.item_id → items.id
+item_movements.rejected_by → user_profiles.id
+item_movements.to_list_id → lists.id
+item_movements.to_team_id → teams.id
+item_relationships.created_by → user_profiles.id
+item_relationships.source_item_id → items.id
+item_relationships.target_item_id → items.id
+item_tags.item_id → items.id
+item_tags.tag_id → tags.id
+item_vote_resets.reset_by → user_profiles.id
+item_votes.item_id → items.id
+item_votes.user_id → user_profiles.id
+items.adopted_by → user_profiles.id
+items.adopted_from → user_profiles.id
+items.created_by → user_profiles.id
+items.delegated_by → user_profiles.id
+items.delegated_to → user_profiles.id
+items.elevated_by → user_profiles.id
+items.goal_id → goals.id
+items.item_category → item_categories.id
+items.list_id → lists.id
+items.locked_by → user_profiles.id
+items.merged_into_issue_id → items.id
+items.original_assignee_id → user_profiles.id
+items.owner_id → user_profiles.id
+items.pending_acceptance_at_list_id → lists.id
+items.pending_acceptance_at_team_id → teams.id
+items.source_list_id → lists.id
+items.source_team_id → teams.id
+items.team_id → teams.id
+items.transferred_by → user_profiles.id
+items.transferred_from_list_id → lists.id
+items.transferred_to_list_id → lists.id
+items.updated_by → user_profiles.id
+knowledge_gaps.interaction_id → chat_interactions.id
+list_security_settings.default_item_category_id → item_categories.id
+list_security_settings.default_owner_id → user_profiles.id
+list_security_settings.list_id → lists.id
+lists.created_by → user_profiles.id
+lists.owner_id → user_profiles.id
+lists.parent_list_id → lists.id
+lists.team_id → teams.id
+lists.updated_by → user_profiles.id
+mcp_server_tools.mcp_server_id → mcp_servers.id
+meeting_attendees.meeting_id → meetings.id
+meeting_segment_templates.meeting_template_id → meeting_templates.id
+meeting_segments.meeting_id → meetings.id
+meeting_segments.source_segment_template_id → meeting_segment_templates.id
+meeting_team_associations.meeting_id → meetings.id
+meeting_team_associations.team_id → teams.id
+meetings.meeting_template_id → meeting_templates.id
+notification_preferences.user_id → user_profiles.id
+notifications.comment_id → comments.id
+notifications.goal_id → goals.id
+notifications.item_id → items.id
+notifications.team_id → teams.id
+notifications.user_id → user_profiles.id
+responsibility_rules.accountable_role_id → org_roles.id
+responsibility_rules.escalation_role_id → org_roles.id
+role_default_permissions.permission_key → permission_catalog.key
+standards.attributed_to → user_profiles.id
+standards_teams.created_by → user_profiles.id
+standards_teams.standard_id → standards.id
+standards_teams.team_id → teams.id
+team_allowed_goal_levels.goal_level_id → goal_levels.id
+team_allowed_goal_levels.team_id → teams.id
+team_members.team_id → teams.id
+team_members.user_id → user_profiles.id
+team_transfer_targets.source_team_id → teams.id
+team_transfer_targets.target_team_id → teams.id
+teams.hierarchy_level_id → team_hierarchy_levels.id
+teams.owner_id → user_profiles.id
+teams.parent_id → teams.id
+teams.primary_list_id → lists.id
+teams.team_admin_id → user_profiles.id
+todos.created_by → user_profiles.id
+todos.goal_id → goals.id
+todos.item_id → items.id
+todos.owner_id → user_profiles.id
+todos.updated_by → user_profiles.id
+user_permission_grants.permission_key → permission_catalog.key
+user_preferences.user_id → user_profiles.id
+vendor_relationships.vendor_id → vendors.id
+workflow_exceptions.workflow_map_id → workflow_maps.id
+workflow_maps.article_id → articles.id
+
+
+
+Quick lookup tips
+
+
+
+
+
+
+
+Question
+
+
+
+Where to look
+
+
+
+
+
+What owns an item?
+
+
+
+items.list_id → lists, items.team_id → teams, items.owner_id → user_profiles
+
+
+
+
+
+How do goals attach to teams?
+
+
+
+goals.team_id, goal_team_associations
+
+
+
+
+
+How do items move teams/lists?
+
+
+
+item_movements (+ pending fields on items)
+
+
+
+
+
+KB tree?
+
+
+
+knowledge_base → article_hierarchy_nodes.parent_id (self) → articles / documents
+
+
+
+
+
+Meeting content?
+
+
+
+meetings ↔ headlines_meetings / cascading_messages_meetings / meeting_segments
+
+
+
+
+
+Who can do what?
+
+
+
+permission_catalog + user_permission_grants / role_default_permissions
+
+
+
+
+
+Suggested live-DEV reconciliation SQL
+
+-- Public tables on this environment
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_type = 'BASE TABLE'
+ORDER BY 1;
+
+-- FK edges on this environment
+SELECT
+  tc.table_name AS from_table,
+  kcu.column_name AS from_column,
+  ccu.table_name AS to_table,
+  ccu.column_name AS to_column
+FROM information_schema.table_constraints tc
+JOIN information_schema.key_column_usage kcu
+  ON tc.constraint_name = kcu.constraint_name
+ AND tc.table_schema = kcu.table_schema
+JOIN information_schema.constraint_column_usage ccu
+  ON ccu.constraint_name = tc.constraint_name
+ AND ccu.table_schema = tc.table_schema
+WHERE tc.constraint_type = 'FOREIGN KEY'
+  AND tc.table_schema = 'public'
+ORDER BY 1, 2;
+
+Compare that result set to the edge list above to spot DEV vs repo drift.
+
+
+
+
+
+Related
+
+
+
+
+
+Types: packages/types/src/database.generated.ts
+
+
+
+Hand rows (legacy / TD-039): packages/types/src/supabase-rows.ts
+
+
+
+Migrations: supabase/migrations/
+
